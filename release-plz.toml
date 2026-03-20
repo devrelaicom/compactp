@@ -1,0 +1,29 @@
+[workspace]
+changelog_update = true
+git_tag_enable = true
+git_release_enable = true
+semver_check = true
+
+[[package]]
+name = "compactp"
+publish = true
+
+[[package]]
+name = "compactp_syntax"
+publish = true
+
+[[package]]
+name = "compactp_lexer"
+publish = true
+
+[[package]]
+name = "compactp_parser"
+publish = true
+
+[[package]]
+name = "compactp_ast"
+publish = true
+
+[[package]]
+name = "compactp_diagnostics"
+publish = true
