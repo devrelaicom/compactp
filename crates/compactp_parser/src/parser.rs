@@ -144,6 +144,7 @@ impl<'src> Parser<'src> {
     }
 
     /// Get the text of the current non-trivia token (for diagnostics).
+    #[allow(dead_code)]
     pub(crate) fn current_text(&self) -> &str {
         let mut i = self.pos;
         while i < self.tokens.len() {

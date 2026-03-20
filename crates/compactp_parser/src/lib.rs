@@ -1,10 +1,6 @@
-// Infrastructure modules contain APIs used by grammar rules added in subsequent tasks.
-#[allow(dead_code)]
 mod event;
 pub mod grammar;
-#[allow(dead_code)]
 mod marker;
-#[allow(dead_code)]
 mod parser;
 mod sink;
 
@@ -76,12 +72,13 @@ mod tests {
         let result = parse("x");
         let root = SyntaxNode::new_root(result.green);
         assert_eq!(root.kind(), SOURCE_FILE);
-        // The token should be inside the SOURCE_FILE
-        let has_ident = root
-            .children_with_tokens()
-            .filter_map(|c| c.into_token())
-            .any(|t| t.kind() == IDENT);
-        assert!(has_ident);
+        // A bare identifier at top level triggers error recovery; it should be wrapped
+        // in an ERROR node but still present in the tree.
+        assert_eq!(root.text().to_string(), "x");
+        assert!(
+            !result.errors.is_empty(),
+            "expected a parse error for bare identifier"
+        );
     }
 
     #[test]

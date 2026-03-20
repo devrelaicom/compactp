@@ -55,11 +55,16 @@ pub(crate) struct CompletedMarker {
 
 impl CompletedMarker {
     /// Wrap this completed node in a new parent node (for Pratt parsing).
+    ///
+    /// Creates a new marker at the current position in the event stream and sets
+    /// the COMPLETED marker's forward_parent to point to the new marker. This way,
+    /// when the sink processes events in order and encounters the original StartNode,
+    /// it follows the forward_parent chain to discover the new outer parent.
     pub(crate) fn precede(self, p: &mut Parser) -> Marker {
         let new_m = p.start();
-        match &mut p.events[new_m.pos as usize] {
+        match &mut p.events[self.pos as usize] {
             Event::StartNode { forward_parent, .. } => {
-                *forward_parent = Some(self.pos);
+                *forward_parent = Some(new_m.pos);
             }
             _ => unreachable!(),
         }
