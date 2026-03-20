@@ -1,0 +1,11 @@
+---
+source: crates/compactp_diagnostics/src/render.rs
+expression: rendered
+---
+warning[W0001]: unused field
+  --> example.compact:1:8
+  |
+1 | ledger count: Field;
+  |        ^^^^^ unused field
+  |
+  = note: consider removing this field

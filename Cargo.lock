@@ -161,6 +161,8 @@ dependencies = [
  "compactp_syntax",
  "insta",
  "notify-debouncer-full",
+ "rowan",
+ "serde",
  "serde_json",
 ]
 
@@ -204,6 +206,7 @@ dependencies = [
  "expect-test",
  "insta",
  "rowan",
+ "walkdir",
 ]
 
 [[package]]

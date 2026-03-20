@@ -1,3 +1,6 @@
+pub mod json;
+pub mod render;
+
 use rowan::TextRange;
 use serde::Serialize;
 
@@ -11,6 +14,58 @@ pub struct Diagnostic {
     pub primary_span: TextRange,
     pub secondary_spans: Vec<LabeledSpan>,
     pub notes: Vec<String>,
+}
+
+impl Diagnostic {
+    /// Create an error-level diagnostic.
+    pub fn error(code: DiagnosticCode, message: String, span: TextRange) -> Self {
+        Self {
+            severity: Severity::Error,
+            code,
+            message,
+            primary_span: span,
+            secondary_spans: vec![],
+            notes: vec![],
+        }
+    }
+
+    /// Create a warning-level diagnostic.
+    pub fn warning(code: DiagnosticCode, message: String, span: TextRange) -> Self {
+        Self {
+            severity: Severity::Warning,
+            code,
+            message,
+            primary_span: span,
+            secondary_spans: vec![],
+            notes: vec![],
+        }
+    }
+
+    /// Create a note-level diagnostic.
+    pub fn note(code: DiagnosticCode, message: String, span: TextRange) -> Self {
+        Self {
+            severity: Severity::Note,
+            code,
+            message,
+            primary_span: span,
+            secondary_spans: vec![],
+            notes: vec![],
+        }
+    }
+
+    /// Append a note to this diagnostic (builder-style).
+    #[must_use]
+    pub fn with_note(mut self, note: String) -> Self {
+        self.notes.push(note);
+        self
+    }
+
+    /// Append a secondary labeled span to this diagnostic (builder-style).
+    #[must_use]
+    pub fn with_secondary(mut self, span: TextRange, label: Option<String>) -> Self {
+        self.secondary_spans.push(LabeledSpan { span, label });
+        self
+    }
 }
 
 /// Diagnostic severity level.

@@ -1,0 +1,39 @@
+---
+source: crates/compactp_diagnostics/src/json.rs
+expression: pretty
+---
+{
+  "code": "W0005",
+  "message": "duplicate field name",
+  "notes": [
+    "rename one of the fields"
+  ],
+  "primary_span": {
+    "end": {
+      "column": 15,
+      "line": 2,
+      "offset": 35
+    },
+    "start": {
+      "column": 10,
+      "line": 2,
+      "offset": 30
+    }
+  },
+  "secondary_spans": [
+    {
+      "end": {
+        "column": 13,
+        "line": 1,
+        "offset": 12
+      },
+      "label": "first defined here",
+      "start": {
+        "column": 8,
+        "line": 1,
+        "offset": 7
+      }
+    }
+  ],
+  "severity": "warning"
+}
