@@ -1,0 +1,13 @@
+[package]
+name = "compactp_ast"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+compactp_syntax.workspace = true
+rowan.workspace = true
+
+[dev-dependencies]
+compactp_parser.workspace = true
+expect-test.workspace = true

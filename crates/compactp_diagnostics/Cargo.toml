@@ -1,0 +1,14 @@
+[package]
+name = "compactp_diagnostics"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+compactp_syntax.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+rowan.workspace = true
+
+[dev-dependencies]
+insta.workspace = true

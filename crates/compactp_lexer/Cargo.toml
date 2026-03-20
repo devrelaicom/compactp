@@ -1,0 +1,9 @@
+[package]
+name = "compactp_lexer"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+compactp_syntax.workspace = true
+logos.workspace = true
