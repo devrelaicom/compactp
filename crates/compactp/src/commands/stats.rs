@@ -12,7 +12,7 @@ struct Stats {
     parse_time_ms: f64,
 }
 
-pub fn run(source: &str, input_name: &str, json: bool, timing: bool) -> i32 {
+pub fn run(source: &str, input_name: &str, json: bool, timing: bool, pretty: bool) -> i32 {
     let file_size = source.len();
     let token_count = compactp_lexer::lex(source).len();
 
@@ -39,7 +39,12 @@ pub fn run(source: &str, input_name: &str, json: bool, timing: bool) -> i32 {
             None
         };
         let envelope = OutputEnvelope::new(input_name.to_string(), stats, timing_ms);
-        println!("{}", serde_json::to_string_pretty(&envelope).unwrap());
+        let output = if pretty {
+            serde_json::to_string_pretty(&envelope).unwrap()
+        } else {
+            serde_json::to_string(&envelope).unwrap()
+        };
+        println!("{output}");
     } else {
         println!("File:        {input_name}");
         println!("Size:        {file_size} bytes");
@@ -49,7 +54,7 @@ pub fn run(source: &str, input_name: &str, json: bool, timing: bool) -> i32 {
         println!("Parse time:  {:.2}ms", stats.parse_time_ms);
     }
 
-    0
+    if error_count > 0 { 1 } else { 0 }
 }
 
 fn count_nodes(node: &SyntaxNode) -> usize {

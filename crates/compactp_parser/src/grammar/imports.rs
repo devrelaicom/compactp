@@ -14,9 +14,28 @@ use crate::parser::Parser;
 use compactp_syntax::SyntaxKind::*;
 
 /// `import import-name gargs? prefix? ;`
+/// `import { specifier, ... } from import-name gargs? prefix? ;`
 pub(crate) fn import(p: &mut Parser) {
     let m = p.start();
     p.bump(IMPORT_KW);
+
+    if p.at(L_BRACE) {
+        // Selective import: `import { id (as id)?, ... } from name gargs? prefix? ;`
+        let list_m = p.start();
+        p.bump(L_BRACE);
+        super::comma_sep(p, R_BRACE, |p| {
+            let spec_m = p.start();
+            p.expect(IDENT);
+            if p.eat(AS_KW) {
+                p.expect(IDENT);
+            }
+            spec_m.complete(p, IMPORT_SPECIFIER);
+        });
+        p.expect(R_BRACE);
+        list_m.complete(p, IMPORT_SPECIFIER_LIST);
+
+        p.expect(FROM_KW);
+    }
 
     // import-name: id or string
     match p.current() {

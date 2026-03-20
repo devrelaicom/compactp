@@ -37,18 +37,22 @@ pub fn lex(source: &str) -> Vec<(SyntaxKind, &str)> {
                     // Block comment: consume until */
                     pos += 1;
                     let mut terminated = false;
+                    let mut nested = false;
                     while pos < bytes.len() {
                         if bytes[pos] == b'*' && pos + 1 < bytes.len() && bytes[pos + 1] == b'/' {
                             pos += 2;
                             terminated = true;
                             break;
                         }
+                        if bytes[pos] == b'/' && pos + 1 < bytes.len() && bytes[pos + 1] == b'*' {
+                            nested = true;
+                        }
                         pos += 1;
                     }
-                    if terminated {
-                        tokens.push((SyntaxKind::BLOCK_COMMENT, &source[start..pos]));
-                    } else {
+                    if !terminated || nested {
                         tokens.push((SyntaxKind::ERROR, &source[start..pos]));
+                    } else {
+                        tokens.push((SyntaxKind::BLOCK_COMMENT, &source[start..pos]));
                     }
                 } else {
                     tokens.push((SyntaxKind::SLASH, &source[start..pos]));
@@ -116,24 +120,39 @@ pub fn lex(source: &str) -> Vec<(SyntaxKind, &str)> {
                     match bytes[pos] {
                         b'x' | b'X' => {
                             pos += 1;
+                            let digit_start = pos;
                             while pos < bytes.len() && is_hex_digit(bytes[pos]) {
                                 pos += 1;
                             }
-                            tokens.push((SyntaxKind::HEX_LIT, &source[start..pos]));
+                            if pos == digit_start {
+                                tokens.push((SyntaxKind::ERROR, &source[start..pos]));
+                            } else {
+                                tokens.push((SyntaxKind::HEX_LIT, &source[start..pos]));
+                            }
                         }
                         b'o' | b'O' => {
                             pos += 1;
+                            let digit_start = pos;
                             while pos < bytes.len() && matches!(bytes[pos], b'0'..=b'7') {
                                 pos += 1;
                             }
-                            tokens.push((SyntaxKind::OCT_LIT, &source[start..pos]));
+                            if pos == digit_start {
+                                tokens.push((SyntaxKind::ERROR, &source[start..pos]));
+                            } else {
+                                tokens.push((SyntaxKind::OCT_LIT, &source[start..pos]));
+                            }
                         }
                         b'b' | b'B' => {
                             pos += 1;
+                            let digit_start = pos;
                             while pos < bytes.len() && matches!(bytes[pos], b'0' | b'1') {
                                 pos += 1;
                             }
-                            tokens.push((SyntaxKind::BIN_LIT, &source[start..pos]));
+                            if pos == digit_start {
+                                tokens.push((SyntaxKind::ERROR, &source[start..pos]));
+                            } else {
+                                tokens.push((SyntaxKind::BIN_LIT, &source[start..pos]));
+                            }
                         }
                         b'.' => {
                             // Could be version literal (0.N.N) or just 0 followed by dot

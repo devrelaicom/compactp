@@ -204,7 +204,7 @@ mod tests {
                           R_BRACKET@33..34 "]"
                         WHITESPACE@34..35 " "
                         EQ@35..36 "="
-                        EXPR_STMT@36..38
+                        NAME_EXPR@36..38
                           WHITESPACE@36..37 " "
                           IDENT@37..38 "x"
                         SEMICOLON@38..39 ";"
@@ -253,7 +253,7 @@ mod tests {
                           R_BRACE@36..37 "}"
                         WHITESPACE@37..38 " "
                         EQ@38..39 "="
-                        EXPR_STMT@39..41
+                        NAME_EXPR@39..41
                           WHITESPACE@39..40 " "
                           IDENT@40..41 "x"
                         SEMICOLON@41..42 ";"

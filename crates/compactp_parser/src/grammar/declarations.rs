@@ -24,6 +24,8 @@ pub(crate) fn declaration(p: &mut Parser) {
         CONTRACT_KW => contract(p, false),
         STRUCT_KW => struct_def(p, false),
         ENUM_KW => enum_def(p, false),
+        TYPE_KW => type_alias(p),
+        NEW_KW if p.nth(1) == TYPE_KW => type_alias(p),
         PURE_KW => pure_prefixed(p, false),
         _ => super::error_recover_to_declaration(p),
     }
@@ -69,6 +71,8 @@ fn export_prefixed(p: &mut Parser) {
         STRUCT_KW => struct_def(p, true),
         ENUM_KW => enum_def(p, true),
         LEDGER_KW => ledger(p, true, false),
+        TYPE_KW => type_alias_exported(p),
+        NEW_KW if p.nth(2) == TYPE_KW => type_alias_exported(p),
         PURE_KW => pure_prefixed(p, true),
         SEALED_KW => {
             // export sealed ledger ...
@@ -351,6 +355,37 @@ fn enum_def(p: &mut Parser, has_export: bool) {
     m.complete(p, ENUM_DEF);
 }
 
+/// `export? new? type id gparams? = type ;`
+fn type_alias(p: &mut Parser) {
+    let m = p.start();
+    p.eat(NEW_KW);
+    p.bump(TYPE_KW);
+    p.expect(IDENT);
+    if p.at(LT) {
+        super::types::generic_param_list(p);
+    }
+    p.expect(EQ);
+    super::types::ty(p);
+    p.expect(SEMICOLON);
+    m.complete(p, TYPE_DECL);
+}
+
+/// `export new? type id gparams? = type ;`
+fn type_alias_exported(p: &mut Parser) {
+    let m = p.start();
+    p.bump(EXPORT_KW);
+    p.eat(NEW_KW);
+    p.bump(TYPE_KW);
+    p.expect(IDENT);
+    if p.at(LT) {
+        super::types::generic_param_list(p);
+    }
+    p.expect(EQ);
+    super::types::ty(p);
+    p.expect(SEMICOLON);
+    m.complete(p, TYPE_DECL);
+}
+
 #[cfg(test)]
 mod tests {
     use crate::grammar::tests::check;
@@ -511,7 +546,7 @@ mod tests {
                       RETURN_STMT@31..41
                         WHITESPACE@31..32 " "
                         RETURN_KW@32..38 "return"
-                        EXPR_STMT@38..40
+                        NAME_EXPR@38..40
                           WHITESPACE@38..39 " "
                           IDENT@39..40 "x"
                         SEMICOLON@40..41 ";"
@@ -615,7 +650,7 @@ mod tests {
                       RETURN_STMT@26..36
                         WHITESPACE@26..27 " "
                         RETURN_KW@27..33 "return"
-                        EXPR_STMT@33..35
+                        NAME_EXPR@33..35
                           WHITESPACE@33..34 " "
                           IDENT@34..35 "x"
                         SEMICOLON@35..36 ";"

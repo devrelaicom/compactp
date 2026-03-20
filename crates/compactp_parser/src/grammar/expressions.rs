@@ -114,7 +114,22 @@ fn expr_bp(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
             }
             let m = lhs.precede(p);
             p.bump(L_BRACKET);
-            expr(p);
+            // Index only accepts nat literals or identifiers (for generic params)
+            match p.current() {
+                INT_LIT | HEX_LIT | OCT_LIT | BIN_LIT => {
+                    let im = p.start();
+                    p.bump_any();
+                    im.complete(p, LITERAL_EXPR);
+                }
+                IDENT => {
+                    let im = p.start();
+                    p.bump(IDENT);
+                    im.complete(p, NAME_EXPR);
+                }
+                _ => {
+                    p.error("expected numeric literal or identifier for index");
+                }
+            }
             p.expect(R_BRACKET);
             lhs = m.complete(p, INDEX_EXPR);
             continue;
@@ -147,7 +162,7 @@ fn infix_binding_power(op: SyntaxKind) -> Option<(u8, u8)> {
         PIPE_PIPE => (4, 5),                 // Level 2: Logical OR, left-assoc
         AMP_AMP => (6, 7),                   // Level 3: Logical AND, left-assoc
         EQ_EQ | BANG_EQ => (8, 9),           // Level 4: Equality, left-assoc
-        LT | LT_EQ | GT | GT_EQ => (10, 11), // Level 5: Relational, non-assoc
+        LT | LT_EQ | GT | GT_EQ => (10, 10), // Level 5: Relational, non-assoc (equal BPs prevent chaining)
         // Cast (as) is handled separately above
         PLUS | MINUS => (14, 15), // Level 7: Additive, left-assoc
         STAR => (16, 17),         // Level 8: Multiplicative, left-assoc
@@ -171,26 +186,38 @@ fn lhs(p: &mut Parser) -> Option<CompletedMarker> {
         TRUE_KW => {
             let m = p.start();
             p.bump(TRUE_KW);
-            Some(m.complete(p, EXPR_STMT)) // We just emit the token inside a trivial wrapper
+            Some(m.complete(p, LITERAL_EXPR))
         }
         FALSE_KW => {
             let m = p.start();
             p.bump(FALSE_KW);
-            Some(m.complete(p, EXPR_STMT))
+            Some(m.complete(p, LITERAL_EXPR))
         }
 
         // Numeric literals
         INT_LIT | HEX_LIT | OCT_LIT | BIN_LIT => {
             let m = p.start();
             p.bump_any();
-            Some(m.complete(p, EXPR_STMT))
+            Some(m.complete(p, LITERAL_EXPR))
         }
 
         // String literal
         STRING_LIT => {
             let m = p.start();
             p.bump(STRING_LIT);
-            Some(m.complete(p, EXPR_STMT))
+            Some(m.complete(p, LITERAL_EXPR))
+        }
+
+        // Assert expression: `assert(cond, "msg")`
+        ASSERT_KW => {
+            let m = p.start();
+            p.bump(ASSERT_KW);
+            p.expect(L_PAREN);
+            expr(p);
+            p.expect(COMMA);
+            expr(p);
+            p.expect(R_PAREN);
+            Some(m.complete(p, CALL_EXPR))
         }
 
         // `default<type>`
@@ -333,7 +360,7 @@ fn ident_expr(p: &mut Parser) -> Option<CompletedMarker> {
             return Some(m.complete(p, CALL_EXPR));
         }
         // Not generic args — just return the plain identifier
-        return Some(m.complete(p, EXPR_STMT));
+        return Some(m.complete(p, NAME_EXPR));
     }
 
     // Function call: `id(args)`
@@ -350,7 +377,7 @@ fn ident_expr(p: &mut Parser) -> Option<CompletedMarker> {
     }
 
     // Plain identifier
-    Some(m.complete(p, EXPR_STMT))
+    Some(m.complete(p, NAME_EXPR))
 }
 
 /// Heuristic to determine if `<` after an identifier starts generic arguments.
@@ -543,12 +570,12 @@ mod tests {
                         WHITESPACE@21..22 " "
                         RETURN_KW@22..28 "return"
                         BINARY_EXPR@28..34
-                          EXPR_STMT@28..30
+                          NAME_EXPR@28..30
                             WHITESPACE@28..29 " "
                             IDENT@29..30 "a"
                           WHITESPACE@30..31 " "
                           PLUS@31..32 "+"
-                          EXPR_STMT@32..34
+                          NAME_EXPR@32..34
                             WHITESPACE@32..33 " "
                             IDENT@33..34 "b"
                         SEMICOLON@34..35 ";"
@@ -583,18 +610,18 @@ mod tests {
                         WHITESPACE@21..22 " "
                         RETURN_KW@22..28 "return"
                         BINARY_EXPR@28..38
-                          EXPR_STMT@28..30
+                          NAME_EXPR@28..30
                             WHITESPACE@28..29 " "
                             IDENT@29..30 "a"
                           WHITESPACE@30..31 " "
                           PLUS@31..32 "+"
                           BINARY_EXPR@32..38
-                            EXPR_STMT@32..34
+                            NAME_EXPR@32..34
                               WHITESPACE@32..33 " "
                               IDENT@33..34 "b"
                             WHITESPACE@34..35 " "
                             STAR@35..36 "*"
-                            EXPR_STMT@36..38
+                            NAME_EXPR@36..38
                               WHITESPACE@36..37 " "
                               IDENT@37..38 "c"
                         SEMICOLON@38..39 ";"
@@ -628,17 +655,17 @@ mod tests {
                         WHITESPACE@21..22 " "
                         RETURN_KW@22..28 "return"
                         TERNARY_EXPR@28..38
-                          EXPR_STMT@28..30
+                          NAME_EXPR@28..30
                             WHITESPACE@28..29 " "
                             IDENT@29..30 "a"
                           WHITESPACE@30..31 " "
                           QUESTION@31..32 "?"
-                          EXPR_STMT@32..34
+                          NAME_EXPR@32..34
                             WHITESPACE@32..33 " "
                             IDENT@33..34 "b"
                           WHITESPACE@34..35 " "
                           COLON@35..36 ":"
-                          EXPR_STMT@36..38
+                          NAME_EXPR@36..38
                             WHITESPACE@36..37 " "
                             IDENT@37..38 "c"
                         SEMICOLON@38..39 ";"
@@ -674,7 +701,7 @@ mod tests {
                         UNARY_EXPR@28..31
                           WHITESPACE@28..29 " "
                           BANG@29..30 "!"
-                          EXPR_STMT@30..31
+                          NAME_EXPR@30..31
                             IDENT@30..31 "x"
                         SEMICOLON@31..32 ";"
                       WHITESPACE@32..33 " "
@@ -707,7 +734,7 @@ mod tests {
                         WHITESPACE@21..22 " "
                         RETURN_KW@22..28 "return"
                         CAST_EXPR@28..41
-                          EXPR_STMT@28..30
+                          NAME_EXPR@28..30
                             WHITESPACE@28..29 " "
                             IDENT@29..30 "x"
                           WHITESPACE@30..31 " "
@@ -750,7 +777,7 @@ mod tests {
                         WHITESPACE@21..22 " "
                         RETURN_KW@22..28 "return"
                         MEMBER_EXPR@28..32
-                          EXPR_STMT@28..30
+                          NAME_EXPR@28..30
                             WHITESPACE@28..29 " "
                             IDENT@29..30 "a"
                           DOT@30..31 "."
@@ -786,16 +813,16 @@ mod tests {
                         WHITESPACE@21..22 " "
                         RETURN_KW@22..28 "return"
                         CALL_EXPR@28..38
-                          EXPR_STMT@28..30
+                          NAME_EXPR@28..30
                             WHITESPACE@28..29 " "
                             IDENT@29..30 "a"
                           DOT@30..31 "."
                           IDENT@31..32 "b"
                           L_PAREN@32..33 "("
-                          EXPR_STMT@33..34
+                          NAME_EXPR@33..34
                             IDENT@33..34 "c"
                           COMMA@34..35 ","
-                          EXPR_STMT@35..37
+                          NAME_EXPR@35..37
                             WHITESPACE@35..36 " "
                             IDENT@36..37 "d"
                           R_PAREN@37..38 ")"
@@ -830,11 +857,11 @@ mod tests {
                         WHITESPACE@21..22 " "
                         RETURN_KW@22..28 "return"
                         INDEX_EXPR@28..33
-                          EXPR_STMT@28..30
+                          NAME_EXPR@28..30
                             WHITESPACE@28..29 " "
                             IDENT@29..30 "a"
                           L_BRACKET@30..31 "["
-                          EXPR_STMT@31..32
+                          LITERAL_EXPR@31..32
                             INT_LIT@31..32 "0"
                           R_BRACKET@32..33 "]"
                         SEMICOLON@33..34 ";"
@@ -871,10 +898,10 @@ mod tests {
                           WHITESPACE@28..29 " "
                           IDENT@29..30 "g"
                           L_PAREN@30..31 "("
-                          EXPR_STMT@31..32
+                          NAME_EXPR@31..32
                             IDENT@31..32 "x"
                           COMMA@32..33 ","
-                          EXPR_STMT@33..35
+                          NAME_EXPR@33..35
                             WHITESPACE@33..34 " "
                             IDENT@34..35 "y"
                           R_PAREN@35..36 ")"
@@ -911,14 +938,14 @@ mod tests {
                         ARRAY_EXPR@28..38
                           WHITESPACE@28..29 " "
                           L_BRACKET@29..30 "["
-                          EXPR_STMT@30..31
+                          LITERAL_EXPR@30..31
                             INT_LIT@30..31 "1"
                           COMMA@31..32 ","
-                          EXPR_STMT@32..34
+                          LITERAL_EXPR@32..34
                             WHITESPACE@32..33 " "
                             INT_LIT@33..34 "2"
                           COMMA@34..35 ","
-                          EXPR_STMT@35..37
+                          LITERAL_EXPR@35..37
                             WHITESPACE@35..36 " "
                             INT_LIT@36..37 "3"
                           R_BRACKET@37..38 "]"
@@ -956,11 +983,11 @@ mod tests {
                           WHITESPACE@28..29 " "
                           L_PAREN@29..30 "("
                           BINARY_EXPR@30..35
-                            EXPR_STMT@30..31
+                            NAME_EXPR@30..31
                               IDENT@30..31 "a"
                             WHITESPACE@31..32 " "
                             PLUS@32..33 "+"
-                            EXPR_STMT@33..35
+                            NAME_EXPR@33..35
                               WHITESPACE@33..34 " "
                               IDENT@34..35 "b"
                           R_PAREN@35..36 ")"
@@ -1033,18 +1060,18 @@ mod tests {
                         WHITESPACE@21..22 " "
                         RETURN_KW@22..28 "return"
                         BINARY_EXPR@28..40
-                          EXPR_STMT@28..30
+                          NAME_EXPR@28..30
                             WHITESPACE@28..29 " "
                             IDENT@29..30 "a"
                           WHITESPACE@30..31 " "
                           PIPE_PIPE@31..33 "||"
                           BINARY_EXPR@33..40
-                            EXPR_STMT@33..35
+                            NAME_EXPR@33..35
                               WHITESPACE@33..34 " "
                               IDENT@34..35 "b"
                             WHITESPACE@35..36 " "
                             AMP_AMP@36..38 "&&"
-                            EXPR_STMT@38..40
+                            NAME_EXPR@38..40
                               WHITESPACE@38..39 " "
                               IDENT@39..40 "c"
                         SEMICOLON@40..41 ";"
@@ -1086,7 +1113,7 @@ mod tests {
                             WHITESPACE@39..40 " "
                             IDENT@40..41 "x"
                             COLON@41..42 ":"
-                            EXPR_STMT@42..44
+                            LITERAL_EXPR@42..44
                               WHITESPACE@42..43 " "
                               INT_LIT@43..44 "1"
                           COMMA@44..45 ","
@@ -1094,7 +1121,7 @@ mod tests {
                             WHITESPACE@45..46 " "
                             IDENT@46..47 "y"
                             COLON@47..48 ":"
-                            EXPR_STMT@48..50
+                            LITERAL_EXPR@48..50
                               WHITESPACE@48..49 " "
                               INT_LIT@49..50 "2"
                           WHITESPACE@50..51 " "
@@ -1137,7 +1164,7 @@ mod tests {
                           STRUCT_UPDATE@39..48
                             WHITESPACE@39..40 " "
                             DOT_DOT_DOT@40..43 "..."
-                            EXPR_STMT@43..48
+                            NAME_EXPR@43..48
                               IDENT@43..48 "other"
                           WHITESPACE@48..49 " "
                           R_BRACE@49..50 "}"
@@ -1188,16 +1215,16 @@ mod tests {
                             WHITESPACE@43..44 " "
                             FAT_ARROW@44..46 "=>"
                             BINARY_EXPR@46..52
-                              EXPR_STMT@46..48
+                              NAME_EXPR@46..48
                                 WHITESPACE@46..47 " "
                                 IDENT@47..48 "x"
                               WHITESPACE@48..49 " "
                               PLUS@49..50 "+"
-                              EXPR_STMT@50..52
+                              LITERAL_EXPR@50..52
                                 WHITESPACE@50..51 " "
                                 INT_LIT@51..52 "1"
                           COMMA@52..53 ","
-                          EXPR_STMT@53..57
+                          NAME_EXPR@53..57
                             WHITESPACE@53..54 " "
                             IDENT@54..57 "arr"
                           R_PAREN@57..58 ")"
@@ -1232,12 +1259,12 @@ mod tests {
                         WHITESPACE@21..22 " "
                         RETURN_KW@22..28 "return"
                         BINARY_EXPR@28..35
-                          EXPR_STMT@28..30
+                          NAME_EXPR@28..30
                             WHITESPACE@28..29 " "
                             IDENT@29..30 "a"
                           WHITESPACE@30..31 " "
                           EQ_EQ@31..33 "=="
-                          EXPR_STMT@33..35
+                          NAME_EXPR@33..35
                             WHITESPACE@33..34 " "
                             IDENT@34..35 "b"
                         SEMICOLON@35..36 ";"
@@ -1274,7 +1301,7 @@ mod tests {
                           WHITESPACE@28..29 " "
                           DISCLOSE_KW@29..37 "disclose"
                           L_PAREN@37..38 "("
-                          EXPR_STMT@38..39
+                          NAME_EXPR@38..39
                             IDENT@38..39 "x"
                           R_PAREN@39..40 ")"
                         SEMICOLON@40..41 ";"
@@ -1311,10 +1338,10 @@ mod tests {
                           WHITESPACE@28..29 " "
                           BYTES_KW@29..34 "Bytes"
                           L_BRACKET@34..35 "["
-                          EXPR_STMT@35..36
+                          LITERAL_EXPR@35..36
                             INT_LIT@35..36 "1"
                           COMMA@36..37 ","
-                          EXPR_STMT@37..39
+                          LITERAL_EXPR@37..39
                             WHITESPACE@37..38 " "
                             INT_LIT@38..39 "2"
                           R_BRACKET@39..40 "]"
@@ -1348,7 +1375,7 @@ mod tests {
                       RETURN_STMT@21..34
                         WHITESPACE@21..22 " "
                         RETURN_KW@22..28 "return"
-                        EXPR_STMT@28..33
+                        LITERAL_EXPR@28..33
                           WHITESPACE@28..29 " "
                           TRUE_KW@29..33 "true"
                         SEMICOLON@33..34 ";"

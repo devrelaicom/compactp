@@ -10,7 +10,7 @@ struct TokenInfo {
     len: u32,
 }
 
-pub fn run(source: &str, input_name: &str, json: bool, timing: bool) -> i32 {
+pub fn run(source: &str, input_name: &str, json: bool, timing: bool, pretty: bool) -> i32 {
     let start = Instant::now();
     let tokens = compactp_lexer::lex(source);
     let elapsed = start.elapsed();
@@ -39,7 +39,12 @@ pub fn run(source: &str, input_name: &str, json: bool, timing: bool) -> i32 {
         };
 
         let envelope = OutputEnvelope::new(input_name.to_string(), token_infos, timing_ms);
-        println!("{}", serde_json::to_string_pretty(&envelope).unwrap());
+        let output = if pretty {
+            serde_json::to_string_pretty(&envelope).unwrap()
+        } else {
+            serde_json::to_string(&envelope).unwrap()
+        };
+        println!("{output}");
     } else {
         let mut offset = 0usize;
         for (kind, text) in &tokens {

@@ -1,4 +1,5 @@
 use crate::event::Event;
+use compactp_diagnostics::{Diagnostic, DiagnosticCode};
 use compactp_syntax::SyntaxKind;
 use rowan::GreenNode;
 
@@ -7,7 +8,8 @@ pub(crate) struct Sink<'src> {
     tokens: Vec<(SyntaxKind, &'src str)>,
     token_pos: usize,
     builder: rowan::GreenNodeBuilder<'static>,
-    errors: Vec<String>,
+    errors: Vec<Diagnostic>,
+    byte_offset: usize,
 }
 
 impl<'src> Sink<'src> {
@@ -18,10 +20,11 @@ impl<'src> Sink<'src> {
             token_pos: 0,
             builder: rowan::GreenNodeBuilder::new(),
             errors: Vec::new(),
+            byte_offset: 0,
         }
     }
 
-    pub(crate) fn finish(mut self) -> (GreenNode, Vec<String>) {
+    pub(crate) fn finish(mut self) -> (GreenNode, Vec<Diagnostic>) {
         // Resolve forward parents. For each event, we need to figure out the
         // chain of forward_parent pointers and process them in reverse order
         // (outermost parent first).
@@ -63,7 +66,13 @@ impl<'src> Sink<'src> {
                     self.builder.finish_node();
                 }
                 Event::Error { message } => {
-                    self.errors.push(message);
+                    let offset = self.byte_offset as u32;
+                    let span = rowan::TextRange::new(offset.into(), offset.into());
+                    self.errors.push(Diagnostic::error(
+                        DiagnosticCode::new("E", 1),
+                        message,
+                        span,
+                    ));
                 }
                 Event::Placeholder => {}
             }
@@ -82,6 +91,7 @@ impl<'src> Sink<'src> {
                 let (tk, text) = self.tokens[self.token_pos];
                 self.builder
                     .token(compactp_syntax::CompactLanguage::kind_to_raw(tk), text);
+                self.byte_offset += text.len();
                 self.token_pos += 1;
             }
         }
@@ -93,6 +103,7 @@ impl<'src> Sink<'src> {
             if kind.is_trivia() {
                 self.builder
                     .token(compactp_syntax::CompactLanguage::kind_to_raw(kind), text);
+                self.byte_offset += text.len();
                 self.token_pos += 1;
             } else {
                 break;

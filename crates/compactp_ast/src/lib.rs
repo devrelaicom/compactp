@@ -554,30 +554,12 @@ mod tests {
         let file = SourceFile::cast(root).unwrap();
         let circuit = file.circuit_defs().next().unwrap();
         let block = circuit.body().unwrap();
+        // Assert is now parsed as an expression (CALL_EXPR) inside EXPR_STMT
         match block.stmts().next().unwrap() {
-            Stmt::Assert(a) => {
-                // In the call form, the message string is wrapped in an EXPR_STMT,
-                // so the direct child_token search won't find it. Verify the
-                // assert node exists and its structure is intact.
-                assert_eq!(a.syntax().kind(), compactp_syntax::SyntaxKind::ASSERT_STMT);
+            Stmt::Expr(e) => {
+                assert_eq!(e.syntax().kind(), compactp_syntax::SyntaxKind::EXPR_STMT);
             }
-            other => panic!("expected Assert, got {other:?}"),
-        }
-    }
-
-    #[test]
-    fn stmt_assert_keyword_form() {
-        let root = parse(r#"circuit f() : Field { assert x "fail"; }"#);
-        let file = SourceFile::cast(root).unwrap();
-        let circuit = file.circuit_defs().next().unwrap();
-        let block = circuit.body().unwrap();
-        match block.stmts().next().unwrap() {
-            Stmt::Assert(a) => {
-                // In the keyword form, the STRING_LIT is a direct child token
-                // of ASSERT_STMT, so message() finds it.
-                assert_eq!(a.message().unwrap().text(), "\"fail\"");
-            }
-            other => panic!("expected Assert, got {other:?}"),
+            other => panic!("expected Expr, got {other:?}"),
         }
     }
 

@@ -52,6 +52,10 @@ macro_rules! ast_node {
 /// matching. Each variant wraps a specific expression node type.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Expr {
+    /// A literal value (number, string, boolean)
+    Literal(LiteralExpr),
+    /// A name reference (identifier)
+    Name(NameExpr),
     /// `cond ? then : else`
     Ternary(TernaryExpr),
     /// `lhs op rhs`
@@ -96,7 +100,9 @@ impl AstNode for Expr {
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            SyntaxKind::TERNARY_EXPR
+            SyntaxKind::LITERAL_EXPR
+                | SyntaxKind::NAME_EXPR
+                | SyntaxKind::TERNARY_EXPR
                 | SyntaxKind::BINARY_EXPR
                 | SyntaxKind::UNARY_EXPR
                 | SyntaxKind::CAST_EXPR
@@ -120,6 +126,8 @@ impl AstNode for Expr {
 
     fn cast(node: SyntaxNode) -> Option<Self> {
         match node.kind() {
+            SyntaxKind::LITERAL_EXPR => Some(Self::Literal(LiteralExpr(node))),
+            SyntaxKind::NAME_EXPR => Some(Self::Name(NameExpr(node))),
             SyntaxKind::TERNARY_EXPR => Some(Self::Ternary(TernaryExpr(node))),
             SyntaxKind::BINARY_EXPR => Some(Self::Binary(BinaryExpr(node))),
             SyntaxKind::UNARY_EXPR => Some(Self::Unary(UnaryExpr(node))),
@@ -145,6 +153,8 @@ impl AstNode for Expr {
 
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::Literal(n) => &n.0,
+            Self::Name(n) => &n.0,
             Self::Ternary(n) => &n.0,
             Self::Binary(n) => &n.0,
             Self::Unary(n) => &n.0,
@@ -171,6 +181,23 @@ impl AstNode for Expr {
 // ===========================================================================
 // Expression node types
 // ===========================================================================
+
+ast_node! {
+    /// A literal value: number, string, or boolean.
+    LiteralExpr => LITERAL_EXPR
+}
+
+ast_node! {
+    /// A name reference (identifier expression).
+    NameExpr => NAME_EXPR
+}
+
+impl NameExpr {
+    /// The identifier token.
+    pub fn ident(&self) -> Option<SyntaxToken> {
+        support::child_token(&self.0, SyntaxKind::IDENT)
+    }
+}
 
 ast_node! {
     /// Ternary conditional: `cond ? then : else`.

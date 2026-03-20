@@ -9,7 +9,7 @@ use rowan::GreenNode;
 /// The result of parsing Compact source code.
 pub struct ParseResult {
     pub green: GreenNode,
-    pub errors: Vec<String>,
+    pub errors: Vec<compactp_diagnostics::Diagnostic>,
 }
 
 /// Options controlling parser behavior.
@@ -79,6 +79,8 @@ mod tests {
             !result.errors.is_empty(),
             "expected a parse error for bare identifier"
         );
+        // Verify errors are Diagnostic values with message field
+        assert!(!result.errors[0].message.is_empty());
     }
 
     #[test]

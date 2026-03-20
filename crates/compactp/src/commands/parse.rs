@@ -17,6 +17,7 @@ pub fn run(
     timing: bool,
     no_recover: bool,
     max_errors: Option<usize>,
+    pretty: bool,
 ) -> i32 {
     let opts = ParseOptions {
         recover: !no_recover,
@@ -39,15 +40,20 @@ pub fn run(
         let info = ParseInfo {
             success: !has_errors,
             error_count: result.errors.len(),
-            errors: result.errors,
+            errors: result.errors.iter().map(|d| d.message.clone()).collect(),
         };
 
         let envelope = OutputEnvelope::new(input_name.to_string(), info, timing_ms);
-        println!("{}", serde_json::to_string_pretty(&envelope).unwrap());
+        let output = if pretty {
+            serde_json::to_string_pretty(&envelope).unwrap()
+        } else {
+            serde_json::to_string(&envelope).unwrap()
+        };
+        println!("{output}");
     } else {
         if has_errors {
             for err in &result.errors {
-                eprintln!("error: {err}");
+                eprintln!("error: {}", err.message);
             }
             eprintln!(
                 "{} error{} found",

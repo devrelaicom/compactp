@@ -125,6 +125,7 @@ pub enum SyntaxKind {
     STRUCT_FIELD,
     ENUM_DEF,
     ENUM_VARIANT,
+    TYPE_DECL,
 
     // === Node kinds: Types ===
     TYPE_REF,
@@ -161,6 +162,8 @@ pub enum SyntaxKind {
     MULTI_CONST_STMT,
 
     // === Node kinds: Expressions ===
+    LITERAL_EXPR,
+    NAME_EXPR,
     TERNARY_EXPR,
     BINARY_EXPR,
     UNARY_EXPR,
@@ -264,7 +267,8 @@ impl From<u16> for SyntaxKind {
         // Safety: we validate the raw value is within range
         assert!(
             raw <= SyntaxKind::VERSION_PAREN_EXPR as u16,
-            "invalid SyntaxKind raw value: {raw}"
+            "invalid SyntaxKind raw value: {raw}, max is {}",
+            SyntaxKind::VERSION_PAREN_EXPR as u16
         );
         // SAFETY: SyntaxKind is repr(u16) and we've validated the range
         unsafe { std::mem::transmute(raw) }

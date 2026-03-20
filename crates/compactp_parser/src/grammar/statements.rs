@@ -9,9 +9,7 @@
 //!      → return expr-seq? ;
 //!      → if ( expr-seq ) stmt (else stmt)?
 //!      → for ( const id of nat..nat | expr-seq ) stmt
-//!      → assert expr str ;       (tree-sitter form)
-//!      → assert(cond, "msg") ;   (corpus form — handled as call expression)
-//!      → const pattern : type? = expr ;
+//!      → const pattern : type? = expr (, pattern : type? = expr)* ;
 //!      → block
 //! ```
 
@@ -25,7 +23,6 @@ pub(crate) fn stmt(p: &mut Parser) {
         RETURN_KW => return_stmt(p),
         IF_KW => if_stmt(p),
         FOR_KW => for_stmt(p),
-        ASSERT_KW => assert_stmt(p),
         CONST_KW => const_stmt(p),
         _ => expr_or_assign_stmt(p),
     }
@@ -84,7 +81,22 @@ fn for_stmt(p: &mut Parser) {
         let rm = p.start();
         p.bump_any(); // nat
         p.expect(DOT_DOT);
-        super::expressions::expr(p);
+        // Range end only accepts nat literals or identifiers
+        match p.current() {
+            INT_LIT | HEX_LIT | OCT_LIT | BIN_LIT => {
+                let lm = p.start();
+                p.bump_any();
+                lm.complete(p, LITERAL_EXPR);
+            }
+            IDENT => {
+                let lm = p.start();
+                p.bump(IDENT);
+                lm.complete(p, NAME_EXPR);
+            }
+            _ => {
+                p.error("expected numeric literal or identifier for range end");
+            }
+        }
         rm.complete(p, RANGE_EXPR);
     } else {
         super::expressions::expr_seq(p);
@@ -100,45 +112,34 @@ fn is_range_start(p: &Parser) -> bool {
     matches!(p.current(), INT_LIT | HEX_LIT | OCT_LIT | BIN_LIT) && p.nth(1) == DOT_DOT
 }
 
-/// `assert expr str ;` (tree-sitter form)
-/// This is the keyword-based assert syntax. The call-form `assert(cond, "msg")`
-/// is handled as an expression statement via ident_expr → call_expr.
-fn assert_stmt(p: &mut Parser) {
-    let m = p.start();
-    p.bump(ASSERT_KW);
-
-    // Distinguish: `assert(expr, str)` call form vs `assert expr str ;` keyword form.
-    if p.at(L_PAREN) {
-        // Call form: `assert(cond, "msg");`
-        p.bump(L_PAREN);
-        super::expressions::expr(p);
-        p.expect(COMMA);
-        super::expressions::expr(p);
-        p.expect(R_PAREN);
-        p.expect(SEMICOLON);
-        m.complete(p, ASSERT_STMT);
-    } else {
-        // Keyword form: `assert expr str ;`
-        super::expressions::expr(p);
-        p.expect(STRING_LIT);
-        p.expect(SEMICOLON);
-        m.complete(p, ASSERT_STMT);
-    }
-}
-
-/// `const pattern : type? = expr ;`
+/// `const pattern : type? = expr (, pattern : type? = expr)* ;`
 fn const_stmt(p: &mut Parser) {
     let m = p.start();
     p.bump(CONST_KW);
+    const_binding(p);
+    let has_multi = p.at(COMMA) && !p.at(SEMICOLON);
+    while p.eat(COMMA) {
+        if p.at(SEMICOLON) {
+            break;
+        }
+        const_binding(p);
+    }
+    p.expect(SEMICOLON);
+    let kind = if has_multi {
+        MULTI_CONST_STMT
+    } else {
+        CONST_STMT
+    };
+    m.complete(p, kind);
+}
+
+fn const_binding(p: &mut Parser) {
     super::patterns::pattern(p);
-    // Optional type annotation
     if p.eat(COLON) {
         super::types::ty(p);
     }
     p.expect(EQ);
     super::expressions::expr(p);
-    p.expect(SEMICOLON);
-    m.complete(p, CONST_STMT);
 }
 
 /// Parse an expression statement or assignment statement.
@@ -200,7 +201,7 @@ mod tests {
                       RETURN_STMT@21..32
                         WHITESPACE@21..22 " "
                         RETURN_KW@22..28 "return"
-                        EXPR_STMT@28..31
+                        LITERAL_EXPR@28..31
                           WHITESPACE@28..29 " "
                           INT_LIT@29..31 "42"
                         SEMICOLON@31..32 ";"
@@ -265,7 +266,7 @@ mod tests {
                         IF_KW@22..24 "if"
                         WHITESPACE@24..25 " "
                         L_PAREN@25..26 "("
-                        EXPR_STMT@26..27
+                        NAME_EXPR@26..27
                           IDENT@26..27 "x"
                         R_PAREN@27..28 ")"
                         BLOCK@28..42
@@ -274,7 +275,7 @@ mod tests {
                           RETURN_STMT@30..40
                             WHITESPACE@30..31 " "
                             RETURN_KW@31..37 "return"
-                            EXPR_STMT@37..39
+                            LITERAL_EXPR@37..39
                               WHITESPACE@37..38 " "
                               INT_LIT@38..39 "1"
                             SEMICOLON@39..40 ";"
@@ -288,7 +289,7 @@ mod tests {
                           RETURN_STMT@49..59
                             WHITESPACE@49..50 " "
                             RETURN_KW@50..56 "return"
-                            EXPR_STMT@56..58
+                            LITERAL_EXPR@56..58
                               WHITESPACE@56..57 " "
                               INT_LIT@57..58 "2"
                             SEMICOLON@58..59 ";"
@@ -334,14 +335,14 @@ mod tests {
                           WHITESPACE@37..38 " "
                           INT_LIT@38..39 "0"
                           DOT_DOT@39..41 ".."
-                          EXPR_STMT@41..43
+                          LITERAL_EXPR@41..43
                             INT_LIT@41..43 "10"
                         R_PAREN@43..44 ")"
                         BLOCK@44..51
                           WHITESPACE@44..45 " "
                           L_BRACE@45..46 "{"
                           EXPR_STMT@46..49
-                            EXPR_STMT@46..48
+                            NAME_EXPR@46..48
                               WHITESPACE@46..47 " "
                               IDENT@47..48 "x"
                             SEMICOLON@48..49 ";"
@@ -373,17 +374,18 @@ mod tests {
                     BLOCK@19..42
                       WHITESPACE@19..20 " "
                       L_BRACE@20..21 "{"
-                      ASSERT_STMT@21..40
-                        WHITESPACE@21..22 " "
-                        ASSERT_KW@22..28 "assert"
-                        L_PAREN@28..29 "("
-                        EXPR_STMT@29..30
-                          IDENT@29..30 "x"
-                        COMMA@30..31 ","
-                        EXPR_STMT@31..38
-                          WHITESPACE@31..32 " "
-                          STRING_LIT@32..38 "\"fail\""
-                        R_PAREN@38..39 ")"
+                      EXPR_STMT@21..40
+                        CALL_EXPR@21..39
+                          WHITESPACE@21..22 " "
+                          ASSERT_KW@22..28 "assert"
+                          L_PAREN@28..29 "("
+                          NAME_EXPR@29..30
+                            IDENT@29..30 "x"
+                          COMMA@30..31 ","
+                          LITERAL_EXPR@31..38
+                            WHITESPACE@31..32 " "
+                            STRING_LIT@32..38 "\"fail\""
+                          R_PAREN@38..39 ")"
                         SEMICOLON@39..40 ";"
                       WHITESPACE@40..41 " "
                       R_BRACE@41..42 "}"
@@ -411,17 +413,23 @@ mod tests {
                     BLOCK@19..40
                       WHITESPACE@19..20 " "
                       L_BRACE@20..21 "{"
-                      ASSERT_STMT@21..38
-                        WHITESPACE@21..22 " "
-                        ASSERT_KW@22..28 "assert"
-                        EXPR_STMT@28..30
-                          WHITESPACE@28..29 " "
-                          IDENT@29..30 "x"
-                        WHITESPACE@30..31 " "
-                        STRING_LIT@31..37 "\"fail\""
+                      EXPR_STMT@21..38
+                        CALL_EXPR@21..37
+                          WHITESPACE@21..22 " "
+                          ASSERT_KW@22..28 "assert"
+                          NAME_EXPR@28..30
+                            WHITESPACE@28..29 " "
+                            IDENT@29..30 "x"
+                          LITERAL_EXPR@30..37
+                            WHITESPACE@30..31 " "
+                            STRING_LIT@31..37 "\"fail\""
                         SEMICOLON@37..38 ";"
                       WHITESPACE@38..39 " "
                       R_BRACE@39..40 "}"
+                errors:
+                  expected L_PAREN
+                  expected COMMA
+                  expected R_PAREN
             "#]],
         );
     }
@@ -459,7 +467,7 @@ mod tests {
                           FIELD_KW@32..37 "Field"
                         WHITESPACE@37..38 " "
                         EQ@38..39 "="
-                        EXPR_STMT@39..41
+                        LITERAL_EXPR@39..41
                           WHITESPACE@39..40 " "
                           INT_LIT@40..41 "1"
                         SEMICOLON@41..42 ";"
@@ -490,12 +498,12 @@ mod tests {
                       WHITESPACE@19..20 " "
                       L_BRACE@20..21 "{"
                       ASSIGN_STMT@21..28
-                        EXPR_STMT@21..23
+                        NAME_EXPR@21..23
                           WHITESPACE@21..22 " "
                           IDENT@22..23 "x"
                         WHITESPACE@23..24 " "
                         EQ@24..25 "="
-                        EXPR_STMT@25..27
+                        LITERAL_EXPR@25..27
                           WHITESPACE@25..26 " "
                           INT_LIT@26..27 "1"
                         SEMICOLON@27..28 ";"
@@ -526,12 +534,12 @@ mod tests {
                       WHITESPACE@19..20 " "
                       L_BRACE@20..21 "{"
                       ASSIGN_STMT@21..29
-                        EXPR_STMT@21..23
+                        NAME_EXPR@21..23
                           WHITESPACE@21..22 " "
                           IDENT@22..23 "x"
                         WHITESPACE@23..24 " "
                         PLUS_EQ@24..26 "+="
-                        EXPR_STMT@26..28
+                        LITERAL_EXPR@26..28
                           WHITESPACE@26..27 " "
                           INT_LIT@27..28 "1"
                         SEMICOLON@28..29 ";"
@@ -567,7 +575,7 @@ mod tests {
                         RETURN_STMT@23..33
                           WHITESPACE@23..24 " "
                           RETURN_KW@24..30 "return"
-                          EXPR_STMT@30..32
+                          LITERAL_EXPR@30..32
                             WHITESPACE@30..31 " "
                             INT_LIT@31..32 "1"
                           SEMICOLON@32..33 ";"
@@ -609,7 +617,7 @@ mod tests {
                         IDENT@33..34 "i"
                         WHITESPACE@34..35 " "
                         OF_KW@35..37 "of"
-                        EXPR_STMT@37..39
+                        NAME_EXPR@37..39
                           WHITESPACE@37..38 " "
                           IDENT@38..39 "n"
                         R_PAREN@39..40 ")"
@@ -617,7 +625,7 @@ mod tests {
                           WHITESPACE@40..41 " "
                           L_BRACE@41..42 "{"
                           EXPR_STMT@42..45
-                            EXPR_STMT@42..44
+                            NAME_EXPR@42..44
                               WHITESPACE@42..43 " "
                               IDENT@43..44 "x"
                             SEMICOLON@44..45 ";"

@@ -106,7 +106,7 @@ mod tests {
         if !result.errors.is_empty() {
             buf.push_str("errors:\n");
             for e in &result.errors {
-                buf.push_str(&format!("  {e}\n"));
+                buf.push_str(&format!("  {}\n", e.message));
             }
         }
         expected.assert_eq(&buf);

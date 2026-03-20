@@ -12,7 +12,7 @@ struct CstNode {
     children: Vec<CstNode>,
 }
 
-pub fn run(source: &str, input_name: &str, json: bool, timing: bool) -> i32 {
+pub fn run(source: &str, input_name: &str, json: bool, timing: bool, pretty: bool) -> i32 {
     let start = Instant::now();
     let result = compactp_parser::parse(source);
     let elapsed = start.elapsed();
@@ -28,7 +28,12 @@ pub fn run(source: &str, input_name: &str, json: bool, timing: bool) -> i32 {
 
         let tree = syntax_node_to_json(&root);
         let envelope = OutputEnvelope::new(input_name.to_string(), tree, timing_ms);
-        println!("{}", serde_json::to_string_pretty(&envelope).unwrap());
+        let output = if pretty {
+            serde_json::to_string_pretty(&envelope).unwrap()
+        } else {
+            serde_json::to_string(&envelope).unwrap()
+        };
+        println!("{output}");
     } else {
         print_tree(&root, 0);
         if timing {

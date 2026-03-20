@@ -62,10 +62,11 @@ fn parse_entire_corpus_without_panics() {
                 .any(|c| c.as_os_str() == "negative");
             if !is_negative {
                 errors += 1;
-                error_files.push((
-                    entry.path().display().to_string(),
-                    result.errors[..result.errors.len().min(3)].to_vec(),
-                ));
+                let msgs: Vec<String> = result.errors[..result.errors.len().min(3)]
+                    .iter()
+                    .map(|d| d.message.clone())
+                    .collect();
+                error_files.push((entry.path().display().to_string(), msgs));
             }
         }
     }

@@ -96,9 +96,11 @@ fn main() {
 
     let json = matches!(cli.format, OutputFormat::Json);
 
+    let pretty = cli.pretty;
+
     let exit_code = match cli.command {
         Commands::Lex { ref paths } => run_on_inputs(paths, &cli, |source, name| {
-            commands::lex::run(source, name, json, cli.timing)
+            commands::lex::run(source, name, json, cli.timing, pretty)
         }),
         Commands::Parse { ref paths } => run_on_inputs(paths, &cli, |source, name| {
             commands::parse::run(
@@ -108,13 +110,14 @@ fn main() {
                 cli.timing,
                 cli.no_recover,
                 cli.max_errors,
+                pretty,
             )
         }),
         Commands::Cst { ref paths } => run_on_inputs(paths, &cli, |source, name| {
-            commands::cst::run(source, name, json, cli.timing)
+            commands::cst::run(source, name, json, cli.timing, pretty)
         }),
         Commands::Stats { ref paths } => run_on_inputs(paths, &cli, |source, name| {
-            commands::stats::run(source, name, json, cli.timing)
+            commands::stats::run(source, name, json, cli.timing, pretty)
         }),
         Commands::Watch {
             ref command,
@@ -125,6 +128,7 @@ fn main() {
             let timing_flag = cli.timing;
             let no_recover_flag = cli.no_recover;
             let max_errs = cli.max_errors;
+            let pretty_flag = pretty;
             let stdin_fn = cli.stdin_filename.clone();
             if let Err(e) = commands::watch::run(paths, |watch_paths| {
                 let inputs =
@@ -143,13 +147,26 @@ fn main() {
                                     timing_flag,
                                     no_recover_flag,
                                     max_errs,
+                                    pretty_flag,
                                 );
                             }
                             WatchCommand::Cst => {
-                                commands::cst::run(&source, &name, json_flag, timing_flag);
+                                commands::cst::run(
+                                    &source,
+                                    &name,
+                                    json_flag,
+                                    timing_flag,
+                                    pretty_flag,
+                                );
                             }
                             WatchCommand::Stats => {
-                                commands::stats::run(&source, &name, json_flag, timing_flag);
+                                commands::stats::run(
+                                    &source,
+                                    &name,
+                                    json_flag,
+                                    timing_flag,
+                                    pretty_flag,
+                                );
                             }
                         }
                     }
