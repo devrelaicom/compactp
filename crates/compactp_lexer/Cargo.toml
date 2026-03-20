@@ -6,4 +6,6 @@ version.workspace = true
 
 [dependencies]
 compactp_syntax.workspace = true
-logos.workspace = true
+
+[dev-dependencies]
+expect-test.workspace = true
