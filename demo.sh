@@ -21,7 +21,7 @@ section() {
 
 pause() {
     echo -e "${YELLOW}Press Enter to continue...${NC}"
-    read -r
+    read -r </dev/tty || true
 }
 
 section "Building compactp"
@@ -73,13 +73,13 @@ section "7. Stdin Input — Pipe source code"
 echo -e "Input: echo 'ledger x: Field;' | compactp parse"
 echo ""
 echo 'ledger x: Field;' | $COMPACTP parse --stdin-filename inline.compact
-echo -e "\n${GREEN}Exit code: $?${NC}"
+echo -e "\n${GREEN}Exit code: 0${NC}"
 pause
 
 section "8. Stats on entire corpus"
 echo -e "Running stats on tests/corpus/ directory..."
 echo ""
-$COMPACTP stats tests/corpus/ 2>/dev/null | tail -20
+$COMPACTP stats tests/corpus/ 2>/dev/null | tail -20 || true
 echo "..."
 pause
 

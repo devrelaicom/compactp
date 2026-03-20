@@ -88,9 +88,11 @@ fn main() {
     let cli = match Cli::try_parse() {
         Ok(cli) => cli,
         Err(e) => {
+            // clap uses DisplayHelp/DisplayVersion for --help/--version (exit 0),
+            // and other error kinds for actual usage errors (exit 3 per design spec)
+            let code = if e.use_stderr() { 3 } else { 0 };
             e.print().ok();
-            // Exit code 3 for invalid CLI usage per design spec
-            std::process::exit(3);
+            std::process::exit(code);
         }
     };
 
