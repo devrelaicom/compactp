@@ -1,0 +1,10 @@
+pragma language_version >= 0.22.0;
+
+ledger value: Field
+
+circuit broken(x: Field): Field {
+    return x +;
+}
+
+circuit missing_brace(): [] {
+    const a = 1;

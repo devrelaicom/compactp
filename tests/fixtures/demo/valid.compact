@@ -1,0 +1,11 @@
+pragma language_version >= 0.22.0;
+
+export ledger count: Counter;
+
+export circuit increment(): [] {
+    count.increment(1);
+}
+
+export circuit get_count(): Field {
+    return count.value();
+}

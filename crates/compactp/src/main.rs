@@ -58,6 +58,24 @@ enum Commands {
         /// Input files or directories
         paths: Vec<PathBuf>,
     },
+    /// Watch files and re-run on changes
+    Watch {
+        /// Command to run on changes
+        #[command(subcommand)]
+        command: WatchCommand,
+        /// Paths to watch
+        paths: Vec<PathBuf>,
+    },
+}
+
+#[derive(Subcommand)]
+enum WatchCommand {
+    /// Watch and parse
+    Parse,
+    /// Watch and show CST
+    Cst,
+    /// Watch and show stats
+    Stats,
 }
 
 #[derive(Clone, ValueEnum)]
@@ -98,6 +116,51 @@ fn main() {
         Commands::Stats { ref paths } => run_on_inputs(paths, &cli, |source, name| {
             commands::stats::run(source, name, json, cli.timing)
         }),
+        Commands::Watch {
+            ref command,
+            ref paths,
+        } => {
+            let cmd = command;
+            let json_flag = json;
+            let timing_flag = cli.timing;
+            let no_recover_flag = cli.no_recover;
+            let max_errs = cli.max_errors;
+            let stdin_fn = cli.stdin_filename.clone();
+            if let Err(e) = commands::watch::run(paths, |watch_paths| {
+                let inputs =
+                    input::resolve_inputs(watch_paths, stdin_fn.as_deref()).unwrap_or_default();
+                for inp in inputs {
+                    if let input::InputSource::File(path) = inp
+                        && let Ok(source) = std::fs::read_to_string(&path)
+                    {
+                        let name = path.display().to_string();
+                        match cmd {
+                            WatchCommand::Parse => {
+                                commands::parse::run(
+                                    &source,
+                                    &name,
+                                    json_flag,
+                                    timing_flag,
+                                    no_recover_flag,
+                                    max_errs,
+                                );
+                            }
+                            WatchCommand::Cst => {
+                                commands::cst::run(&source, &name, json_flag, timing_flag);
+                            }
+                            WatchCommand::Stats => {
+                                commands::stats::run(&source, &name, json_flag, timing_flag);
+                            }
+                        }
+                    }
+                }
+            }) {
+                eprintln!("Watch error: {e}");
+                4 // Internal failure
+            } else {
+                0
+            }
+        }
     };
 
     std::process::exit(exit_code);
