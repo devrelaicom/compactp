@@ -325,9 +325,10 @@ pub fn lex(source: &str) -> Vec<(SyntaxKind, &str)> {
                 tokens.push((SyntaxKind::HASH, &source[start..pos]));
             }
 
-            // Unknown character
+            // Unknown character — advance by full UTF-8 codepoint width
             _ => {
-                pos += 1;
+                let ch = source[pos..].chars().next().unwrap();
+                pos += ch.len_utf8();
                 tokens.push((SyntaxKind::ERROR, &source[start..pos]));
             }
         }
