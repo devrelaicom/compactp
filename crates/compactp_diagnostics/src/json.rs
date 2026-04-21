@@ -11,7 +11,7 @@ use crate::{Diagnostic, Severity};
 /// ```json
 /// {
 ///   "severity": "error",
-///   "code": "E0012",
+///   "code": { "prefix": "E", "number": 12 },
 ///   "message": "expected `;`",
 ///   "primary_span": {
 ///     "start": { "offset": 19, "line": 1, "column": 20 },
@@ -22,7 +22,10 @@ use crate::{Diagnostic, Severity};
 /// }
 /// ```
 ///
-/// Line and column numbers are 1-based in the JSON output.
+/// Line and column numbers are 1-based in the JSON output. The `code`
+/// field is the structured form documented in the README; the stringified
+/// form (e.g. `"E0012"`) is still available via `DiagnosticCode::to_string`
+/// if needed.
 pub fn render_json(diag: &Diagnostic, source: &str) -> serde_json::Value {
     let start_offset: usize = diag.primary_span.start().into();
     let end_offset: usize = diag.primary_span.end().into();
@@ -53,7 +56,7 @@ pub fn render_json(diag: &Diagnostic, source: &str) -> serde_json::Value {
 
     serde_json::json!({
         "severity": severity_str,
-        "code": diag.code.to_string(),
+        "code": { "prefix": diag.code.prefix, "number": diag.code.number },
         "message": diag.message,
         "primary_span": {
             "start": { "offset": start_offset, "line": start_line, "column": start_col },
@@ -84,6 +87,7 @@ fn offset_to_line_col(source: &str, offset: usize) -> (usize, usize) {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
     use crate::{Diagnostic, DiagnosticCode, LabeledSpan, Severity};
