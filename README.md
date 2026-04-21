@@ -113,28 +113,38 @@ specific:
 | Subcommand | `data` shape                                                                 |
 | ---------- | ---------------------------------------------------------------------------- |
 | `lex`      | `[{ kind, text, offset, len }]` — array of token records                     |
-| `parse`    | `{ success, error_count, diagnostics: [Diagnostic] }`                        |
+| `parse`    | `{ success, error_count, truncated?, diagnostics: [Diagnostic] }`            |
 | `cst`      | `{ kind, text?, children: [CstNode] }` — recursive lossless tree             |
 | `ast`      | `{ kind: "SourceFile", items: [Item] }` — items tagged by `kind` (14 variants) |
-| `diag`     | `[Diagnostic]` — flat array                                                  |
+| `diag`     | `{ error_count, truncated?, diagnostics: [Diagnostic] }`                     |
 | `stats`    | `{ file_size_bytes, token_count, node_count, error_count, recovery_count, parse_time_ms }` |
 
-Diagnostic shape:
+`error_count` is the count *before* `--max-diagnostics` applies — the CLI
+will not erase the signal that something went wrong. `truncated` is present
+(and `true`) only when the cap fired; omitted otherwise.
+
+Diagnostic shape (identical for `parse` and `diag`):
 
 ```json
 {
   "severity":        "error" | "warning" | "note",
   "code":            { "prefix": "E", "number": 1 },
   "message":         "expected SEMICOLON",
-  "primary_span":    { "start": 19, "end": 20 },
-  "secondary_spans": [{ "span": { "start": 0, "end": 4 }, "label": null }],
+  "primary_span":    {
+    "start": { "offset": 19, "line": 1, "column": 20 },
+    "end":   { "offset": 20, "line": 1, "column": 21 }
+  },
+  "secondary_spans": [{
+    "start": { "offset": 0, "line": 1, "column": 1 },
+    "end":   { "offset": 4, "line": 1, "column": 5 },
+    "label": null
+  }],
   "notes":           ["did you mean `;`?"]
 }
 ```
 
-Spans use byte offsets into the original source. `render_json` in
-`compactp_diagnostics` exposes a richer form with resolved 1-based line/column
-pairs when the source text is available.
+Line and column numbers are 1-based. Byte offsets index the original
+source.
 
 `ast` items are tagged unions — every element has a `kind` field and variant-
 specific fields. The supported variants are:
@@ -248,8 +258,9 @@ cargo test -p compactp --test cli
 # regenerate snapshots after an intentional change
 cargo insta test --accept -p compactp --test cli
 
-# parser corpus (486 upstream files, lossless invariant enforced,
-# known-failure manifest at tests/corpus_known_failures.txt)
+# parser corpus (486 upstream source files under tests/corpus/, lossless
+# invariant enforced, known-failure manifest at
+# tests/corpus_known_failures.txt)
 cargo test -p compactp_parser --test corpus_test
 
 # formatting + lints (CI enforces both)

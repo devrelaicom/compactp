@@ -1,8 +1,9 @@
 # CLI integration fixtures
 
 Hand-written inputs used exclusively by the CLI integration tests
-(`crates/compactp/tests/cli.rs`) and any local demo workflows. The 486-file
-upstream corpus lives at `tests/corpus/` (repo root) and covers valid-Compact
+(`crates/compactp/tests/cli.rs`) and any local demo workflows. The upstream
+corpus (486 regular `.compact` source files) lives at `tests/corpus/` (repo
+root) and covers valid-Compact
 breadth; fixtures here target specific CLI behaviors — recovery output shape,
 human-rendering layout, snapshot stability — that need small, reviewable
 content.
