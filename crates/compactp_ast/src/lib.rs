@@ -913,4 +913,137 @@ mod tests {
         assert!(Expr::can_cast(compactp_syntax::SyntaxKind::BINARY_EXPR));
         assert!(!Expr::can_cast(compactp_syntax::SyntaxKind::BLOCK));
     }
+
+    // -----------------------------------------------------------------------
+    // TypeDecl (new in Step 4)
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn type_decl_newtype_accessors() {
+        let root = parse("export new type MyCounter = Field;");
+        let file = SourceFile::cast(root).unwrap();
+        let decl = file
+            .items()
+            .find_map(|item| match item {
+                Item::TypeDecl(t) => Some(t),
+                _ => None,
+            })
+            .expect("should contain a TypeDecl");
+        assert_eq!(decl.name().unwrap().text(), "MyCounter");
+        assert!(decl.is_exported());
+        assert!(decl.is_newtype());
+        assert!(decl.aliased_type().is_some());
+    }
+
+    #[test]
+    fn type_decl_alias_without_new() {
+        let root = parse("type Alias = Field;");
+        let file = SourceFile::cast(root).unwrap();
+        let decl = file
+            .items()
+            .find_map(|item| match item {
+                Item::TypeDecl(t) => Some(t),
+                _ => None,
+            })
+            .expect("should contain a TypeDecl");
+        assert_eq!(decl.name().unwrap().text(), "Alias");
+        assert!(!decl.is_exported());
+        assert!(!decl.is_newtype());
+    }
+
+    // -----------------------------------------------------------------------
+    // Item enum and SourceFile::items() iteration
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn source_file_items_preserves_source_order() {
+        let source = "\
+pragma language_version >= 0.22;
+include \"lib.compact\";
+ledger count: Field;
+struct Pair { left: Field, right: Field }
+";
+        let root = parse(source);
+        let file = SourceFile::cast(root).unwrap();
+        let kinds: Vec<&'static str> = file
+            .items()
+            .map(|item| match item {
+                Item::Pragma(_) => "pragma",
+                Item::Include(_) => "include",
+                Item::Import(_) => "import",
+                Item::ExportList(_) => "export",
+                Item::LedgerDecl(_) => "ledger",
+                Item::ConstructorDef(_) => "constructor",
+                Item::CircuitDef(_) => "circuit_def",
+                Item::CircuitDecl(_) => "circuit_decl",
+                Item::WitnessDecl(_) => "witness",
+                Item::ContractDecl(_) => "contract",
+                Item::StructDef(_) => "struct",
+                Item::EnumDef(_) => "enum",
+                Item::ModuleDef(_) => "module",
+                Item::TypeDecl(_) => "type_decl",
+            })
+            .collect();
+        assert_eq!(kinds, vec!["pragma", "include", "ledger", "struct"]);
+    }
+
+    #[test]
+    fn item_cast_rejects_unrelated_kinds() {
+        let root = parse("circuit foo(): [] { return []; }");
+        let file = SourceFile::cast(root).unwrap();
+        // Walking into a circuit body's block should NOT cast to an Item.
+        let circuit = file.circuit_defs().next().unwrap();
+        let body = circuit.body().expect("circuit should have body");
+        assert!(Item::cast(body.syntax().clone()).is_none());
+    }
+
+    #[test]
+    fn item_can_cast_covers_every_variant() {
+        use compactp_syntax::SyntaxKind as K;
+        for kind in [
+            K::PRAGMA,
+            K::INCLUDE,
+            K::IMPORT,
+            K::EXPORT_LIST,
+            K::LEDGER_DECL,
+            K::CONSTRUCTOR_DEF,
+            K::CIRCUIT_DEF,
+            K::CIRCUIT_DECL,
+            K::WITNESS_DECL,
+            K::CONTRACT_DECL,
+            K::STRUCT_DEF,
+            K::ENUM_DEF,
+            K::MODULE_DEF,
+            K::TYPE_DECL,
+        ] {
+            assert!(
+                Item::can_cast(kind),
+                "Item::can_cast({kind:?}) should be true"
+            );
+        }
+        assert!(!Item::can_cast(K::BINARY_EXPR));
+        assert!(!Item::can_cast(K::BLOCK));
+        assert!(!Item::can_cast(K::SOURCE_FILE));
+    }
+
+    #[test]
+    fn item_syntax_roundtrips_for_each_variant() {
+        let source = "\
+pragma language_version >= 0.22;
+export { foo };
+ledger count: Field;
+export circuit adder(x: Field): Field { return x; }
+struct Pair { left: Field, right: Field }
+enum Color { Red, Green }
+";
+        let root = parse(source);
+        let file = SourceFile::cast(root).unwrap();
+        for item in file.items() {
+            // Item::cast → Item::syntax → Item::cast should produce the same
+            // underlying SyntaxNode text.
+            let text = item.syntax().text().to_string();
+            let recast = Item::cast(item.syntax().clone()).unwrap();
+            assert_eq!(recast.syntax().text().to_string(), text);
+        }
+    }
 }

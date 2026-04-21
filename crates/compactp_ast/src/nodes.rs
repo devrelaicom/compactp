@@ -82,6 +82,14 @@ impl SourceFile {
     pub fn enum_defs(&self) -> impl Iterator<Item = EnumDef> {
         support::children_nodes(&self.0)
     }
+
+    /// Iterate every top-level item in source order.
+    ///
+    /// This is the heterogeneous view. The per-variant iterators above remain
+    /// available for typed consumers that want a single variant.
+    pub fn items(&self) -> impl Iterator<Item = Item> + '_ {
+        self.0.children().filter_map(Item::cast)
+    }
 }
 
 ast_node! {
@@ -517,6 +525,160 @@ impl PrefixDecl {
     /// The prefix identifier.
     pub fn name(&self) -> Option<SyntaxToken> {
         support::child_token(&self.0, SyntaxKind::IDENT)
+    }
+}
+
+ast_node! {
+    /// `export? [new]? type name gparams? [= type] ;`
+    TypeDecl => TYPE_DECL
+}
+
+impl TypeDecl {
+    /// The `export` keyword if present.
+    pub fn export_kw(&self) -> Option<SyntaxToken> {
+        support::child_token(&self.0, SyntaxKind::EXPORT_KW)
+    }
+
+    /// The `new` keyword if present (newtype form).
+    pub fn new_kw(&self) -> Option<SyntaxToken> {
+        support::child_token(&self.0, SyntaxKind::NEW_KW)
+    }
+
+    /// The declared type name.
+    pub fn name(&self) -> Option<SyntaxToken> {
+        support::child_token(&self.0, SyntaxKind::IDENT)
+    }
+
+    /// Optional generic parameter list.
+    pub fn generic_params(&self) -> Option<GenericParamList> {
+        support::child_node(&self.0)
+    }
+
+    /// The aliased type on the right-hand side of `=`, if present.
+    pub fn aliased_type(&self) -> Option<Type> {
+        support::child_node(&self.0)
+    }
+
+    /// Whether this type declaration is exported.
+    pub fn is_exported(&self) -> bool {
+        self.export_kw().is_some()
+    }
+
+    /// Whether this is a newtype declaration (has the `new` keyword).
+    pub fn is_newtype(&self) -> bool {
+        self.new_kw().is_some()
+    }
+}
+
+// ===========================================================================
+// Item — heterogeneous view of top-level declarations
+// ===========================================================================
+
+/// Every top-level item variant in a [`SourceFile`].
+///
+/// Use [`SourceFile::items`] to iterate items in source order. For typed
+/// callers that want a single variant, the per-kind iterators (`pragmas`,
+/// `includes`, `imports`, `circuit_defs`, `struct_defs`, `enum_defs`) on
+/// [`SourceFile`] remain available.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum Item {
+    Pragma(Pragma),
+    Include(Include),
+    Import(Import),
+    ExportList(ExportList),
+    LedgerDecl(LedgerDecl),
+    ConstructorDef(ConstructorDef),
+    CircuitDef(CircuitDef),
+    CircuitDecl(CircuitDecl),
+    WitnessDecl(WitnessDecl),
+    ContractDecl(ContractDecl),
+    StructDef(StructDef),
+    EnumDef(EnumDef),
+    ModuleDef(ModuleDef),
+    TypeDecl(TypeDecl),
+}
+
+impl AstNode for Item {
+    fn can_cast(kind: SyntaxKind) -> bool {
+        Pragma::can_cast(kind)
+            || Include::can_cast(kind)
+            || Import::can_cast(kind)
+            || ExportList::can_cast(kind)
+            || LedgerDecl::can_cast(kind)
+            || ConstructorDef::can_cast(kind)
+            || CircuitDef::can_cast(kind)
+            || CircuitDecl::can_cast(kind)
+            || WitnessDecl::can_cast(kind)
+            || ContractDecl::can_cast(kind)
+            || StructDef::can_cast(kind)
+            || EnumDef::can_cast(kind)
+            || ModuleDef::can_cast(kind)
+            || TypeDecl::can_cast(kind)
+    }
+
+    fn cast(node: SyntaxNode) -> Option<Self> {
+        if let Some(n) = Pragma::cast(node.clone()) {
+            return Some(Item::Pragma(n));
+        }
+        if let Some(n) = Include::cast(node.clone()) {
+            return Some(Item::Include(n));
+        }
+        if let Some(n) = Import::cast(node.clone()) {
+            return Some(Item::Import(n));
+        }
+        if let Some(n) = ExportList::cast(node.clone()) {
+            return Some(Item::ExportList(n));
+        }
+        if let Some(n) = LedgerDecl::cast(node.clone()) {
+            return Some(Item::LedgerDecl(n));
+        }
+        if let Some(n) = ConstructorDef::cast(node.clone()) {
+            return Some(Item::ConstructorDef(n));
+        }
+        if let Some(n) = CircuitDef::cast(node.clone()) {
+            return Some(Item::CircuitDef(n));
+        }
+        if let Some(n) = CircuitDecl::cast(node.clone()) {
+            return Some(Item::CircuitDecl(n));
+        }
+        if let Some(n) = WitnessDecl::cast(node.clone()) {
+            return Some(Item::WitnessDecl(n));
+        }
+        if let Some(n) = ContractDecl::cast(node.clone()) {
+            return Some(Item::ContractDecl(n));
+        }
+        if let Some(n) = StructDef::cast(node.clone()) {
+            return Some(Item::StructDef(n));
+        }
+        if let Some(n) = EnumDef::cast(node.clone()) {
+            return Some(Item::EnumDef(n));
+        }
+        if let Some(n) = ModuleDef::cast(node.clone()) {
+            return Some(Item::ModuleDef(n));
+        }
+        if let Some(n) = TypeDecl::cast(node) {
+            return Some(Item::TypeDecl(n));
+        }
+        None
+    }
+
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Item::Pragma(n) => n.syntax(),
+            Item::Include(n) => n.syntax(),
+            Item::Import(n) => n.syntax(),
+            Item::ExportList(n) => n.syntax(),
+            Item::LedgerDecl(n) => n.syntax(),
+            Item::ConstructorDef(n) => n.syntax(),
+            Item::CircuitDef(n) => n.syntax(),
+            Item::CircuitDecl(n) => n.syntax(),
+            Item::WitnessDecl(n) => n.syntax(),
+            Item::ContractDecl(n) => n.syntax(),
+            Item::StructDef(n) => n.syntax(),
+            Item::EnumDef(n) => n.syntax(),
+            Item::ModuleDef(n) => n.syntax(),
+            Item::TypeDecl(n) => n.syntax(),
+        }
     }
 }
 
