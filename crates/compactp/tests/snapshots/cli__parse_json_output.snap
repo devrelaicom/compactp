@@ -1,15 +1,15 @@
 ---
 source: crates/compactp/tests/cli.rs
-expression: rendered
+expression: normalise_path_separators(&raw)
 ---
 {
-  "data": {
-    "diagnostics": [],
-    "error_count": 0,
-    "success": true
-  },
-  "input": "tests/fixtures/demo/valid.compact",
-  "language_version": "0.22.0",
+  "tool_version": "0.1.0",
   "schema_version": 1,
-  "tool_version": "0.1.0"
+  "language_version": "0.22.0",
+  "input": "tests/fixtures/demo/valid.compact",
+  "data": {
+    "success": true,
+    "error_count": 0,
+    "diagnostics": []
+  }
 }

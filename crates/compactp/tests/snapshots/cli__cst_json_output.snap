@@ -1,17 +1,24 @@
 ---
 source: crates/compactp/tests/cli.rs
-expression: rendered
+expression: normalise_path_separators(&raw)
 ---
 {
+  "tool_version": "0.1.0",
+  "schema_version": 1,
+  "language_version": "0.22.0",
+  "input": "tests/fixtures/imports/all_import_forms.compact",
   "data": {
+    "kind": "SOURCE_FILE",
     "children": [
       {
+        "kind": "IMPORT",
         "children": [
           {
             "kind": "IMPORT_KW",
             "text": "import"
           },
           {
+            "kind": "IMPORT_SPECIFIER_LIST",
             "children": [
               {
                 "kind": "WHITESPACE",
@@ -22,6 +29,7 @@ expression: rendered
                 "text": "{"
               },
               {
+                "kind": "IMPORT_SPECIFIER",
                 "children": [
                   {
                     "kind": "WHITESPACE",
@@ -47,14 +55,14 @@ expression: rendered
                     "kind": "IDENT",
                     "text": "f"
                   }
-                ],
-                "kind": "IMPORT_SPECIFIER"
+                ]
               },
               {
                 "kind": "COMMA",
                 "text": ","
               },
               {
+                "kind": "IMPORT_SPECIFIER",
                 "children": [
                   {
                     "kind": "WHITESPACE",
@@ -64,8 +72,7 @@ expression: rendered
                     "kind": "IDENT",
                     "text": "bar"
                   }
-                ],
-                "kind": "IMPORT_SPECIFIER"
+                ]
               },
               {
                 "kind": "WHITESPACE",
@@ -75,8 +82,7 @@ expression: rendered
                 "kind": "R_BRACE",
                 "text": "}"
               }
-            ],
-            "kind": "IMPORT_SPECIFIER_LIST"
+            ]
           },
           {
             "kind": "WHITESPACE",
@@ -95,33 +101,34 @@ expression: rendered
             "text": "Math"
           },
           {
+            "kind": "GENERIC_ARG_LIST",
             "children": [
               {
                 "kind": "LT",
                 "text": "<"
               },
               {
+                "kind": "GENERIC_ARG",
                 "children": [
                   {
+                    "kind": "FIELD_TYPE",
                     "children": [
                       {
                         "kind": "FIELD_KW",
                         "text": "Field"
                       }
-                    ],
-                    "kind": "FIELD_TYPE"
+                    ]
                   }
-                ],
-                "kind": "GENERIC_ARG"
+                ]
               },
               {
                 "kind": "GT",
                 "text": ">"
               }
-            ],
-            "kind": "GENERIC_ARG_LIST"
+            ]
           },
           {
+            "kind": "PREFIX_DECL",
             "children": [
               {
                 "kind": "WHITESPACE",
@@ -139,17 +146,16 @@ expression: rendered
                 "kind": "IDENT",
                 "text": "M$"
               }
-            ],
-            "kind": "PREFIX_DECL"
+            ]
           },
           {
             "kind": "SEMICOLON",
             "text": ";"
           }
-        ],
-        "kind": "IMPORT"
+        ]
       },
       {
+        "kind": "EXPORT_LIST",
         "children": [
           {
             "kind": "WHITESPACE",
@@ -199,10 +205,10 @@ expression: rendered
             "kind": "SEMICOLON",
             "text": ";"
           }
-        ],
-        "kind": "EXPORT_LIST"
+        ]
       },
       {
+        "kind": "MODULE_DEF",
         "children": [
           {
             "kind": "WHITESPACE",
@@ -221,12 +227,14 @@ expression: rendered
             "text": "Wrapped"
           },
           {
+            "kind": "GENERIC_PARAM_LIST",
             "children": [
               {
                 "kind": "LT",
                 "text": "<"
               },
               {
+                "kind": "GENERIC_PARAM",
                 "children": [
                   {
                     "kind": "HASH",
@@ -236,15 +244,13 @@ expression: rendered
                     "kind": "IDENT",
                     "text": "n"
                   }
-                ],
-                "kind": "GENERIC_PARAM"
+                ]
               },
               {
                 "kind": "GT",
                 "text": ">"
               }
-            ],
-            "kind": "GENERIC_PARAM_LIST"
+            ]
           },
           {
             "kind": "WHITESPACE",
@@ -255,6 +261,7 @@ expression: rendered
             "text": "{"
           },
           {
+            "kind": "LEDGER_DECL",
             "children": [
               {
                 "kind": "WHITESPACE",
@@ -277,6 +284,7 @@ expression: rendered
                 "text": ":"
               },
               {
+                "kind": "FIELD_TYPE",
                 "children": [
                   {
                     "kind": "WHITESPACE",
@@ -286,15 +294,13 @@ expression: rendered
                     "kind": "FIELD_KW",
                     "text": "Field"
                   }
-                ],
-                "kind": "FIELD_TYPE"
+                ]
               },
               {
                 "kind": "SEMICOLON",
                 "text": ";"
               }
-            ],
-            "kind": "LEDGER_DECL"
+            ]
           },
           {
             "kind": "WHITESPACE",
@@ -304,18 +310,12 @@ expression: rendered
             "kind": "R_BRACE",
             "text": "}"
           }
-        ],
-        "kind": "MODULE_DEF"
+        ]
       },
       {
         "kind": "WHITESPACE",
         "text": "\n"
       }
-    ],
-    "kind": "SOURCE_FILE"
-  },
-  "input": "tests/fixtures/imports/all_import_forms.compact",
-  "language_version": "0.22.0",
-  "schema_version": 1,
-  "tool_version": "0.1.0"
+    ]
+  }
 }

@@ -1,11 +1,18 @@
 ---
 source: crates/compactp/tests/cli.rs
-expression: rendered
+expression: normalise_path_separators(&raw)
 ---
 {
+  "tool_version": "0.1.0",
+  "schema_version": 1,
+  "language_version": "0.22.0",
+  "input": "tests/fixtures/recovery/broken_expressions.compact",
   "data": [
     {
-      "code": "E0001",
+      "code": {
+        "number": 1,
+        "prefix": "E"
+      },
       "message": "expected type",
       "notes": [],
       "primary_span": {
@@ -24,7 +31,10 @@ expression: rendered
       "severity": "error"
     },
     {
-      "code": "E0001",
+      "code": {
+        "number": 1,
+        "prefix": "E"
+      },
       "message": "expected expression",
       "notes": [],
       "primary_span": {
@@ -43,7 +53,10 @@ expression: rendered
       "severity": "error"
     },
     {
-      "code": "E0001",
+      "code": {
+        "number": 1,
+        "prefix": "E"
+      },
       "message": "expected expression",
       "notes": [],
       "primary_span": {
@@ -62,7 +75,10 @@ expression: rendered
       "severity": "error"
     },
     {
-      "code": "E0001",
+      "code": {
+        "number": 1,
+        "prefix": "E"
+      },
       "message": "expected R_PAREN",
       "notes": [],
       "primary_span": {
@@ -81,7 +97,10 @@ expression: rendered
       "severity": "error"
     },
     {
-      "code": "E0001",
+      "code": {
+        "number": 1,
+        "prefix": "E"
+      },
       "message": "expected expression",
       "notes": [],
       "primary_span": {
@@ -99,9 +118,5 @@ expression: rendered
       "secondary_spans": [],
       "severity": "error"
     }
-  ],
-  "input": "tests/fixtures/recovery/broken_expressions.compact",
-  "language_version": "0.22.0",
-  "schema_version": 1,
-  "tool_version": "0.1.0"
+  ]
 }

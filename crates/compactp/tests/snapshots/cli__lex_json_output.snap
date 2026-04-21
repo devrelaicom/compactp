@@ -1,366 +1,366 @@
 ---
 source: crates/compactp/tests/cli.rs
-expression: rendered
+expression: normalise_path_separators(&raw)
 ---
 {
+  "tool_version": "0.1.0",
+  "schema_version": 1,
+  "language_version": "0.22.0",
+  "input": "tests/fixtures/imports/all_import_forms.compact",
   "data": [
     {
       "kind": "IMPORT_KW",
-      "len": 6,
+      "text": "import",
       "offset": 0,
-      "text": "import"
+      "len": 6
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 6,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "L_BRACE",
-      "len": 1,
+      "text": "{",
       "offset": 7,
-      "text": "{"
+      "len": 1
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 8,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "IDENT",
-      "len": 3,
+      "text": "foo",
       "offset": 9,
-      "text": "foo"
+      "len": 3
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 12,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "AS_KW",
-      "len": 2,
+      "text": "as",
       "offset": 13,
-      "text": "as"
+      "len": 2
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 15,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "IDENT",
-      "len": 1,
+      "text": "f",
       "offset": 16,
-      "text": "f"
+      "len": 1
     },
     {
       "kind": "COMMA",
-      "len": 1,
+      "text": ",",
       "offset": 17,
-      "text": ","
+      "len": 1
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 18,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "IDENT",
-      "len": 3,
+      "text": "bar",
       "offset": 19,
-      "text": "bar"
+      "len": 3
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 22,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "R_BRACE",
-      "len": 1,
+      "text": "}",
       "offset": 23,
-      "text": "}"
+      "len": 1
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 24,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "FROM_KW",
-      "len": 4,
+      "text": "from",
       "offset": 25,
-      "text": "from"
+      "len": 4
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 29,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "IDENT",
-      "len": 4,
+      "text": "Math",
       "offset": 30,
-      "text": "Math"
+      "len": 4
     },
     {
       "kind": "LT",
-      "len": 1,
+      "text": "<",
       "offset": 34,
-      "text": "<"
+      "len": 1
     },
     {
       "kind": "FIELD_KW",
-      "len": 5,
+      "text": "Field",
       "offset": 35,
-      "text": "Field"
+      "len": 5
     },
     {
       "kind": "GT",
-      "len": 1,
+      "text": ">",
       "offset": 40,
-      "text": ">"
+      "len": 1
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 41,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "PREFIX_KW",
-      "len": 6,
+      "text": "prefix",
       "offset": 42,
-      "text": "prefix"
+      "len": 6
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 48,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "IDENT",
-      "len": 2,
+      "text": "M$",
       "offset": 49,
-      "text": "M$"
+      "len": 2
     },
     {
       "kind": "SEMICOLON",
-      "len": 1,
+      "text": ";",
       "offset": 51,
-      "text": ";"
+      "len": 1
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": "\n",
       "offset": 52,
-      "text": "\n"
+      "len": 1
     },
     {
       "kind": "EXPORT_KW",
-      "len": 6,
+      "text": "export",
       "offset": 53,
-      "text": "export"
+      "len": 6
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 59,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "L_BRACE",
-      "len": 1,
+      "text": "{",
       "offset": 60,
-      "text": "{"
+      "len": 1
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 61,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "IDENT",
-      "len": 1,
+      "text": "f",
       "offset": 62,
-      "text": "f"
+      "len": 1
     },
     {
       "kind": "COMMA",
-      "len": 1,
+      "text": ",",
       "offset": 63,
-      "text": ","
+      "len": 1
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 64,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "IDENT",
-      "len": 2,
+      "text": "M$",
       "offset": 65,
-      "text": "M$"
+      "len": 2
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 67,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "R_BRACE",
-      "len": 1,
+      "text": "}",
       "offset": 68,
-      "text": "}"
+      "len": 1
     },
     {
       "kind": "SEMICOLON",
-      "len": 1,
+      "text": ";",
       "offset": 69,
-      "text": ";"
+      "len": 1
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": "\n",
       "offset": 70,
-      "text": "\n"
+      "len": 1
     },
     {
       "kind": "MODULE_KW",
-      "len": 6,
+      "text": "module",
       "offset": 71,
-      "text": "module"
+      "len": 6
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 77,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "IDENT",
-      "len": 7,
+      "text": "Wrapped",
       "offset": 78,
-      "text": "Wrapped"
+      "len": 7
     },
     {
       "kind": "LT",
-      "len": 1,
+      "text": "<",
       "offset": 85,
-      "text": "<"
+      "len": 1
     },
     {
       "kind": "HASH",
-      "len": 1,
+      "text": "#",
       "offset": 86,
-      "text": "#"
+      "len": 1
     },
     {
       "kind": "IDENT",
-      "len": 1,
+      "text": "n",
       "offset": 87,
-      "text": "n"
+      "len": 1
     },
     {
       "kind": "GT",
-      "len": 1,
+      "text": ">",
       "offset": 88,
-      "text": ">"
+      "len": 1
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 89,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "L_BRACE",
-      "len": 1,
+      "text": "{",
       "offset": 90,
-      "text": "{"
+      "len": 1
     },
     {
       "kind": "WHITESPACE",
-      "len": 3,
+      "text": "\n  ",
       "offset": 91,
-      "text": "\n  "
+      "len": 3
     },
     {
       "kind": "LEDGER_KW",
-      "len": 6,
+      "text": "ledger",
       "offset": 94,
-      "text": "ledger"
+      "len": 6
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 100,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "IDENT",
-      "len": 5,
+      "text": "value",
       "offset": 101,
-      "text": "value"
+      "len": 5
     },
     {
       "kind": "COLON",
-      "len": 1,
+      "text": ":",
       "offset": 106,
-      "text": ":"
+      "len": 1
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": " ",
       "offset": 107,
-      "text": " "
+      "len": 1
     },
     {
       "kind": "FIELD_KW",
-      "len": 5,
+      "text": "Field",
       "offset": 108,
-      "text": "Field"
+      "len": 5
     },
     {
       "kind": "SEMICOLON",
-      "len": 1,
+      "text": ";",
       "offset": 113,
-      "text": ";"
+      "len": 1
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": "\n",
       "offset": 114,
-      "text": "\n"
+      "len": 1
     },
     {
       "kind": "R_BRACE",
-      "len": 1,
+      "text": "}",
       "offset": 115,
-      "text": "}"
+      "len": 1
     },
     {
       "kind": "WHITESPACE",
-      "len": 1,
+      "text": "\n",
       "offset": 116,
-      "text": "\n"
+      "len": 1
     }
-  ],
-  "input": "tests/fixtures/imports/all_import_forms.compact",
-  "language_version": "0.22.0",
-  "schema_version": 1,
-  "tool_version": "0.1.0"
+  ]
 }

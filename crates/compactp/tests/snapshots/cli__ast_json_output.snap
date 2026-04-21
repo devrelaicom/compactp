@@ -1,8 +1,12 @@
 ---
 source: crates/compactp/tests/cli.rs
-expression: rendered
+expression: normalise_path_separators(&raw)
 ---
 {
+  "tool_version": "0.1.0",
+  "schema_version": 1,
+  "language_version": "0.22.0",
+  "input": "tests/fixtures/declarations/all_declarations.compact",
   "data": {
     "items": [
       {
@@ -10,6 +14,26 @@ expression: rendered
       },
       {
         "kind": "Include"
+      },
+      {
+        "kind": "Import"
+      },
+      {
+        "kind": "ExportList"
+      },
+      {
+        "exported": false,
+        "has_generic_params": false,
+        "kind": "TypeDecl",
+        "name": "Hash",
+        "new": false
+      },
+      {
+        "exported": true,
+        "has_generic_params": false,
+        "kind": "TypeDecl",
+        "name": "Word",
+        "new": false
       },
       {
         "exported": false,
@@ -32,6 +56,11 @@ expression: rendered
         "kind": "CircuitDef",
         "name": "add",
         "pure": false
+      },
+      {
+        "exported": false,
+        "kind": "CircuitDecl",
+        "name": "declaration_only"
       },
       {
         "exported": false,
@@ -71,9 +100,5 @@ expression: rendered
       }
     ],
     "kind": "SourceFile"
-  },
-  "input": "tests/fixtures/declarations/all_declarations.compact",
-  "language_version": "0.22.0",
-  "schema_version": 1,
-  "tool_version": "0.1.0"
+  }
 }

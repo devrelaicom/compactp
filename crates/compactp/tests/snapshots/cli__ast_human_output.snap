@@ -5,10 +5,15 @@ expression: "stdout(run_ok(&[\"ast\", &path]))"
 SourceFile
   Pragma
   Include
+  Import
+  ExportList
+  TypeDecl name=Hash exported=false new=false
+  TypeDecl name=Word exported=true new=false
   LedgerDecl name=count
   LedgerDecl name=secret
   ConstructorDef
   CircuitDef name=add exported=false pure=false
+  CircuitDecl name=declaration_only
   WitnessDecl name=private$seed
   StructDef name=Point
   EnumDef name=Mode

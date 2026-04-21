@@ -1,5 +1,10 @@
 pragma language_version >= 0.15.0;
 include "Counter";
+import Foo;
+export { foo, bar };
+
+type Hash = Bytes<32>;
+export type Word = Uint<64>;
 
 ledger count: Field;
 sealed ledger secret: Bytes<32>;
@@ -9,6 +14,8 @@ constructor() {}
 circuit add(x: Field, y: Field): Field {
   return x + y;
 }
+
+circuit declaration_only(x: Field): Field;
 
 witness private$seed(): Bytes<32>;
 
