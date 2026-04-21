@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Compact Language (upstream)
+    url: https://github.com/LFDT-Minokawa/compact
+    about: For issues with the Compact language itself rather than the compactp parser frontend.
+  - name: Midnight Network documentation
+    url: https://docs.midnight.network
+    about: General Midnight Network developer docs and guides.

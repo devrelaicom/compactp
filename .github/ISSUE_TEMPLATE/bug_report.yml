@@ -1,0 +1,75 @@
+name: Bug Report
+description: Report a parsing bug, incorrect output, crash, or resource issue
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear description of what went wrong.
+    validations:
+      required: true
+  - type: textarea
+    id: input
+    attributes:
+      label: Input (.compact source)
+      description: The Compact source code that triggers the bug. Prefer the smallest reproducer you can provide.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened. Include CLI output (human or JSON) and the exit code.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: compactp version
+      description: Output of `compactp --version`
+      placeholder: "compactp 0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: command
+    attributes:
+      label: CLI command
+      options:
+        - lex
+        - parse
+        - cst
+        - ast
+        - diag
+        - stats
+        - watch
+        - Library API (not a CLI command)
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: format
+    attributes:
+      label: Output format in use
+      options:
+        - human (default)
+        - json
+        - "--format json --pretty"
+        - not applicable
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: OS, Rust version, upstream Compact language version, or anything else relevant.
