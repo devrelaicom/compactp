@@ -239,6 +239,7 @@ dependencies = [
  "compactp_parser",
  "compactp_syntax",
  "insta",
+ "libc",
  "notify",
  "notify-debouncer-full",
  "rowan",

@@ -110,6 +110,8 @@ impl WatchableCommand {
 }
 
 fn main() {
+    reset_sigpipe_to_default();
+
     let cli = match Cli::try_parse() {
         Ok(cli) => cli,
         Err(err) => {
@@ -125,8 +127,30 @@ fn main() {
     match commands::run(cli) {
         Ok(code) => std::process::exit(code),
         Err(err) => {
-            eprintln!("{}", err.message());
+            // Intentionally `let _ =` — if stderr is also closed we still want
+            // to surface the numeric exit code, not trigger a secondary panic.
+            let _ = writeln!(std::io::stderr(), "{}", err.message());
             std::process::exit(err.exit_code());
         }
     }
 }
+
+/// Restore SIGPIPE to its default action on Unix so downstream pipe closures
+/// (e.g. `compactp lex big.compact | head`) terminate the process cleanly
+/// with status 141 instead of triggering a Rust panic inside `println!`.
+/// Rust's default is to ignore SIGPIPE, which causes `write!` / `println!`
+/// to fail with `BrokenPipe` and the standard print macros panic on that
+/// error. Most Unix CLI tools reset the signal explicitly.
+#[cfg(unix)]
+fn reset_sigpipe_to_default() {
+    // SAFETY: calling `signal(SIGPIPE, SIG_DFL)` is safe; it just rewrites
+    // the signal disposition table. No data-race concerns at program start.
+    unsafe {
+        libc::signal(libc::SIGPIPE, libc::SIG_DFL);
+    }
+}
+
+#[cfg(not(unix))]
+fn reset_sigpipe_to_default() {}
+
+use std::io::Write;
