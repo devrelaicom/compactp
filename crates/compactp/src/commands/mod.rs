@@ -8,7 +8,6 @@ pub mod watch;
 
 use crate::Cli;
 use crate::error::CliError;
-use std::path::PathBuf;
 
 pub fn run(cli: Cli) -> Result<i32, CliError> {
     match &cli.command {
@@ -18,21 +17,17 @@ pub fn run(cli: Cli) -> Result<i32, CliError> {
         crate::Commands::Ast { paths } => ast::run(&cli, paths),
         crate::Commands::Diag { paths } => diag::run(&cli, paths),
         crate::Commands::Stats { paths } => stats::run(&cli, paths),
-        crate::Commands::Watch { command, paths } => watch::run(&cli, command, paths),
+        crate::Commands::Watch { command } => watch::run(&cli, command),
     }
 }
 
-pub(crate) fn run_watchable(
-    cli: &Cli,
-    command: &crate::WatchableCommand,
-    paths: &[PathBuf],
-) -> Result<i32, CliError> {
+pub(crate) fn run_watchable(cli: &Cli, command: &crate::WatchableCommand) -> Result<i32, CliError> {
     match command {
-        crate::WatchableCommand::Lex => lex::run(cli, paths),
-        crate::WatchableCommand::Parse => parse::run(cli, paths),
-        crate::WatchableCommand::Cst => cst::run(cli, paths),
-        crate::WatchableCommand::Ast => ast::run(cli, paths),
-        crate::WatchableCommand::Diag => diag::run(cli, paths),
-        crate::WatchableCommand::Stats => stats::run(cli, paths),
+        crate::WatchableCommand::Lex { paths } => lex::run(cli, paths),
+        crate::WatchableCommand::Parse { paths } => parse::run(cli, paths),
+        crate::WatchableCommand::Cst { paths } => cst::run(cli, paths),
+        crate::WatchableCommand::Ast { paths } => ast::run(cli, paths),
+        crate::WatchableCommand::Diag { paths } => diag::run(cli, paths),
+        crate::WatchableCommand::Stats { paths } => stats::run(cli, paths),
     }
 }

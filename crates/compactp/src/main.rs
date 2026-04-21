@@ -64,8 +64,6 @@ pub enum Commands {
         /// Command to run on change
         #[command(subcommand)]
         command: WatchableCommand,
-        /// Paths to watch
-        paths: Vec<PathBuf>,
     },
 }
 
@@ -84,12 +82,31 @@ pub enum ColorChoice {
 
 #[derive(Debug, Subcommand, Clone)]
 pub enum WatchableCommand {
-    Lex,
-    Parse,
-    Cst,
-    Ast,
-    Diag,
-    Stats,
+    /// Tokenize on change
+    Lex { paths: Vec<PathBuf> },
+    /// Parse on change
+    Parse { paths: Vec<PathBuf> },
+    /// Dump concrete syntax tree on change
+    Cst { paths: Vec<PathBuf> },
+    /// Dump typed abstract syntax tree on change
+    Ast { paths: Vec<PathBuf> },
+    /// Emit diagnostics only on change
+    Diag { paths: Vec<PathBuf> },
+    /// Report stats on change
+    Stats { paths: Vec<PathBuf> },
+}
+
+impl WatchableCommand {
+    pub fn paths(&self) -> &[PathBuf] {
+        match self {
+            WatchableCommand::Lex { paths }
+            | WatchableCommand::Parse { paths }
+            | WatchableCommand::Cst { paths }
+            | WatchableCommand::Ast { paths }
+            | WatchableCommand::Diag { paths }
+            | WatchableCommand::Stats { paths } => paths,
+        }
+    }
 }
 
 fn main() {

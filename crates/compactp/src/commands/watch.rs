@@ -1,22 +1,20 @@
 use crate::Cli;
 use crate::error::CliError;
 use notify_debouncer_full::{DebounceEventResult, new_debouncer, notify::RecursiveMode};
-use std::path::{Path, PathBuf};
+use std::io::IsTerminal;
+use std::path::Path;
 use std::sync::mpsc::channel;
 use std::time::Duration;
 
-pub fn run(
-    cli: &Cli,
-    command: &crate::WatchableCommand,
-    paths: &[PathBuf],
-) -> Result<i32, CliError> {
+pub fn run(cli: &Cli, command: &crate::WatchableCommand) -> Result<i32, CliError> {
+    let paths = command.paths();
     if paths.is_empty() {
         return Err(CliError::usage("watch requires at least one path"));
     }
 
     let (tx, rx) = channel::<DebounceEventResult>();
     let mut debouncer = new_debouncer(Duration::from_millis(200), None, tx)
-        .map_err(|err| CliError::io(format!("failed to create watch debouncer: {err}")))?;
+        .map_err(|err| CliError::internal(format!("failed to create watch debouncer: {err}")))?;
 
     for path in paths {
         debouncer
@@ -24,8 +22,10 @@ pub fn run(
             .map_err(|err| CliError::io(format!("failed to watch {}: {err}", path.display())))?;
     }
 
+    let interactive = std::io::stdout().is_terminal();
+
     // Initial run so the user sees output before the first file change.
-    if let Err(err) = crate::commands::run_watchable(cli, command, paths) {
+    if let Err(err) = crate::commands::run_watchable(cli, command) {
         eprintln!("{}", err.message());
     }
 
@@ -41,12 +41,14 @@ pub fn run(
                     continue;
                 }
 
-                if matches!(cli.format, crate::OutputFormat::Human) {
+                if matches!(cli.format, crate::OutputFormat::Human) && interactive {
                     print!("\x1B[2J\x1B[H");
+                }
+                if matches!(cli.format, crate::OutputFormat::Human) {
                     println!("changed: {}", changed.join(", "));
                 }
 
-                if let Err(err) = crate::commands::run_watchable(cli, command, paths) {
+                if let Err(err) = crate::commands::run_watchable(cli, command) {
                     eprintln!("{}", err.message());
                 }
             }
