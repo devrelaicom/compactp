@@ -18,10 +18,13 @@ pub struct InputFile {
 ///   in which case the CLI errors rather than hang).
 /// - A single `-` in `paths` reads from stdin. Mixing `-` with other paths is
 ///   a usage error — we refuse to silently drop either side.
-/// - Files are included when explicitly named (extension-independent).
+/// - Explicitly-named files (symlinks included) are always followed — build
+///   systems frequently stage sources as symlinks, and the user opted in by
+///   naming the path directly.
 /// - Directories are walked recursively, collecting only `*.compact` files.
-///   The walk follows regular directories and files but does not traverse
-///   symlinks, so cycles cannot exhaust the stack or the FD table.
+///   Symlinks encountered during the walk are skipped to prevent cycles from
+///   exhausting the stack or FD table, and a warning is printed to stderr so
+///   users notice that their symlinked subtrees were not parsed.
 pub fn resolve_inputs(
     paths: &[PathBuf],
     stdin_filename: Option<&str>,
@@ -78,21 +81,13 @@ fn read_stdin(stdin_filename: Option<&str>) -> Result<InputFile, CliError> {
 }
 
 fn collect(path: &Path, files: &mut BTreeSet<PathBuf>) -> Result<(), CliError> {
-    let meta = fs::symlink_metadata(path)
+    // Explicit paths follow symlinks (`fs::metadata`) — the user named the
+    // path directly, so they opted in.
+    let meta = fs::metadata(path)
         .map_err(|err| CliError::io(format!("failed to read {}: {err}", path.display())))?;
     let ty = meta.file_type();
 
-    if ty.is_symlink() {
-        // Explicit path that resolves to a symlink: don't follow. Give the user
-        // a precise message rather than dereferencing and risking a cycle.
-        return Err(CliError::io(format!(
-            "refusing to follow symlink at {}",
-            path.display()
-        )));
-    }
-
     if ty.is_file() {
-        // Explicitly-named file: include regardless of extension.
         files.insert(path.to_path_buf());
         return Ok(());
     }
@@ -120,8 +115,12 @@ fn walk_dir(dir: &Path, files: &mut BTreeSet<PathBuf>) -> Result<(), CliError> {
             .map_err(|err| CliError::io(format!("failed to stat {}: {err}", path.display())))?;
 
         if ty.is_symlink() {
-            // Skip symlinks in directory walks: the parent directory may contain
-            // loops or point out of the tree.
+            // Visible warning so users notice that a symlinked subtree was
+            // skipped rather than silently producing a smaller output.
+            eprintln!(
+                "warning: skipping symlink at {} (pass the path explicitly to follow)",
+                path.display()
+            );
             continue;
         }
         if ty.is_dir() {
