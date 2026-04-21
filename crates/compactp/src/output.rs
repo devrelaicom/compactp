@@ -41,3 +41,15 @@ pub fn print_json<T: Serialize>(value: &T, pretty: bool) -> Result<(), CliError>
     println!("{rendered}");
     Ok(())
 }
+
+/// Resolve the user's `--color` choice against the current stdout terminal
+/// state. `auto` activates ANSI colour only when stdout is a terminal;
+/// `always`/`never` override unconditionally.
+pub fn use_color(choice: crate::ColorChoice) -> bool {
+    use std::io::IsTerminal;
+    match choice {
+        crate::ColorChoice::Always => true,
+        crate::ColorChoice::Never => false,
+        crate::ColorChoice::Auto => std::io::stdout().is_terminal(),
+    }
+}

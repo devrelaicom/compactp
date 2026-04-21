@@ -12,6 +12,8 @@ use std::time::Instant;
 struct ParseData {
     success: bool,
     error_count: usize,
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    truncated: bool,
     diagnostics: Vec<compactp_diagnostics::Diagnostic>,
 }
 
@@ -29,19 +31,21 @@ pub fn run(cli: &Cli, paths: &[PathBuf]) -> Result<i32, CliError> {
         let result = parse_with(&input.source, opts);
         let elapsed = start.elapsed();
 
-        let success = result.errors.is_empty();
+        let total_errors = result.errors.len();
+        let success = total_errors == 0;
         if !success {
             worst = worst.max(1);
         }
 
-        let diagnostics = limit_diagnostics(result.errors, cli.max_diagnostics);
+        let (diagnostics, truncated) = limit_diagnostics(result.errors, cli.max_diagnostics);
 
         match cli.format {
             crate::OutputFormat::Json => {
                 let timing_ms = cli.timing.then_some(elapsed.as_secs_f64() * 1000.0);
                 let data = ParseData {
                     success,
-                    error_count: diagnostics.len(),
+                    error_count: total_errors,
+                    truncated,
                     diagnostics,
                 };
                 let envelope = OutputEnvelope::new(input.label.clone(), data, timing_ms);
@@ -51,7 +55,7 @@ pub fn run(cli: &Cli, paths: &[PathBuf]) -> Result<i32, CliError> {
                 if success {
                     println!("{}: OK", input.label);
                 } else {
-                    let colored = matches!(cli.color, crate::ColorChoice::Always);
+                    let colored = crate::output::use_color(cli.color);
                     for diag in &diagnostics {
                         print!(
                             "{}",
@@ -59,9 +63,14 @@ pub fn run(cli: &Cli, paths: &[PathBuf]) -> Result<i32, CliError> {
                         );
                     }
                     eprintln!(
-                        "{} error{} found",
-                        diagnostics.len(),
-                        if diagnostics.len() == 1 { "" } else { "s" }
+                        "{} error{} found{}",
+                        total_errors,
+                        if total_errors == 1 { "" } else { "s" },
+                        if truncated {
+                            format!(" (showing {} of {total_errors})", diagnostics.len())
+                        } else {
+                            String::new()
+                        },
                     );
                 }
                 if cli.timing {
@@ -77,9 +86,11 @@ pub fn run(cli: &Cli, paths: &[PathBuf]) -> Result<i32, CliError> {
 fn limit_diagnostics(
     diagnostics: Vec<compactp_diagnostics::Diagnostic>,
     max_diagnostics: Option<usize>,
-) -> Vec<compactp_diagnostics::Diagnostic> {
+) -> (Vec<compactp_diagnostics::Diagnostic>, bool) {
     match max_diagnostics {
-        Some(limit) => diagnostics.into_iter().take(limit).collect(),
-        None => diagnostics,
+        Some(limit) if diagnostics.len() > limit => {
+            (diagnostics.into_iter().take(limit).collect(), true)
+        }
+        _ => (diagnostics, false),
     }
 }

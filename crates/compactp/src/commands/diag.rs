@@ -17,15 +17,26 @@ pub fn run(cli: &Cli, paths: &[PathBuf]) -> Result<i32, CliError> {
                 max_errors: cli.max_errors.unwrap_or(256),
             },
         );
-        let diagnostics: Vec<_> = match cli.max_diagnostics {
-            Some(limit) => result.errors.into_iter().take(limit).collect(),
-            None => result.errors,
+
+        // Lock the exit-code signal before any user-supplied cap can erase it.
+        had_errors |= !result.errors.is_empty();
+
+        let (diagnostics, _truncated) = match cli.max_diagnostics {
+            Some(limit) if result.errors.len() > limit => (
+                result
+                    .errors
+                    .iter()
+                    .take(limit)
+                    .cloned()
+                    .collect::<Vec<_>>(),
+                true,
+            ),
+            _ => (result.errors, false),
         };
-        had_errors |= !diagnostics.is_empty();
 
         match cli.format {
             crate::OutputFormat::Human => {
-                let colored = matches!(cli.color, crate::ColorChoice::Always);
+                let colored = crate::output::use_color(cli.color);
                 for d in &diagnostics {
                     print!("{}", render_human(d, &input.source, &input.label, colored));
                 }
