@@ -75,13 +75,18 @@ fn parse_json(output: &std::process::Output) -> Value {
     serde_json::from_slice(&output.stdout).expect("stdout is JSON")
 }
 
-/// Normalise Windows backslashes to forward slashes inside JSON string values
-/// so snapshots match across platforms.
+/// Normalise Windows backslashes to forward slashes inside both JSON-encoded
+/// and raw-text path values so snapshots match across platforms. Two passes:
+///
+///  1. `\\` (JSON-escape for a single backslash) → `/` — handles paths that
+///     appear in JSON string literals.
+///  2. Remaining literal `\` → `/` — handles human-mode output where paths
+///     are not escaped.
 fn normalise_path_separators(text: &str) -> String {
     if MAIN_SEPARATOR == '/' {
         return text.to_string();
     }
-    text.replace('\\', "/")
+    text.replace("\\\\", "/").replace('\\', "/")
 }
 
 fn assert_envelope(value: &Value, expected_input: &str) {
@@ -270,7 +275,7 @@ fn diag_json_code_is_structured_object() {
     let path = fixture("recovery/broken_expressions.compact");
     let output = run_expect_code(&["--format", "json", "--pretty", "diag", &path], 1);
     let json = parse_json(&output);
-    let first = &json["data"][0];
+    let first = &json["data"]["diagnostics"][0];
     let code = first.get("code").expect("diagnostic has code");
     assert!(
         code.is_object(),
@@ -278,6 +283,41 @@ fn diag_json_code_is_structured_object() {
     );
     assert!(code.get("prefix").and_then(Value::as_str).is_some());
     assert!(code.get("number").and_then(Value::as_u64).is_some());
+    // parse and diag must emit the same per-diagnostic shape.
+    let primary = first
+        .get("primary_span")
+        .expect("diagnostic has primary_span");
+    let start = primary.get("start").expect("span has start");
+    assert!(
+        start.is_object() && start.get("offset").is_some() && start.get("line").is_some(),
+        "primary_span.start must be structured {{offset, line, column}}; got {start}"
+    );
+}
+
+#[test]
+fn parse_and_diag_emit_same_diagnostic_shape() {
+    let path = fixture("recovery/broken_expressions.compact");
+    let parse_out = run_expect_code(&["--format", "json", "--pretty", "parse", &path], 1);
+    let diag_out = run_expect_code(&["--format", "json", "--pretty", "diag", &path], 1);
+    let parse_json_val = parse_json(&parse_out);
+    let diag_json_val = parse_json(&diag_out);
+    let parse_first = &parse_json_val["data"]["diagnostics"][0];
+    let diag_first = &diag_json_val["data"]["diagnostics"][0];
+    for field in [
+        "severity",
+        "code",
+        "message",
+        "primary_span",
+        "secondary_spans",
+        "notes",
+    ] {
+        let p_val = parse_first.get(field).cloned();
+        let d_val = diag_first.get(field).cloned();
+        assert_eq!(
+            p_val, d_val,
+            "parse/diag disagree on diagnostic.{field}: parse={p_val:?} diag={d_val:?}"
+        );
+    }
 }
 
 #[test]
@@ -372,8 +412,35 @@ fn diag_json_respects_max_diagnostics() {
         1,
     );
     let json = parse_json(&output);
-    let arr = json["data"].as_array().expect("data is array");
+    let data = &json["data"];
+    let arr = data["diagnostics"].as_array().expect("diagnostics array");
     assert_eq!(arr.len(), 1, "expected one diagnostic, got {arr:?}");
+    assert_eq!(data["truncated"].as_bool(), Some(true));
+    assert!(
+        data["error_count"].as_u64().unwrap_or(0) > 1,
+        "error_count must report full error count pre-cap"
+    );
+}
+
+#[test]
+fn diag_json_max_diagnostics_zero_preserves_envelope_signals() {
+    let path = fixture("recovery/broken_expressions.compact");
+    let output = run_expect_code(
+        &["--format", "json", "diag", &path, "--max-diagnostics", "0"],
+        1,
+    );
+    let json = parse_json(&output);
+    let data = &json["data"];
+    assert!(
+        data["error_count"].as_u64().unwrap_or(0) > 0,
+        "error_count must reflect the real count even with --max-diagnostics 0"
+    );
+    assert_eq!(data["truncated"].as_bool(), Some(true));
+    assert_eq!(
+        data["diagnostics"].as_array().map(Vec::len),
+        Some(0),
+        "diagnostics array is capped at 0"
+    );
 }
 
 #[test]
@@ -539,16 +606,116 @@ fn watch_parse_accepts_paths_and_runs_once() {
         .spawn()
         .expect("spawn watch");
 
-    // Give the initial run time to complete. 500ms is generous — the watch
-    // implementation calls run_watchable synchronously before the change loop.
-    std::thread::sleep(std::time::Duration::from_millis(500));
+    // Poll stdout with a deadline rather than sleeping a fixed interval, so
+    // the test is robust to cold-CI launch overhead without burning time on
+    // fast machines. Deadline is intentionally generous (5s) because the
+    // watch subprocess has to spin up, install the debouncer, and emit the
+    // initial run before we observe anything.
+    let stdout_handle = child.stdout.take().expect("captured stdout");
+    let rx = stream_reader(stdout_handle);
+
+    let observed = wait_for(&rx, &["probe.compact", "OK"], 5);
+
     let _ = child.kill();
-    let output = child.wait_with_output().expect("reap");
-    let stdout = String::from_utf8_lossy(&output.stdout);
+    let _ = child.wait();
+
     assert!(
-        stdout.contains("probe.compact") && stdout.contains("OK"),
-        "watch did not perform an initial run: stdout={stdout:?}"
+        observed.contains("probe.compact") && observed.contains("OK"),
+        "watch did not perform an initial run within 5s: stdout={observed:?}"
     );
+}
+
+#[test]
+fn watch_reparses_on_file_change() {
+    // The change loop in watch.rs is otherwise untested. Write an invalid
+    // file first, observe `error[E`, then rewrite it with valid content and
+    // observe `OK`, proving the debouncer wired a re-run.
+    let dir = tempfile::tempdir().expect("tempdir");
+    let file_path = dir.path().join("evolve.compact");
+    fs::write(&file_path, b"ledger bad: Field\n").expect("write invalid");
+
+    let binary = assert_cmd::cargo::cargo_bin("compactp");
+    let mut child = std::process::Command::new(binary)
+        .args(["watch", "parse", file_path.to_str().unwrap()])
+        .current_dir(env!("CARGO_MANIFEST_DIR"))
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .expect("spawn watch");
+
+    let stdout_handle = child.stdout.take().expect("captured stdout");
+    let rx = stream_reader(stdout_handle);
+
+    // Phase 1: wait for the initial error output.
+    let phase1 = wait_for(&rx, &["error[E"], 5);
+    if !phase1.contains("error[E") {
+        let _ = child.kill();
+        let _ = child.wait();
+        panic!("watch did not emit the initial error output: stdout={phase1:?}");
+    }
+
+    // Phase 2: rewrite with valid content and wait for the re-run `OK`.
+    fs::write(
+        &file_path,
+        b"circuit noop(): Field { return 0 as Field; }\n",
+    )
+    .expect("rewrite valid");
+
+    let phase2 = wait_for(&rx, &["OK"], 8);
+
+    let _ = child.kill();
+    let _ = child.wait();
+
+    assert!(
+        phase2.contains("OK"),
+        "watch did not re-parse after file change: phase1={phase1:?} phase2={phase2:?}"
+    );
+}
+
+/// Spawn a reader thread that streams `read` chunks from a child process's
+/// stdout over an mpsc channel. Returns the receiver; the thread exits when
+/// the stream reaches EOF (typically after `child.kill()`).
+fn stream_reader(mut handle: std::process::ChildStdout) -> std::sync::mpsc::Receiver<String> {
+    use std::io::Read;
+    let (tx, rx) = std::sync::mpsc::channel::<String>();
+    std::thread::spawn(move || {
+        let mut buf = [0u8; 1024];
+        loop {
+            match handle.read(&mut buf) {
+                Ok(0) => break,
+                Ok(n) => {
+                    let s = String::from_utf8_lossy(&buf[..n]).into_owned();
+                    if tx.send(s).is_err() {
+                        break;
+                    }
+                }
+                Err(_) => break,
+            }
+        }
+    });
+    rx
+}
+
+/// Drain `rx` until every needle is present in the accumulated string OR the
+/// deadline passes. Returns the accumulated string.
+fn wait_for(
+    rx: &std::sync::mpsc::Receiver<String>,
+    needles: &[&str],
+    deadline_secs: u64,
+) -> String {
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(deadline_secs);
+    let mut observed = String::new();
+    while std::time::Instant::now() < deadline {
+        match rx.recv_timeout(std::time::Duration::from_millis(100)) {
+            Ok(chunk) => observed.push_str(&chunk),
+            Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {}
+            Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => break,
+        }
+        if needles.iter().all(|n| observed.contains(n)) {
+            break;
+        }
+    }
+    observed
 }
 
 // ---------------------------------------------------------------------------
@@ -566,4 +733,56 @@ fn mixing_stdin_with_file_path_is_usage_error() {
         .output()
         .expect("spawn");
     assert_eq!(output.status.code(), Some(3));
+}
+
+// ---------------------------------------------------------------------------
+// Symlink behaviour
+// ---------------------------------------------------------------------------
+
+#[cfg(unix)]
+#[test]
+fn explicit_symlink_path_is_followed() {
+    // Build systems stage sources as symlinks. Naming the symlinked path
+    // directly must parse the target, not error.
+    use std::os::unix::fs::symlink;
+    let dir = tempfile::tempdir().expect("tempdir");
+    let target = dir.path().join("real.compact");
+    fs::write(&target, b"circuit noop(): Field { return 0 as Field; }\n").expect("write target");
+    let link = dir.path().join("linked.compact");
+    symlink(&target, &link).expect("symlink");
+
+    let output = bin()
+        .args(["parse", link.to_str().unwrap()])
+        .output()
+        .expect("spawn");
+    assert!(
+        output.status.success(),
+        "explicit symlink parse failed: status={:?} stderr={}",
+        output.status,
+        String::from_utf8_lossy(&output.stderr)
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn symlink_inside_directory_is_skipped_with_warning() {
+    // A symlink discovered during a directory walk is skipped (cycle safety)
+    // but must produce a visible warning so the user knows coverage is partial.
+    use std::os::unix::fs::symlink;
+    let dir = tempfile::tempdir().expect("tempdir");
+    let real = dir.path().join("real.compact");
+    fs::write(&real, b"circuit noop(): Field { return 0 as Field; }\n").expect("write");
+    let link = dir.path().join("linked.compact");
+    symlink(&real, &link).expect("symlink");
+
+    let output = bin()
+        .args(["parse", dir.path().to_str().unwrap()])
+        .output()
+        .expect("spawn");
+    assert!(output.status.success(), "directory walk failed");
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("skipping symlink"),
+        "expected skipping-symlink warning on stderr, got {stderr:?}"
+    );
 }
