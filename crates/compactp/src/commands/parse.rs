@@ -2,7 +2,7 @@ use crate::Cli;
 use crate::error::CliError;
 use crate::input::resolve_inputs;
 use crate::output::OutputEnvelope;
-use compactp_diagnostics::render_human;
+use compactp_diagnostics::{render_human, render_json};
 use compactp_parser::{ParseOptions, parse_with};
 use serde::Serialize;
 use std::path::PathBuf;
@@ -14,7 +14,7 @@ struct ParseData {
     error_count: usize,
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     truncated: bool,
-    diagnostics: Vec<compactp_diagnostics::Diagnostic>,
+    diagnostics: Vec<serde_json::Value>,
 }
 
 pub fn run(cli: &Cli, paths: &[PathBuf]) -> Result<i32, CliError> {
@@ -41,12 +41,20 @@ pub fn run(cli: &Cli, paths: &[PathBuf]) -> Result<i32, CliError> {
 
         match cli.format {
             crate::OutputFormat::Json => {
+                // Diagnostics flow through the same `render_json` renderer as
+                // the `diag` command so both subcommands publish the same
+                // per-diagnostic shape (structured `code`, line/column-resolved
+                // spans, and note list).
+                let rendered: Vec<serde_json::Value> = diagnostics
+                    .iter()
+                    .map(|d| render_json(d, &input.source))
+                    .collect();
                 let timing_ms = cli.timing.then_some(elapsed.as_secs_f64() * 1000.0);
                 let data = ParseData {
                     success,
                     error_count: total_errors,
                     truncated,
-                    diagnostics,
+                    diagnostics: rendered,
                 };
                 let envelope = OutputEnvelope::new(input.label.clone(), data, timing_ms);
                 crate::output::print_json(&envelope, cli.pretty)?;

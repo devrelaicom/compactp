@@ -7,116 +7,119 @@ expression: normalise_path_separators(&raw)
   "schema_version": 1,
   "language_version": "0.22.0",
   "input": "tests/fixtures/recovery/broken_expressions.compact",
-  "data": [
-    {
-      "code": {
-        "number": 1,
-        "prefix": "E"
-      },
-      "message": "expected type",
-      "notes": [],
-      "primary_span": {
-        "end": {
-          "column": 20,
-          "line": 2,
-          "offset": 63
+  "data": {
+    "error_count": 5,
+    "diagnostics": [
+      {
+        "code": {
+          "number": 1,
+          "prefix": "E"
         },
-        "start": {
-          "column": 20,
-          "line": 2,
-          "offset": 63
-        }
-      },
-      "secondary_spans": [],
-      "severity": "error"
-    },
-    {
-      "code": {
-        "number": 1,
-        "prefix": "E"
-      },
-      "message": "expected expression",
-      "notes": [],
-      "primary_span": {
-        "end": {
-          "column": 22,
-          "line": 3,
-          "offset": 87
+        "message": "expected type",
+        "notes": [],
+        "primary_span": {
+          "end": {
+            "column": 20,
+            "line": 2,
+            "offset": 63
+          },
+          "start": {
+            "column": 20,
+            "line": 2,
+            "offset": 63
+          }
         },
-        "start": {
-          "column": 22,
-          "line": 3,
-          "offset": 87
-        }
+        "secondary_spans": [],
+        "severity": "error"
       },
-      "secondary_spans": [],
-      "severity": "error"
-    },
-    {
-      "code": {
-        "number": 1,
-        "prefix": "E"
-      },
-      "message": "expected expression",
-      "notes": [],
-      "primary_span": {
-        "end": {
-          "column": 25,
-          "line": 4,
-          "offset": 117
+      {
+        "code": {
+          "number": 1,
+          "prefix": "E"
         },
-        "start": {
-          "column": 25,
-          "line": 4,
-          "offset": 117
-        }
-      },
-      "secondary_spans": [],
-      "severity": "error"
-    },
-    {
-      "code": {
-        "number": 1,
-        "prefix": "E"
-      },
-      "message": "expected R_PAREN",
-      "notes": [],
-      "primary_span": {
-        "end": {
-          "column": 25,
-          "line": 4,
-          "offset": 117
+        "message": "expected expression",
+        "notes": [],
+        "primary_span": {
+          "end": {
+            "column": 22,
+            "line": 3,
+            "offset": 87
+          },
+          "start": {
+            "column": 22,
+            "line": 3,
+            "offset": 87
+          }
         },
-        "start": {
-          "column": 25,
-          "line": 4,
-          "offset": 117
-        }
+        "secondary_spans": [],
+        "severity": "error"
       },
-      "secondary_spans": [],
-      "severity": "error"
-    },
-    {
-      "code": {
-        "number": 1,
-        "prefix": "E"
-      },
-      "message": "expected expression",
-      "notes": [],
-      "primary_span": {
-        "end": {
-          "column": 13,
-          "line": 5,
-          "offset": 131
+      {
+        "code": {
+          "number": 1,
+          "prefix": "E"
         },
-        "start": {
-          "column": 13,
-          "line": 5,
-          "offset": 131
-        }
+        "message": "expected expression",
+        "notes": [],
+        "primary_span": {
+          "end": {
+            "column": 25,
+            "line": 4,
+            "offset": 117
+          },
+          "start": {
+            "column": 25,
+            "line": 4,
+            "offset": 117
+          }
+        },
+        "secondary_spans": [],
+        "severity": "error"
       },
-      "secondary_spans": [],
-      "severity": "error"
-    }
-  ]
+      {
+        "code": {
+          "number": 1,
+          "prefix": "E"
+        },
+        "message": "expected R_PAREN",
+        "notes": [],
+        "primary_span": {
+          "end": {
+            "column": 25,
+            "line": 4,
+            "offset": 117
+          },
+          "start": {
+            "column": 25,
+            "line": 4,
+            "offset": 117
+          }
+        },
+        "secondary_spans": [],
+        "severity": "error"
+      },
+      {
+        "code": {
+          "number": 1,
+          "prefix": "E"
+        },
+        "message": "expected expression",
+        "notes": [],
+        "primary_span": {
+          "end": {
+            "column": 13,
+            "line": 5,
+            "offset": 131
+          },
+          "start": {
+            "column": 13,
+            "line": 5,
+            "offset": 131
+          }
+        },
+        "secondary_spans": [],
+        "severity": "error"
+      }
+    ]
+  }
 }
