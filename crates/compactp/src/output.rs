@@ -1,9 +1,10 @@
+use crate::error::CliError;
 use serde::Serialize;
 
 /// JSON output envelope wrapping all command output.
 ///
 /// Every JSON payload includes metadata for version tracking and downstream consumers.
-#[derive(Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct OutputEnvelope<T: Serialize> {
     pub tool_version: &'static str,
     pub schema_version: u32,
@@ -29,4 +30,14 @@ impl<T: Serialize> OutputEnvelope<T> {
             data,
         }
     }
+}
+
+pub fn print_json<T: Serialize>(value: &T, pretty: bool) -> Result<(), CliError> {
+    let rendered = if pretty {
+        serde_json::to_string_pretty(value)?
+    } else {
+        serde_json::to_string(value)?
+    };
+    println!("{rendered}");
+    Ok(())
 }

@@ -39,12 +39,10 @@ pub fn run(source: &str, input_name: &str, json: bool, timing: bool, pretty: boo
         };
 
         let envelope = OutputEnvelope::new(input_name.to_string(), token_infos, timing_ms);
-        let output = if pretty {
-            serde_json::to_string_pretty(&envelope).unwrap()
-        } else {
-            serde_json::to_string(&envelope).unwrap()
-        };
-        println!("{output}");
+        if let Err(e) = crate::output::print_json(&envelope, pretty) {
+            eprintln!("error: {e}");
+            return 1;
+        }
     } else {
         let mut offset = 0usize;
         for (kind, text) in &tokens {
