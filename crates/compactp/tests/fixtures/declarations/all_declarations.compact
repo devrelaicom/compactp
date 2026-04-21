@@ -1,0 +1,31 @@
+pragma language_version >= 0.15.0;
+include "Counter";
+
+ledger count: Field;
+sealed ledger secret: Bytes<32>;
+
+constructor() {}
+
+circuit add(x: Field, y: Field): Field {
+  return x + y;
+}
+
+witness private$seed(): Bytes<32>;
+
+struct Point {
+  x: Field,
+  y: Field,
+}
+
+enum Mode {
+  on,
+  off,
+}
+
+contract Demo {
+  pure circuit get(): Field;
+}
+
+module Math<#n> {
+  ledger value: Field;
+}

@@ -1,0 +1,79 @@
+---
+source: crates/compactp/tests/cli.rs
+expression: rendered
+---
+{
+  "data": {
+    "items": [
+      {
+        "kind": "Pragma"
+      },
+      {
+        "kind": "Include"
+      },
+      {
+        "exported": false,
+        "kind": "LedgerDecl",
+        "name": "count",
+        "sealed": false
+      },
+      {
+        "exported": false,
+        "kind": "LedgerDecl",
+        "name": "secret",
+        "sealed": true
+      },
+      {
+        "kind": "ConstructorDef"
+      },
+      {
+        "exported": false,
+        "has_body": true,
+        "kind": "CircuitDef",
+        "name": "add",
+        "pure": false
+      },
+      {
+        "exported": false,
+        "kind": "WitnessDecl",
+        "name": "private$seed"
+      },
+      {
+        "exported": false,
+        "fields": [
+          "x",
+          "y"
+        ],
+        "kind": "StructDef",
+        "name": "Point"
+      },
+      {
+        "exported": false,
+        "kind": "EnumDef",
+        "name": "Mode",
+        "variants": [
+          "on",
+          "off"
+        ]
+      },
+      {
+        "circuits": [
+          "get"
+        ],
+        "exported": false,
+        "kind": "ContractDecl",
+        "name": "Demo"
+      },
+      {
+        "exported": false,
+        "kind": "ModuleDef",
+        "name": "Math"
+      }
+    ],
+    "kind": "SourceFile"
+  },
+  "input": "tests/fixtures/declarations/all_declarations.compact",
+  "language_version": "0.22.0",
+  "schema_version": 1,
+  "tool_version": "0.1.0"
+}

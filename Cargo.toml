@@ -38,6 +38,7 @@ expect-test = "1.5"
 criterion = "0.8"
 assert_cmd = "2.2"
 walkdir = "2"
+tempfile = "3"
 
 # The profile that 'dist' will build with
 [profile.dist]

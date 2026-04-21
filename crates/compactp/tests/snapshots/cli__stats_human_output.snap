@@ -1,0 +1,11 @@
+---
+source: crates/compactp/tests/cli.rs
+expression: redacted
+---
+File:        tests/fixtures/imports/all_import_forms.compact
+Size:        117 bytes
+Tokens:      59
+Nodes:       15
+Errors:      0
+Recoveries:  0
+Parse time:  <redacted>

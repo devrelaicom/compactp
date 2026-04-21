@@ -1,0 +1,18 @@
+---
+source: crates/compactp/tests/cli.rs
+expression: rendered
+---
+{
+  "data": {
+    "error_count": 0,
+    "file_size_bytes": 117,
+    "node_count": 15,
+    "parse_time_ms": "<redacted>",
+    "recovery_count": 0,
+    "token_count": 59
+  },
+  "input": "tests/fixtures/imports/all_import_forms.compact",
+  "language_version": "0.22.0",
+  "schema_version": 1,
+  "tool_version": "0.1.0"
+}

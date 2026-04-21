@@ -1,0 +1,16 @@
+---
+source: crates/compactp/tests/cli.rs
+expression: "stdout(run_ok(&[\"ast\", &path]))"
+---
+SourceFile
+  Pragma
+  Include
+  LedgerDecl name=count
+  LedgerDecl name=secret
+  ConstructorDef
+  CircuitDef name=add exported=false pure=false
+  WitnessDecl name=private$seed
+  StructDef name=Point
+  EnumDef name=Mode
+  ContractDecl name=Demo
+  ModuleDef name=Math

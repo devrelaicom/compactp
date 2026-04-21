@@ -1,0 +1,5 @@
+import { foo as f, bar } from Math<Field> prefix M$;
+export { f, M$ };
+module Wrapped<#n> {
+  ledger value: Field;
+}

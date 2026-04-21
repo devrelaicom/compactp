@@ -1,0 +1,321 @@
+---
+source: crates/compactp/tests/cli.rs
+expression: rendered
+---
+{
+  "data": {
+    "children": [
+      {
+        "children": [
+          {
+            "kind": "IMPORT_KW",
+            "text": "import"
+          },
+          {
+            "children": [
+              {
+                "kind": "WHITESPACE",
+                "text": " "
+              },
+              {
+                "kind": "L_BRACE",
+                "text": "{"
+              },
+              {
+                "children": [
+                  {
+                    "kind": "WHITESPACE",
+                    "text": " "
+                  },
+                  {
+                    "kind": "IDENT",
+                    "text": "foo"
+                  },
+                  {
+                    "kind": "WHITESPACE",
+                    "text": " "
+                  },
+                  {
+                    "kind": "AS_KW",
+                    "text": "as"
+                  },
+                  {
+                    "kind": "WHITESPACE",
+                    "text": " "
+                  },
+                  {
+                    "kind": "IDENT",
+                    "text": "f"
+                  }
+                ],
+                "kind": "IMPORT_SPECIFIER"
+              },
+              {
+                "kind": "COMMA",
+                "text": ","
+              },
+              {
+                "children": [
+                  {
+                    "kind": "WHITESPACE",
+                    "text": " "
+                  },
+                  {
+                    "kind": "IDENT",
+                    "text": "bar"
+                  }
+                ],
+                "kind": "IMPORT_SPECIFIER"
+              },
+              {
+                "kind": "WHITESPACE",
+                "text": " "
+              },
+              {
+                "kind": "R_BRACE",
+                "text": "}"
+              }
+            ],
+            "kind": "IMPORT_SPECIFIER_LIST"
+          },
+          {
+            "kind": "WHITESPACE",
+            "text": " "
+          },
+          {
+            "kind": "FROM_KW",
+            "text": "from"
+          },
+          {
+            "kind": "WHITESPACE",
+            "text": " "
+          },
+          {
+            "kind": "IDENT",
+            "text": "Math"
+          },
+          {
+            "children": [
+              {
+                "kind": "LT",
+                "text": "<"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "kind": "FIELD_KW",
+                        "text": "Field"
+                      }
+                    ],
+                    "kind": "FIELD_TYPE"
+                  }
+                ],
+                "kind": "GENERIC_ARG"
+              },
+              {
+                "kind": "GT",
+                "text": ">"
+              }
+            ],
+            "kind": "GENERIC_ARG_LIST"
+          },
+          {
+            "children": [
+              {
+                "kind": "WHITESPACE",
+                "text": " "
+              },
+              {
+                "kind": "PREFIX_KW",
+                "text": "prefix"
+              },
+              {
+                "kind": "WHITESPACE",
+                "text": " "
+              },
+              {
+                "kind": "IDENT",
+                "text": "M$"
+              }
+            ],
+            "kind": "PREFIX_DECL"
+          },
+          {
+            "kind": "SEMICOLON",
+            "text": ";"
+          }
+        ],
+        "kind": "IMPORT"
+      },
+      {
+        "children": [
+          {
+            "kind": "WHITESPACE",
+            "text": "\n"
+          },
+          {
+            "kind": "EXPORT_KW",
+            "text": "export"
+          },
+          {
+            "kind": "WHITESPACE",
+            "text": " "
+          },
+          {
+            "kind": "L_BRACE",
+            "text": "{"
+          },
+          {
+            "kind": "WHITESPACE",
+            "text": " "
+          },
+          {
+            "kind": "IDENT",
+            "text": "f"
+          },
+          {
+            "kind": "COMMA",
+            "text": ","
+          },
+          {
+            "kind": "WHITESPACE",
+            "text": " "
+          },
+          {
+            "kind": "IDENT",
+            "text": "M$"
+          },
+          {
+            "kind": "WHITESPACE",
+            "text": " "
+          },
+          {
+            "kind": "R_BRACE",
+            "text": "}"
+          },
+          {
+            "kind": "SEMICOLON",
+            "text": ";"
+          }
+        ],
+        "kind": "EXPORT_LIST"
+      },
+      {
+        "children": [
+          {
+            "kind": "WHITESPACE",
+            "text": "\n"
+          },
+          {
+            "kind": "MODULE_KW",
+            "text": "module"
+          },
+          {
+            "kind": "WHITESPACE",
+            "text": " "
+          },
+          {
+            "kind": "IDENT",
+            "text": "Wrapped"
+          },
+          {
+            "children": [
+              {
+                "kind": "LT",
+                "text": "<"
+              },
+              {
+                "children": [
+                  {
+                    "kind": "HASH",
+                    "text": "#"
+                  },
+                  {
+                    "kind": "IDENT",
+                    "text": "n"
+                  }
+                ],
+                "kind": "GENERIC_PARAM"
+              },
+              {
+                "kind": "GT",
+                "text": ">"
+              }
+            ],
+            "kind": "GENERIC_PARAM_LIST"
+          },
+          {
+            "kind": "WHITESPACE",
+            "text": " "
+          },
+          {
+            "kind": "L_BRACE",
+            "text": "{"
+          },
+          {
+            "children": [
+              {
+                "kind": "WHITESPACE",
+                "text": "\n  "
+              },
+              {
+                "kind": "LEDGER_KW",
+                "text": "ledger"
+              },
+              {
+                "kind": "WHITESPACE",
+                "text": " "
+              },
+              {
+                "kind": "IDENT",
+                "text": "value"
+              },
+              {
+                "kind": "COLON",
+                "text": ":"
+              },
+              {
+                "children": [
+                  {
+                    "kind": "WHITESPACE",
+                    "text": " "
+                  },
+                  {
+                    "kind": "FIELD_KW",
+                    "text": "Field"
+                  }
+                ],
+                "kind": "FIELD_TYPE"
+              },
+              {
+                "kind": "SEMICOLON",
+                "text": ";"
+              }
+            ],
+            "kind": "LEDGER_DECL"
+          },
+          {
+            "kind": "WHITESPACE",
+            "text": "\n"
+          },
+          {
+            "kind": "R_BRACE",
+            "text": "}"
+          }
+        ],
+        "kind": "MODULE_DEF"
+      },
+      {
+        "kind": "WHITESPACE",
+        "text": "\n"
+      }
+    ],
+    "kind": "SOURCE_FILE"
+  },
+  "input": "tests/fixtures/imports/all_import_forms.compact",
+  "language_version": "0.22.0",
+  "schema_version": 1,
+  "tool_version": "0.1.0"
+}

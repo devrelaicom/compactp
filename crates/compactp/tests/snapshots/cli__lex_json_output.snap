@@ -1,0 +1,366 @@
+---
+source: crates/compactp/tests/cli.rs
+expression: rendered
+---
+{
+  "data": [
+    {
+      "kind": "IMPORT_KW",
+      "len": 6,
+      "offset": 0,
+      "text": "import"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 6,
+      "text": " "
+    },
+    {
+      "kind": "L_BRACE",
+      "len": 1,
+      "offset": 7,
+      "text": "{"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 8,
+      "text": " "
+    },
+    {
+      "kind": "IDENT",
+      "len": 3,
+      "offset": 9,
+      "text": "foo"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 12,
+      "text": " "
+    },
+    {
+      "kind": "AS_KW",
+      "len": 2,
+      "offset": 13,
+      "text": "as"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 15,
+      "text": " "
+    },
+    {
+      "kind": "IDENT",
+      "len": 1,
+      "offset": 16,
+      "text": "f"
+    },
+    {
+      "kind": "COMMA",
+      "len": 1,
+      "offset": 17,
+      "text": ","
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 18,
+      "text": " "
+    },
+    {
+      "kind": "IDENT",
+      "len": 3,
+      "offset": 19,
+      "text": "bar"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 22,
+      "text": " "
+    },
+    {
+      "kind": "R_BRACE",
+      "len": 1,
+      "offset": 23,
+      "text": "}"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 24,
+      "text": " "
+    },
+    {
+      "kind": "FROM_KW",
+      "len": 4,
+      "offset": 25,
+      "text": "from"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 29,
+      "text": " "
+    },
+    {
+      "kind": "IDENT",
+      "len": 4,
+      "offset": 30,
+      "text": "Math"
+    },
+    {
+      "kind": "LT",
+      "len": 1,
+      "offset": 34,
+      "text": "<"
+    },
+    {
+      "kind": "FIELD_KW",
+      "len": 5,
+      "offset": 35,
+      "text": "Field"
+    },
+    {
+      "kind": "GT",
+      "len": 1,
+      "offset": 40,
+      "text": ">"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 41,
+      "text": " "
+    },
+    {
+      "kind": "PREFIX_KW",
+      "len": 6,
+      "offset": 42,
+      "text": "prefix"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 48,
+      "text": " "
+    },
+    {
+      "kind": "IDENT",
+      "len": 2,
+      "offset": 49,
+      "text": "M$"
+    },
+    {
+      "kind": "SEMICOLON",
+      "len": 1,
+      "offset": 51,
+      "text": ";"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 52,
+      "text": "\n"
+    },
+    {
+      "kind": "EXPORT_KW",
+      "len": 6,
+      "offset": 53,
+      "text": "export"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 59,
+      "text": " "
+    },
+    {
+      "kind": "L_BRACE",
+      "len": 1,
+      "offset": 60,
+      "text": "{"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 61,
+      "text": " "
+    },
+    {
+      "kind": "IDENT",
+      "len": 1,
+      "offset": 62,
+      "text": "f"
+    },
+    {
+      "kind": "COMMA",
+      "len": 1,
+      "offset": 63,
+      "text": ","
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 64,
+      "text": " "
+    },
+    {
+      "kind": "IDENT",
+      "len": 2,
+      "offset": 65,
+      "text": "M$"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 67,
+      "text": " "
+    },
+    {
+      "kind": "R_BRACE",
+      "len": 1,
+      "offset": 68,
+      "text": "}"
+    },
+    {
+      "kind": "SEMICOLON",
+      "len": 1,
+      "offset": 69,
+      "text": ";"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 70,
+      "text": "\n"
+    },
+    {
+      "kind": "MODULE_KW",
+      "len": 6,
+      "offset": 71,
+      "text": "module"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 77,
+      "text": " "
+    },
+    {
+      "kind": "IDENT",
+      "len": 7,
+      "offset": 78,
+      "text": "Wrapped"
+    },
+    {
+      "kind": "LT",
+      "len": 1,
+      "offset": 85,
+      "text": "<"
+    },
+    {
+      "kind": "HASH",
+      "len": 1,
+      "offset": 86,
+      "text": "#"
+    },
+    {
+      "kind": "IDENT",
+      "len": 1,
+      "offset": 87,
+      "text": "n"
+    },
+    {
+      "kind": "GT",
+      "len": 1,
+      "offset": 88,
+      "text": ">"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 89,
+      "text": " "
+    },
+    {
+      "kind": "L_BRACE",
+      "len": 1,
+      "offset": 90,
+      "text": "{"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 3,
+      "offset": 91,
+      "text": "\n  "
+    },
+    {
+      "kind": "LEDGER_KW",
+      "len": 6,
+      "offset": 94,
+      "text": "ledger"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 100,
+      "text": " "
+    },
+    {
+      "kind": "IDENT",
+      "len": 5,
+      "offset": 101,
+      "text": "value"
+    },
+    {
+      "kind": "COLON",
+      "len": 1,
+      "offset": 106,
+      "text": ":"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 107,
+      "text": " "
+    },
+    {
+      "kind": "FIELD_KW",
+      "len": 5,
+      "offset": 108,
+      "text": "Field"
+    },
+    {
+      "kind": "SEMICOLON",
+      "len": 1,
+      "offset": 113,
+      "text": ";"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 114,
+      "text": "\n"
+    },
+    {
+      "kind": "R_BRACE",
+      "len": 1,
+      "offset": 115,
+      "text": "}"
+    },
+    {
+      "kind": "WHITESPACE",
+      "len": 1,
+      "offset": 116,
+      "text": "\n"
+    }
+  ],
+  "input": "tests/fixtures/imports/all_import_forms.compact",
+  "language_version": "0.22.0",
+  "schema_version": 1,
+  "tool_version": "0.1.0"
+}

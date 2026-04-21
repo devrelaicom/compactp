@@ -1,0 +1,6 @@
+circuit broken(a: Field, b: Field): Field {
+  const cast = a as ;
+  const ternary = a ? : b;
+  const call = disclose(;
+  return a + ;
+}

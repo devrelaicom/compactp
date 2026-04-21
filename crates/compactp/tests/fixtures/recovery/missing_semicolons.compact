@@ -1,0 +1,6 @@
+ledger count: Field
+
+circuit broken(x: Field): Field {
+  const y = disclose(x)
+  return y
+}
