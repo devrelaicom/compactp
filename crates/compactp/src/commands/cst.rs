@@ -1,9 +1,14 @@
+use crate::Cli;
+use crate::error::CliError;
+use crate::input::resolve_inputs;
 use crate::output::OutputEnvelope;
 use compactp_syntax::SyntaxNode;
+use rowan::GreenNode;
 use serde::Serialize;
+use std::path::PathBuf;
 use std::time::Instant;
 
-#[derive(Serialize)]
+#[derive(Debug, Clone, Serialize)]
 struct CstNode {
     kind: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -12,34 +17,42 @@ struct CstNode {
     children: Vec<CstNode>,
 }
 
-pub fn run(source: &str, input_name: &str, json: bool, timing: bool, pretty: bool) -> i32 {
-    let start = Instant::now();
-    let result = compactp_parser::parse(source);
-    let elapsed = start.elapsed();
+pub fn run(cli: &Cli, paths: &[PathBuf]) -> Result<i32, CliError> {
+    let inputs = resolve_inputs(paths, cli.stdin_filename.as_deref())?;
+    let mut worst = 0;
 
-    let root = SyntaxNode::new_root(result.green);
+    for input in inputs {
+        let start = Instant::now();
+        let result = compactp_parser::parse(&input.source);
+        let elapsed = start.elapsed();
 
-    if json {
-        let timing_ms = if timing {
-            Some(elapsed.as_secs_f64() * 1000.0)
-        } else {
-            None
-        };
+        let root = root_from_green(result.green);
 
-        let tree = syntax_node_to_json(&root);
-        let envelope = OutputEnvelope::new(input_name.to_string(), tree, timing_ms);
-        if let Err(e) = crate::output::print_json(&envelope, pretty) {
-            eprintln!("error: {e}");
-            return 1;
+        match cli.format {
+            crate::OutputFormat::Json => {
+                let timing_ms = cli.timing.then_some(elapsed.as_secs_f64() * 1000.0);
+                let tree = syntax_node_to_json(&root);
+                let envelope = OutputEnvelope::new(input.label.clone(), tree, timing_ms);
+                crate::output::print_json(&envelope, cli.pretty)?;
+            }
+            crate::OutputFormat::Human => {
+                print_tree(&root, 0);
+                if cli.timing {
+                    eprintln!("Parsed in {:.2}ms", elapsed.as_secs_f64() * 1000.0);
+                }
+            }
         }
-    } else {
-        print_tree(&root, 0);
-        if timing {
-            eprintln!("Parsed in {:.2}ms", elapsed.as_secs_f64() * 1000.0);
+
+        if !result.errors.is_empty() {
+            worst = worst.max(1);
         }
     }
 
-    if result.errors.is_empty() { 0 } else { 1 }
+    Ok(worst)
+}
+
+pub(crate) fn root_from_green(green: GreenNode) -> SyntaxNode {
+    SyntaxNode::new_root(green)
 }
 
 fn print_tree(node: &SyntaxNode, indent: usize) {

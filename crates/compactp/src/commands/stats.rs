@@ -1,9 +1,14 @@
+use crate::Cli;
+use crate::commands::cst::root_from_green;
+use crate::error::CliError;
+use crate::input::resolve_inputs;
 use crate::output::OutputEnvelope;
 use compactp_syntax::SyntaxNode;
 use serde::Serialize;
+use std::path::PathBuf;
 use std::time::Instant;
 
-#[derive(Serialize)]
+#[derive(Debug, Clone, Serialize)]
 struct Stats {
     file_size_bytes: usize,
     token_count: usize,
@@ -12,47 +17,52 @@ struct Stats {
     parse_time_ms: f64,
 }
 
-pub fn run(source: &str, input_name: &str, json: bool, timing: bool, pretty: bool) -> i32 {
-    let file_size = source.len();
-    let token_count = compactp_lexer::lex(source).len();
+pub fn run(cli: &Cli, paths: &[PathBuf]) -> Result<i32, CliError> {
+    let inputs = resolve_inputs(paths, cli.stdin_filename.as_deref())?;
+    let mut worst = 0;
 
-    let start = Instant::now();
-    let result = compactp_parser::parse(source);
-    let parse_time = start.elapsed();
+    for input in inputs {
+        let file_size = input.source.len();
+        let token_count = compactp_lexer::lex(&input.source).len();
 
-    let root = SyntaxNode::new_root(result.green);
-    let node_count = count_nodes(&root);
-    let error_count = result.errors.len();
+        let start = Instant::now();
+        let result = compactp_parser::parse(&input.source);
+        let parse_time = start.elapsed();
 
-    let stats = Stats {
-        file_size_bytes: file_size,
-        token_count,
-        node_count,
-        error_count,
-        parse_time_ms: parse_time.as_secs_f64() * 1000.0,
-    };
+        let root = root_from_green(result.green);
+        let node_count = count_nodes(&root);
+        let error_count = result.errors.len();
 
-    if json {
-        let timing_ms = if timing {
-            Some(parse_time.as_secs_f64() * 1000.0)
-        } else {
-            None
+        let stats = Stats {
+            file_size_bytes: file_size,
+            token_count,
+            node_count,
+            error_count,
+            parse_time_ms: parse_time.as_secs_f64() * 1000.0,
         };
-        let envelope = OutputEnvelope::new(input_name.to_string(), stats, timing_ms);
-        if let Err(e) = crate::output::print_json(&envelope, pretty) {
-            eprintln!("error: {e}");
-            return 1;
+
+        match cli.format {
+            crate::OutputFormat::Json => {
+                let timing_ms = cli.timing.then_some(parse_time.as_secs_f64() * 1000.0);
+                let envelope = OutputEnvelope::new(input.label.clone(), stats, timing_ms);
+                crate::output::print_json(&envelope, cli.pretty)?;
+            }
+            crate::OutputFormat::Human => {
+                println!("File:        {}", input.label);
+                println!("Size:        {file_size} bytes");
+                println!("Tokens:      {token_count}");
+                println!("Nodes:       {node_count}");
+                println!("Errors:      {error_count}");
+                println!("Parse time:  {:.2}ms", stats.parse_time_ms);
+            }
         }
-    } else {
-        println!("File:        {input_name}");
-        println!("Size:        {file_size} bytes");
-        println!("Tokens:      {token_count}");
-        println!("Nodes:       {node_count}");
-        println!("Errors:      {error_count}");
-        println!("Parse time:  {:.2}ms", stats.parse_time_ms);
+
+        if error_count > 0 {
+            worst = worst.max(1);
+        }
     }
 
-    if error_count > 0 { 1 } else { 0 }
+    Ok(worst)
 }
 
 fn count_nodes(node: &SyntaxNode) -> usize {

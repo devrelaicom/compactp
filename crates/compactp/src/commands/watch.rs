@@ -1,54 +1,91 @@
-use notify_debouncer_full::{DebouncedEvent, new_debouncer};
-use std::path::PathBuf;
-use std::sync::mpsc;
+use crate::Cli;
+use crate::error::CliError;
+use notify_debouncer_full::{DebounceEventResult, new_debouncer, notify::RecursiveMode};
+use std::path::{Path, PathBuf};
+use std::sync::mpsc::channel;
 use std::time::Duration;
 
 pub fn run(
+    cli: &Cli,
+    command: &crate::WatchableCommand,
     paths: &[PathBuf],
-    run_fn: impl Fn(&[PathBuf]),
-) -> Result<(), Box<dyn std::error::Error>> {
-    let (tx, rx) = mpsc::channel();
-    let mut debouncer = new_debouncer(Duration::from_millis(200), None, tx)?;
-
-    for path in paths {
-        let watch_path = if path.as_os_str() == "-" {
-            continue;
-        } else {
-            path.clone()
-        };
-        debouncer.watch(&watch_path, notify::RecursiveMode::Recursive)?;
+) -> Result<i32, CliError> {
+    if paths.is_empty() {
+        return Err(CliError::usage("watch requires at least one path"));
     }
 
-    // Initial run
-    eprintln!("Watching {} path(s) for changes...", paths.len());
-    run_fn(paths);
+    let (tx, rx) = channel::<DebounceEventResult>();
+    let mut debouncer = new_debouncer(Duration::from_millis(200), None, tx)
+        .map_err(|err| CliError::io(format!("failed to create watch debouncer: {err}")))?;
 
-    // Watch loop
-    loop {
-        match rx.recv() {
-            Ok(Ok(events)) => {
-                let changed: Vec<&PathBuf> = events
-                    .iter()
-                    .flat_map(|e: &DebouncedEvent| e.paths.iter())
-                    .filter(|p| p.extension().is_some_and(|ext| ext == "compact"))
-                    .collect();
+    for path in paths {
+        debouncer
+            .watch(path, RecursiveMode::Recursive)
+            .map_err(|err| CliError::io(format!("failed to watch {}: {err}", path.display())))?;
+    }
 
-                if !changed.is_empty() {
-                    eprintln!("\n--- File changed, re-running... ---\n");
-                    run_fn(paths);
+    // Initial run so the user sees output before the first file change.
+    if let Err(err) = crate::commands::run_watchable(cli, command, paths) {
+        eprintln!("{}", err.message());
+    }
+
+    for result in rx {
+        match result {
+            Ok(events) => {
+                let changed = changed_compact_paths(
+                    events
+                        .iter()
+                        .flat_map(|event| event.paths.iter().map(|path| path.as_path())),
+                );
+                if changed.is_empty() {
+                    continue;
+                }
+
+                if matches!(cli.format, crate::OutputFormat::Human) {
+                    print!("\x1B[2J\x1B[H");
+                    println!("changed: {}", changed.join(", "));
+                }
+
+                if let Err(err) = crate::commands::run_watchable(cli, command, paths) {
+                    eprintln!("{}", err.message());
                 }
             }
-            Ok(Err(errors)) => {
-                for e in errors {
-                    eprintln!("Watch error: {e}");
+            Err(errors) => {
+                for error in errors {
+                    eprintln!("watch error: {error}");
                 }
-            }
-            Err(e) => {
-                eprintln!("Channel error: {e}");
-                break;
             }
         }
     }
 
-    Ok(())
+    Ok(0)
+}
+
+fn changed_compact_paths<'a>(paths: impl Iterator<Item = &'a Path>) -> Vec<String> {
+    let mut changed = paths
+        .filter(|path| path.extension().is_some_and(|ext| ext == "compact"))
+        .map(|path| path.display().to_string())
+        .collect::<Vec<_>>();
+    changed.sort();
+    changed.dedup();
+    changed
+}
+
+#[cfg(test)]
+mod tests {
+    use super::changed_compact_paths;
+    use std::path::Path;
+
+    #[test]
+    fn filters_non_compact_paths_from_watch_events() {
+        let changed = changed_compact_paths(
+            [
+                Path::new("tests/fixtures/input.compact"),
+                Path::new("tests/fixtures/input.compact"),
+                Path::new("tests/fixtures/output.json"),
+            ]
+            .into_iter(),
+        );
+        assert_eq!(changed, vec!["tests/fixtures/input.compact"]);
+    }
 }

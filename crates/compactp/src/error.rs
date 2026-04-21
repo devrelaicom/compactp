@@ -18,11 +18,6 @@ pub struct CliError {
     message: String,
 }
 
-// Constructors and accessors below are wired step by step across the CLI.
-// Step 1 introduces the type and its serde/io conversions; Step 2 wires every
-// remaining variant into main and the command dispatch. The `dead_code` allow
-// is removed in Step 2 once every constructor has at least one caller.
-#[allow(dead_code)]
 impl CliError {
     pub fn runtime(message: impl Into<String>) -> Self {
         Self {
@@ -45,6 +40,10 @@ impl CliError {
         }
     }
 
+    // Wired into ast.rs in Step 5 for "root node was not SOURCE_FILE" invariant
+    // violations. Kept part of the public surface now so the exit-code table
+    // stays documented end-to-end.
+    #[allow(dead_code)]
     pub fn internal(message: impl Into<String>) -> Self {
         Self {
             exit_code: 4,

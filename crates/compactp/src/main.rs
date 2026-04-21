@@ -3,12 +3,12 @@ mod error;
 mod input;
 mod output;
 
-use clap::{Parser, Subcommand, ValueEnum};
+use clap::{Parser, Subcommand, ValueEnum, error::ErrorKind};
 use std::path::PathBuf;
 
-#[derive(Parser)]
+#[derive(Debug, Parser, Clone)]
 #[command(name = "compactp", about = "Compact language parser", version)]
-struct Cli {
+pub struct Cli {
     #[command(subcommand)]
     command: Commands,
 
@@ -20,6 +20,10 @@ struct Cli {
     #[arg(long, global = true)]
     pretty: bool,
 
+    /// ANSI color policy for human output
+    #[arg(long, default_value = "auto", global = true)]
+    color: ColorChoice,
+
     /// Show timing information
     #[arg(long, global = true)]
     timing: bool,
@@ -27,6 +31,10 @@ struct Cli {
     /// Filename to use when reading from stdin
     #[arg(long, global = true)]
     stdin_filename: Option<String>,
+
+    /// Cap the number of diagnostics emitted per input
+    #[arg(long, global = true)]
+    max_diagnostics: Option<usize>,
 
     /// Maximum parse errors before the parser stops recovery
     #[arg(long, global = true)]
@@ -37,199 +45,71 @@ struct Cli {
     no_recover: bool,
 }
 
-#[derive(Subcommand)]
-enum Commands {
+#[derive(Debug, Subcommand, Clone)]
+pub enum Commands {
     /// Tokenize and print token stream
-    Lex {
-        /// Input files or directories
-        paths: Vec<PathBuf>,
-    },
+    Lex { paths: Vec<PathBuf> },
     /// Parse and report diagnostics
-    Parse {
-        /// Input files or directories
-        paths: Vec<PathBuf>,
-    },
+    Parse { paths: Vec<PathBuf> },
     /// Dump concrete syntax tree
-    Cst {
-        /// Input files or directories
-        paths: Vec<PathBuf>,
-    },
+    Cst { paths: Vec<PathBuf> },
+    /// Dump typed abstract syntax tree
+    Ast { paths: Vec<PathBuf> },
+    /// Emit diagnostics only
+    Diag { paths: Vec<PathBuf> },
     /// Report token/node counts and parse time
-    Stats {
-        /// Input files or directories
-        paths: Vec<PathBuf>,
-    },
+    Stats { paths: Vec<PathBuf> },
     /// Watch files and re-run on changes
     Watch {
-        /// Command to run on changes
+        /// Command to run on change
         #[command(subcommand)]
-        command: WatchCommand,
+        command: WatchableCommand,
         /// Paths to watch
         paths: Vec<PathBuf>,
     },
 }
 
-#[derive(Subcommand)]
-enum WatchCommand {
-    /// Watch and parse
-    Parse,
-    /// Watch and show CST
-    Cst,
-    /// Watch and show stats
-    Stats,
-}
-
-#[derive(Clone, ValueEnum)]
-enum OutputFormat {
+#[derive(Debug, Clone, Copy, ValueEnum)]
+pub enum OutputFormat {
     Human,
     Json,
+}
+
+#[derive(Debug, Clone, Copy, ValueEnum)]
+pub enum ColorChoice {
+    Auto,
+    Always,
+    Never,
+}
+
+#[derive(Debug, Subcommand, Clone)]
+pub enum WatchableCommand {
+    Lex,
+    Parse,
+    Cst,
+    Ast,
+    Diag,
+    Stats,
 }
 
 fn main() {
     let cli = match Cli::try_parse() {
         Ok(cli) => cli,
-        Err(e) => {
-            // clap uses DisplayHelp/DisplayVersion for --help/--version (exit 0),
-            // and other error kinds for actual usage errors (exit 3 per design spec)
-            let code = if e.use_stderr() { 3 } else { 0 };
-            e.print().ok();
+        Err(err) => {
+            err.print().ok();
+            let code = match err.kind() {
+                ErrorKind::DisplayHelp | ErrorKind::DisplayVersion => 0,
+                _ => 3,
+            };
             std::process::exit(code);
         }
     };
 
-    let json = matches!(cli.format, OutputFormat::Json);
-
-    let pretty = cli.pretty;
-
-    let exit_code = match cli.command {
-        Commands::Lex { ref paths } => run_on_inputs(paths, &cli, |source, name| {
-            commands::lex::run(source, name, json, cli.timing, pretty)
-        }),
-        Commands::Parse { ref paths } => run_on_inputs(paths, &cli, |source, name| {
-            commands::parse::run(
-                source,
-                name,
-                json,
-                cli.timing,
-                cli.no_recover,
-                cli.max_errors,
-                pretty,
-            )
-        }),
-        Commands::Cst { ref paths } => run_on_inputs(paths, &cli, |source, name| {
-            commands::cst::run(source, name, json, cli.timing, pretty)
-        }),
-        Commands::Stats { ref paths } => run_on_inputs(paths, &cli, |source, name| {
-            commands::stats::run(source, name, json, cli.timing, pretty)
-        }),
-        Commands::Watch {
-            ref command,
-            ref paths,
-        } => {
-            let cmd = command;
-            let json_flag = json;
-            let timing_flag = cli.timing;
-            let no_recover_flag = cli.no_recover;
-            let max_errs = cli.max_errors;
-            let pretty_flag = pretty;
-            let stdin_fn = cli.stdin_filename.clone();
-            if let Err(e) = commands::watch::run(paths, |watch_paths| {
-                let inputs =
-                    input::resolve_inputs(watch_paths, stdin_fn.as_deref()).unwrap_or_default();
-                for inp in inputs {
-                    if let input::InputSource::File(path) = inp
-                        && let Ok(source) = std::fs::read_to_string(&path)
-                    {
-                        let name = path.display().to_string();
-                        match cmd {
-                            WatchCommand::Parse => {
-                                commands::parse::run(
-                                    &source,
-                                    &name,
-                                    json_flag,
-                                    timing_flag,
-                                    no_recover_flag,
-                                    max_errs,
-                                    pretty_flag,
-                                );
-                            }
-                            WatchCommand::Cst => {
-                                commands::cst::run(
-                                    &source,
-                                    &name,
-                                    json_flag,
-                                    timing_flag,
-                                    pretty_flag,
-                                );
-                            }
-                            WatchCommand::Stats => {
-                                commands::stats::run(
-                                    &source,
-                                    &name,
-                                    json_flag,
-                                    timing_flag,
-                                    pretty_flag,
-                                );
-                            }
-                        }
-                    }
-                }
-            }) {
-                eprintln!("Watch error: {e}");
-                4 // Internal failure
-            } else {
-                0
-            }
-        }
-    };
-
-    std::process::exit(exit_code);
-}
-
-fn run_on_inputs<F>(paths: &[PathBuf], cli: &Cli, mut run_fn: F) -> i32
-where
-    F: FnMut(&str, &str) -> i32,
-{
-    let inputs = match input::resolve_inputs(paths, cli.stdin_filename.as_deref()) {
-        Ok(inputs) => inputs,
-        Err(e) => {
-            eprintln!("error: {e}");
-            return 2; // IO error
-        }
-    };
-
-    let mut worst_exit = 0;
-
-    for input in inputs {
-        match input {
-            input::InputSource::File(path) => {
-                let source = match std::fs::read_to_string(&path) {
-                    Ok(s) => s,
-                    Err(e) => {
-                        eprintln!("error: {}: {e}", path.display());
-                        worst_exit = worst_exit.max(2);
-                        continue;
-                    }
-                };
-                let name = path.display().to_string();
-                let code = run_fn(&source, &name);
-                worst_exit = worst_exit.max(code);
-            }
-            input::InputSource::Stdin { filename } => {
-                let source = match std::io::read_to_string(std::io::stdin()) {
-                    Ok(s) => s,
-                    Err(e) => {
-                        eprintln!("error: reading stdin: {e}");
-                        worst_exit = worst_exit.max(2);
-                        continue;
-                    }
-                };
-                let name = filename.as_deref().unwrap_or("<stdin>");
-                let code = run_fn(&source, name);
-                worst_exit = worst_exit.max(code);
-            }
+    match commands::run(cli) {
+        Ok(code) => std::process::exit(code),
+        Err(err) => {
+            eprintln!("{}", err.message());
+            std::process::exit(err.exit_code());
         }
     }
-
-    worst_exit
 }
