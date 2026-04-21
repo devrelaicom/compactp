@@ -1,6 +1,9 @@
 pub mod json;
 pub mod render;
 
+pub use json::render_json;
+pub use render::render_human;
+
 use rowan::TextRange;
 use serde::Serialize;
 

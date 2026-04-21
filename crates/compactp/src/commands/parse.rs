@@ -2,16 +2,17 @@ use crate::Cli;
 use crate::error::CliError;
 use crate::input::resolve_inputs;
 use crate::output::OutputEnvelope;
+use compactp_diagnostics::render_human;
 use compactp_parser::{ParseOptions, parse_with};
 use serde::Serialize;
 use std::path::PathBuf;
 use std::time::Instant;
 
 #[derive(Debug, Clone, Serialize)]
-struct ParseInfo {
+struct ParseData {
     success: bool,
     error_count: usize,
-    errors: Vec<String>,
+    diagnostics: Vec<compactp_diagnostics::Diagnostic>,
 }
 
 pub fn run(cli: &Cli, paths: &[PathBuf]) -> Result<i32, CliError> {
@@ -28,34 +29,40 @@ pub fn run(cli: &Cli, paths: &[PathBuf]) -> Result<i32, CliError> {
         let result = parse_with(&input.source, opts);
         let elapsed = start.elapsed();
 
-        let has_errors = !result.errors.is_empty();
-        if has_errors {
+        let success = result.errors.is_empty();
+        if !success {
             worst = worst.max(1);
         }
+
+        let diagnostics = limit_diagnostics(result.errors, cli.max_diagnostics);
 
         match cli.format {
             crate::OutputFormat::Json => {
                 let timing_ms = cli.timing.then_some(elapsed.as_secs_f64() * 1000.0);
-                let info = ParseInfo {
-                    success: !has_errors,
-                    error_count: result.errors.len(),
-                    errors: result.errors.iter().map(|d| d.message.clone()).collect(),
+                let data = ParseData {
+                    success,
+                    error_count: diagnostics.len(),
+                    diagnostics,
                 };
-                let envelope = OutputEnvelope::new(input.label.clone(), info, timing_ms);
+                let envelope = OutputEnvelope::new(input.label.clone(), data, timing_ms);
                 crate::output::print_json(&envelope, cli.pretty)?;
             }
             crate::OutputFormat::Human => {
-                if has_errors {
-                    for err in &result.errors {
-                        eprintln!("error: {}", err.message);
+                if success {
+                    println!("{}: OK", input.label);
+                } else {
+                    let colored = matches!(cli.color, crate::ColorChoice::Always);
+                    for diag in &diagnostics {
+                        print!(
+                            "{}",
+                            render_human(diag, &input.source, &input.label, colored)
+                        );
                     }
                     eprintln!(
                         "{} error{} found",
-                        result.errors.len(),
-                        if result.errors.len() == 1 { "" } else { "s" }
+                        diagnostics.len(),
+                        if diagnostics.len() == 1 { "" } else { "s" }
                     );
-                } else {
-                    println!("{}: OK", input.label);
                 }
                 if cli.timing {
                     eprintln!("Parsed in {:.2}ms", elapsed.as_secs_f64() * 1000.0);
@@ -65,4 +72,14 @@ pub fn run(cli: &Cli, paths: &[PathBuf]) -> Result<i32, CliError> {
     }
 
     Ok(worst)
+}
+
+fn limit_diagnostics(
+    diagnostics: Vec<compactp_diagnostics::Diagnostic>,
+    max_diagnostics: Option<usize>,
+) -> Vec<compactp_diagnostics::Diagnostic> {
+    match max_diagnostics {
+        Some(limit) => diagnostics.into_iter().take(limit).collect(),
+        None => diagnostics,
+    }
 }

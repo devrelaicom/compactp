@@ -3,7 +3,7 @@ use crate::commands::cst::root_from_green;
 use crate::error::CliError;
 use crate::input::resolve_inputs;
 use crate::output::OutputEnvelope;
-use compactp_syntax::SyntaxNode;
+use compactp_syntax::{SyntaxKind, SyntaxNode};
 use serde::Serialize;
 use std::path::PathBuf;
 use std::time::Instant;
@@ -14,6 +14,7 @@ struct Stats {
     token_count: usize,
     node_count: usize,
     error_count: usize,
+    recovery_count: usize,
     parse_time_ms: f64,
 }
 
@@ -31,6 +32,7 @@ pub fn run(cli: &Cli, paths: &[PathBuf]) -> Result<i32, CliError> {
 
         let root = root_from_green(result.green);
         let node_count = count_nodes(&root);
+        let recovery_count = count_error_nodes(&root);
         let error_count = result.errors.len();
 
         let stats = Stats {
@@ -38,6 +40,7 @@ pub fn run(cli: &Cli, paths: &[PathBuf]) -> Result<i32, CliError> {
             token_count,
             node_count,
             error_count,
+            recovery_count,
             parse_time_ms: parse_time.as_secs_f64() * 1000.0,
         };
 
@@ -53,6 +56,7 @@ pub fn run(cli: &Cli, paths: &[PathBuf]) -> Result<i32, CliError> {
                 println!("Tokens:      {token_count}");
                 println!("Nodes:       {node_count}");
                 println!("Errors:      {error_count}");
+                println!("Recoveries:  {recovery_count}");
                 println!("Parse time:  {:.2}ms", stats.parse_time_ms);
             }
         }
@@ -71,4 +75,10 @@ fn count_nodes(node: &SyntaxNode) -> usize {
         count += count_nodes(&child);
     }
     count
+}
+
+fn count_error_nodes(root: &SyntaxNode) -> usize {
+    root.descendants()
+        .filter(|node| node.kind() == SyntaxKind::ERROR)
+        .count()
 }
