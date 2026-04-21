@@ -248,7 +248,8 @@ cargo test -p compactp --test cli
 # regenerate snapshots after an intentional change
 cargo insta test --accept -p compactp --test cli
 
-# parser corpus (489 upstream files, lossless invariant enforced)
+# parser corpus (486 upstream files, lossless invariant enforced,
+# known-failure manifest at tests/corpus_known_failures.txt)
 cargo test -p compactp_parser --test corpus_test
 
 # formatting + lints (CI enforces both)

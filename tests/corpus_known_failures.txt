@@ -1,0 +1,86 @@
+# Corpus files that produce unexpected parse errors.
+#
+# This file is the corpus contract. The corpus test in
+# `crates/compactp_parser/tests/corpus_test.rs` compares the set of
+# non-negative files that emit diagnostics against this manifest and fails
+# if they differ in either direction:
+#
+#   * A file listed here that now parses cleanly     -> remove the line
+#   * A file not listed here that emits diagnostics  -> fix the grammar
+#                                                       or add it here
+#
+# Files under any `negative/` directory are expected to fail and are not
+# tracked here. Paths are corpus-relative with forward-slash separators.
+#
+# Lines starting with `#` and blank lines are ignored.
+assert/example_one.compact
+bugs/issue-139/a.compact
+bugs/pm-16040.compact
+bugs/pm-16059.compact
+bugs/pm-16075.compact
+bugs/pm-16183/multiple_circuit_returns.compact
+bugs/pm-16349/example_one.compact
+bugs/pm-16440.compact
+bugs/pm-16447.compact
+bugs/pm-17347/example_eight.compact
+bugs/pm-17347/example_four.compact
+bugs/pm-17347/example_one.compact
+bugs/pm-17347/example_seven.compact
+bugs/pm-17347/example_six.compact
+bugs/pm-17347/example_three.compact
+bugs/pm-17347/example_two.compact
+bugs/pm-19287.compact
+bugs/pm-19907/examples.compact
+bugs/pm-20231/example_five.compact
+bugs/pm-20239/example_16.compact
+bugs/pm-20239/example_20.compact
+bugs/pm-20291/examples.compact
+bugs/pm-20295/example_eight.compact
+bugs/pm-20295/example_five.compact
+bugs/pm-20295/example_four.compact
+bugs/pm-20295/example_nine.compact
+bugs/pm-20295/example_seven.compact
+bugs/pm-20295/example_two.compact
+bugs/pm-20487/examples.compact
+bytes/test_basic_bytes.compact
+casts/advanced_casts.compact
+commas/more_commas.compact
+composable/cases/contract-in-circuit/main.compact
+composable/cases/contract-in-constructor/main.compact
+composable/cases/export-in-definition/main.compact
+errors/noimport.compact
+modules/selective_examples.compact
+multiconst/multiconst.compact
+proposal.compact
+reserved/example_10.compact
+reserved/example_12.compact
+reserved/example_13.compact
+reserved/example_14.compact
+reserved/example_16.compact
+reserved/example_18.compact
+reserved/example_20.compact
+reserved/example_21.compact
+reserved/example_24.compact
+reserved/example_26.compact
+reserved/example_31.compact
+reserved/example_32.compact
+reserved/example_36.compact
+reserved/example_42.compact
+reserved/example_43.compact
+reserved/example_44.compact
+reserved/example_45.compact
+reserved/example_46.compact
+reserved/example_47.compact
+reserved/example_48.compact
+reserved/example_6.compact
+reserved/example_9.compact
+return/examples.compact
+std_lib/mint.compact
+types/examples.compact
+vectors/slice_part_one.compact
+vectors/spread_part_one.compact
+wpp/constructor_test.compact
+wpp/export_circuit.compact
+wpp/module_wpp.compact
+wpp/pm_16723.compact
+wpp/pm_16774.compact

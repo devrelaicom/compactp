@@ -52,7 +52,7 @@ JSON output schemas, exit codes, and Rust API signatures are public contracts fr
 
 Test corpus correctness, output contracts, and recovery behavior. Don't chase coverage percentages. Every test should catch a real class of bug.
 
-- **Corpus tests:** Parse all 489 upstream .compact files without panics. No expected-pass file should produce errors.
+- **Corpus tests:** Parse all 486 upstream .compact files without panics. The set of files that emit diagnostics must match the `tests/corpus_known_failures.txt` manifest exactly; any drift — new failures or newly-passing files — must be reflected in the manifest in the same commit.
 - **Snapshot tests:** CST shape, AST accessors, diagnostic rendering, JSON output. These are regression guards.
 - **Recovery tests:** Intentionally broken source must produce ERROR nodes, meaningful diagnostics, and an intact surrounding tree.
 - **Contract tests:** JSON output snapshots are the public contract. Changing a snapshot is a conscious decision.

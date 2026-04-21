@@ -1,30 +1,42 @@
-use std::path::Path;
+use std::collections::BTreeSet;
+use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
-/// Parse all 489 upstream .compact files without panics.
+/// Parse every `.compact` file under `tests/corpus/` and enforce:
 ///
-/// This is the primary correctness test for the parser. Every file in the corpus
-/// must parse without panicking, and expected-pass files should not produce errors.
+/// 1. No panic (reaching the end of each iteration proves this).
+/// 2. Byte-exact lossless round-trip (`root.text() == source`).
+/// 3. The set of files that produce "unexpected" errors (i.e. not under a
+///    `negative/` directory) exactly matches the checked-in
+///    `tests/corpus_known_failures.txt` manifest.
+///
+/// If you fix the grammar and a file starts parsing cleanly, remove it from
+/// the manifest. If a change introduces a new failure, the test fails with
+/// the diff so regressions cannot sneak through. This is what CONSTITUTION §V
+/// calls "the corpus is the contract."
 #[test]
-fn parse_entire_corpus_without_panics() {
-    let corpus_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
+fn parse_entire_corpus_and_diff_known_failures() {
+    let workspace_root = Path::new(env!("CARGO_MANIFEST_DIR"))
         .parent()
-        .unwrap()
+        .expect("crates/ dir")
         .parent()
-        .unwrap()
-        .join("tests/corpus");
+        .expect("workspace root");
+    let corpus_dir = workspace_root.join("tests/corpus");
+    let manifest_path = workspace_root.join("tests/corpus_known_failures.txt");
 
     if !corpus_dir.exists() {
         eprintln!(
-            "Corpus directory not found at {}. Skipping corpus test.",
+            "corpus directory not found at {}; skipping",
             corpus_dir.display()
         );
         return;
     }
 
-    let mut total = 0;
-    let mut errors = 0;
-    let mut error_files = Vec::new();
+    let expected = load_manifest(&manifest_path);
+
+    let mut total = 0usize;
+    let mut actual: BTreeSet<String> = BTreeSet::new();
+    let mut first_errors: Vec<(String, Vec<String>)> = Vec::new();
 
     for entry in WalkDir::new(&corpus_dir)
         .into_iter()
@@ -34,60 +46,108 @@ fn parse_entire_corpus_without_panics() {
         })
     {
         total += 1;
-        let source = std::fs::read_to_string(entry.path()).unwrap();
+        let source = match std::fs::read_to_string(entry.path()) {
+            Ok(s) => s,
+            Err(err) => panic!(
+                "failed to read corpus fixture {}: {err}",
+                entry.path().display()
+            ),
+        };
         let result = compactp_parser::parse(&source);
 
-        // The parse must never panic — just reaching here proves it didn't
         let root = compactp_syntax::SyntaxNode::new_root(result.green);
         assert_eq!(
             root.kind(),
             compactp_syntax::SyntaxKind::SOURCE_FILE,
-            "Root node should be SOURCE_FILE for {}",
+            "root node should be SOURCE_FILE for {}",
             entry.path().display()
         );
-
-        // Verify lossless: reconstructed text must match original source
         assert_eq!(
             root.text().to_string(),
             source,
-            "Lossless roundtrip failed for {}",
+            "lossless round-trip failed for {}",
             entry.path().display()
         );
 
         if !result.errors.is_empty() {
-            // Files in "negative/" directories are expected to have errors
             let is_negative = entry
                 .path()
                 .components()
                 .any(|c| c.as_os_str() == "negative");
             if !is_negative {
-                errors += 1;
+                let rel = relative_to_corpus(&corpus_dir, entry.path());
                 let msgs: Vec<String> = result.errors[..result.errors.len().min(3)]
                     .iter()
                     .map(|d| d.message.clone())
                     .collect();
-                error_files.push((entry.path().display().to_string(), msgs));
+                first_errors.push((rel.clone(), msgs));
+                actual.insert(rel);
             }
         }
     }
 
-    eprintln!("Parsed {total} files, {errors} unexpected errors");
+    let new_failures: Vec<&String> = actual.difference(&expected).collect();
+    let fixed_files: Vec<&String> = expected.difference(&actual).collect();
 
-    if !error_files.is_empty() {
-        eprintln!("\nFiles with errors:");
-        for (path, errs) in &error_files {
-            eprintln!("  {path}:");
-            for e in errs {
-                eprintln!("    {e}");
+    if !new_failures.is_empty() || !fixed_files.is_empty() {
+        let mut msg = String::new();
+        msg.push_str(&format!(
+            "corpus drift: parsed {total} files; expected {} known failures, observed {}.\n",
+            expected.len(),
+            actual.len(),
+        ));
+        if !new_failures.is_empty() {
+            msg.push_str(
+                "\nnew failures (fix the grammar or add to tests/corpus_known_failures.txt):\n",
+            );
+            for path in &new_failures {
+                msg.push_str(&format!("  + {path}\n"));
+                if let Some((_, errs)) = first_errors.iter().find(|(p, _)| p == *path) {
+                    for e in errs {
+                        msg.push_str(&format!("      {e}\n"));
+                    }
+                }
             }
         }
+        if !fixed_files.is_empty() {
+            msg.push_str(
+                "\nnewly-parsing files (remove these from tests/corpus_known_failures.txt):\n",
+            );
+            for path in &fixed_files {
+                msg.push_str(&format!("  - {path}\n"));
+            }
+        }
+        panic!("{msg}");
     }
 
-    // Note: This assertion may initially fail as the grammar is refined.
-    // The goal is 0 unexpected errors across all 489 corpus files.
-    // Track progress by running: cargo test --test corpus_test -- --nocapture
     eprintln!(
-        "Error rate: {errors}/{total} ({:.1}%)",
-        errors as f64 / total as f64 * 100.0
+        "corpus ok: {total} files parsed, {} known failures, 0 regressions",
+        actual.len()
     );
+}
+
+fn load_manifest(path: &Path) -> BTreeSet<String> {
+    let text = match std::fs::read_to_string(path) {
+        Ok(s) => s,
+        Err(err) => panic!(
+            "failed to read known-failures manifest {}: {err}",
+            path.display()
+        ),
+    };
+    text.lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty() && !line.starts_with('#'))
+        .map(ToOwned::to_owned)
+        .collect()
+}
+
+fn relative_to_corpus(corpus_dir: &Path, path: &Path) -> String {
+    let rel: PathBuf = path
+        .strip_prefix(corpus_dir)
+        .map(Path::to_path_buf)
+        .unwrap_or_else(|_| path.to_path_buf());
+    rel.components()
+        .map(|c| c.as_os_str().to_string_lossy().into_owned())
+        .collect::<Vec<_>>()
+        .join("/")
 }
