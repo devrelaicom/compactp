@@ -40,10 +40,6 @@ impl CliError {
         }
     }
 
-    // Wired into ast.rs in Step 5 for "root node was not SOURCE_FILE" invariant
-    // violations. Kept part of the public surface now so the exit-code table
-    // stays documented end-to-end.
-    #[allow(dead_code)]
     pub fn internal(message: impl Into<String>) -> Self {
         Self {
             exit_code: 4,
