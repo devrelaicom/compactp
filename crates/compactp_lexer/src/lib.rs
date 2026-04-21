@@ -344,10 +344,13 @@ pub fn lex(source: &str) -> Vec<(SyntaxKind, &str)> {
                 tokens.push((SyntaxKind::HASH, &source[start..pos]));
             }
 
-            // Unknown character — advance by full UTF-8 codepoint width
+            // Unknown character — advance by full UTF-8 codepoint width.
+            // The outer `while pos < source.len()` loop guarantees at least
+            // one char is available here; fall back to one-byte advance if the
+            // slice is somehow empty (defensive, keeps the lexer progressing).
             _ => {
-                let ch = source[pos..].chars().next().unwrap();
-                pos += ch.len_utf8();
+                let step = source[pos..].chars().next().map_or(1, char::len_utf8);
+                pos += step;
                 tokens.push((SyntaxKind::ERROR, &source[start..pos]));
             }
         }

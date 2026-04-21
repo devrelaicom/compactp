@@ -11,16 +11,25 @@
 //!
 //! # Usage
 //!
-//! ```rust,ignore
+//! ```rust,no_run
+//! use compactp_ast::{AstNode, Item, SourceFile};
 //! use compactp_syntax::SyntaxNode;
-//! use compactp_ast::{AstNode, nodes::*};
 //!
+//! # fn example(source: &str) {
+//! // `compactp_parser` builds the green tree from source:
 //! let result = compactp_parser::parse(source);
 //! let root = SyntaxNode::new_root(result.green);
 //! let file = SourceFile::cast(root).expect("root should be SOURCE_FILE");
-//! for circuit in file.circuit_defs() {
-//!     println!("{:?}", circuit.name());
+//!
+//! for item in file.items() {
+//!     match item {
+//!         Item::CircuitDef(c) => {
+//!             let _ = c.name();
+//!         }
+//!         _ => {}
+//!     }
 //! }
+//! # }
 //! ```
 
 pub mod expr;
