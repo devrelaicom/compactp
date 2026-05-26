@@ -296,7 +296,11 @@ fn contract(p: &mut Parser, has_export: bool) {
     m.complete(p, CONTRACT_DECL);
 }
 
-/// `pure? circuit id ( arg, ... ) : type ;`
+/// `pure? circuit id ( arg, ... ) : type (;|,)`
+///
+/// Contract members may be terminated by either `;` or `,`. A trailing
+/// terminator before the closing `}` is permitted (and required, except
+/// for the last member which may be unterminated if at `R_BRACE`).
 fn contract_circuit(p: &mut Parser) {
     let m = p.start();
     if p.eat(PURE_KW) {
@@ -309,7 +313,11 @@ fn contract_circuit(p: &mut Parser) {
     p.expect(R_PAREN);
     p.expect(COLON);
     super::types::ty(p);
-    p.expect(SEMICOLON);
+    // Accept `;` or `,` as the member terminator; tolerate omission if the
+    // closing `}` is next (last member without trailing separator).
+    if !p.eat(SEMICOLON) && !p.eat(COMMA) && !p.at(R_BRACE) {
+        p.expect(SEMICOLON);
+    }
     m.complete(p, CONTRACT_CIRCUIT);
 }
 
@@ -1307,6 +1315,53 @@ mod tests {
                       L_BRACE@43..44 "{"
                       WHITESPACE@44..45 " "
                       R_BRACE@45..46 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn decl_contract_comma_separated_circuits() {
+        check(
+            "contract C { circuit a(): [], circuit b(): Uint<32>, }",
+            expect![[r#"
+                SOURCE_FILE@0..54
+                  CONTRACT_DECL@0..54
+                    CONTRACT_KW@0..8 "contract"
+                    WHITESPACE@8..9 " "
+                    IDENT@9..10 "C"
+                    WHITESPACE@10..11 " "
+                    L_BRACE@11..12 "{"
+                    CONTRACT_CIRCUIT@12..29
+                      WHITESPACE@12..13 " "
+                      CIRCUIT_KW@13..20 "circuit"
+                      WHITESPACE@20..21 " "
+                      IDENT@21..22 "a"
+                      L_PAREN@22..23 "("
+                      R_PAREN@23..24 ")"
+                      COLON@24..25 ":"
+                      TUPLE_TYPE@25..28
+                        WHITESPACE@25..26 " "
+                        L_BRACKET@26..27 "["
+                        R_BRACKET@27..28 "]"
+                      COMMA@28..29 ","
+                    CONTRACT_CIRCUIT@29..52
+                      WHITESPACE@29..30 " "
+                      CIRCUIT_KW@30..37 "circuit"
+                      WHITESPACE@37..38 " "
+                      IDENT@38..39 "b"
+                      L_PAREN@39..40 "("
+                      R_PAREN@40..41 ")"
+                      COLON@41..42 ":"
+                      UINT_TYPE@42..51
+                        WHITESPACE@42..43 " "
+                        UINT_KW@43..47 "Uint"
+                        LT@47..48 "<"
+                        TYPE_SIZE@48..50
+                          INT_LIT@48..50 "32"
+                        GT@50..51 ">"
+                      COMMA@51..52 ","
+                    WHITESPACE@52..53 " "
+                    R_BRACE@53..54 "}"
             "#]],
         );
     }
