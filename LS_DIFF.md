@@ -13,8 +13,9 @@ upstream Compact (`tests/corpus/` was already byte-identical to
 retrospective diff is meaningful; the parser's behavior against this
 baseline is captured by:
 
-- `tests/corpus/` — 489 `.compact` files copied from upstream
-  `examples/`.
+- `tests/corpus/` — 486 `.compact` source files (489 path entries via
+  `find -name '*.compact'`; the difference is 3 symlinks) copied from
+  upstream `examples/`.
 - `tests/corpus_known_failures.txt` — 71 manifest entries categorized
   as: 21 grammar-gap, 28 upstream-bug-repro, 22 intentional-strictness.
 - `LS.md` §18 — three intentional-strictness deviations documented.

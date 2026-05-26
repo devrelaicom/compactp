@@ -140,6 +140,8 @@ fn load_manifest(path: &Path) -> BTreeSet<String> {
         // Strip inline category annotations (everything from the first `#`).
         // See `tests/corpus_known_failures.txt` for the annotation schema
         // introduced in WS1 Phase 1 Task 8.
+        // Assumes corpus paths contain no `#` character — corpus paths
+        // are upstream-controlled `.compact` filenames and do not.
         .map(|line| line.split('#').next().unwrap_or(line).trim().to_owned())
         .filter(|s| !s.is_empty())
         .collect()
