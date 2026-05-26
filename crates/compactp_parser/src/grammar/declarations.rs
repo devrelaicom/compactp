@@ -378,7 +378,12 @@ fn enum_def(p: &mut Parser, has_export: bool) {
     m.complete(p, ENUM_DEF);
 }
 
-/// `export? new? type id gparams? = type ;`
+/// `export? new? type id gparams? = type ;?`
+///
+/// The trailing `;` is required in the canonical form. It is permitted to
+/// be omitted when the RHS is a record-type body (`{ ... }`) since the
+/// closing brace already terminates the declaration unambiguously — this
+/// mirrors the `struct`/`enum` rule where `;?` is optional after `}`.
 fn type_alias(p: &mut Parser) {
     let m = p.start();
     p.eat(NEW_KW);
@@ -388,12 +393,18 @@ fn type_alias(p: &mut Parser) {
         super::types::generic_param_list(p);
     }
     p.expect(EQ);
+    let body_ends_in_brace = p.at(L_BRACE);
     super::types::ty(p);
-    p.expect(SEMICOLON);
+    if body_ends_in_brace {
+        p.eat(SEMICOLON);
+    } else {
+        p.expect(SEMICOLON);
+    }
     m.complete(p, TYPE_DECL);
 }
 
-/// `export new? type id gparams? = type ;`
+/// `export new? type id gparams? = type ;?` — see `type_alias` for the
+/// trailing-`;` rule.
 fn type_alias_exported(p: &mut Parser) {
     let m = p.start();
     p.bump(EXPORT_KW);
@@ -404,8 +415,13 @@ fn type_alias_exported(p: &mut Parser) {
         super::types::generic_param_list(p);
     }
     p.expect(EQ);
+    let body_ends_in_brace = p.at(L_BRACE);
     super::types::ty(p);
-    p.expect(SEMICOLON);
+    if body_ends_in_brace {
+        p.eat(SEMICOLON);
+    } else {
+        p.expect(SEMICOLON);
+    }
     m.complete(p, TYPE_DECL);
 }
 
@@ -1315,6 +1331,103 @@ mod tests {
                       L_BRACE@43..44 "{"
                       WHITESPACE@44..45 " "
                       R_BRACE@45..46 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn decl_type_alias_simple() {
+        check(
+            "type Foo = Field;",
+            expect![[r#"
+                SOURCE_FILE@0..17
+                  TYPE_DECL@0..17
+                    TYPE_KW@0..4 "type"
+                    WHITESPACE@4..5 " "
+                    IDENT@5..8 "Foo"
+                    WHITESPACE@8..9 " "
+                    EQ@9..10 "="
+                    FIELD_TYPE@10..16
+                      WHITESPACE@10..11 " "
+                      FIELD_KW@11..16 "Field"
+                    SEMICOLON@16..17 ";"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn decl_type_alias_record() {
+        // `type Name = { field: Type; ... }` — record body, no trailing `;`.
+        // Mirrors the proposal.compact fixture's ledger schema form.
+        check(
+            "type Ledger = { x: Field; y: Boolean }",
+            expect![[r#"
+                SOURCE_FILE@0..38
+                  TYPE_DECL@0..38
+                    TYPE_KW@0..4 "type"
+                    WHITESPACE@4..5 " "
+                    IDENT@5..11 "Ledger"
+                    WHITESPACE@11..12 " "
+                    EQ@12..13 "="
+                    RECORD_TYPE@13..38
+                      WHITESPACE@13..14 " "
+                      L_BRACE@14..15 "{"
+                      STRUCT_FIELD@15..24
+                        WHITESPACE@15..16 " "
+                        IDENT@16..17 "x"
+                        COLON@17..18 ":"
+                        FIELD_TYPE@18..24
+                          WHITESPACE@18..19 " "
+                          FIELD_KW@19..24 "Field"
+                      SEMICOLON@24..25 ";"
+                      STRUCT_FIELD@25..36
+                        WHITESPACE@25..26 " "
+                        IDENT@26..27 "y"
+                        COLON@27..28 ":"
+                        BOOLEAN_TYPE@28..36
+                          WHITESPACE@28..29 " "
+                          BOOLEAN_KW@29..36 "Boolean"
+                      WHITESPACE@36..37 " "
+                      R_BRACE@37..38 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn decl_export_type_alias_record() {
+        check(
+            "export type Ledger = { x: Field, y: Boolean };",
+            expect![[r#"
+                SOURCE_FILE@0..46
+                  TYPE_DECL@0..46
+                    EXPORT_KW@0..6 "export"
+                    WHITESPACE@6..7 " "
+                    TYPE_KW@7..11 "type"
+                    WHITESPACE@11..12 " "
+                    IDENT@12..18 "Ledger"
+                    WHITESPACE@18..19 " "
+                    EQ@19..20 "="
+                    RECORD_TYPE@20..45
+                      WHITESPACE@20..21 " "
+                      L_BRACE@21..22 "{"
+                      STRUCT_FIELD@22..31
+                        WHITESPACE@22..23 " "
+                        IDENT@23..24 "x"
+                        COLON@24..25 ":"
+                        FIELD_TYPE@25..31
+                          WHITESPACE@25..26 " "
+                          FIELD_KW@26..31 "Field"
+                      COMMA@31..32 ","
+                      STRUCT_FIELD@32..43
+                        WHITESPACE@32..33 " "
+                        IDENT@33..34 "y"
+                        COLON@34..35 ":"
+                        BOOLEAN_TYPE@35..43
+                          WHITESPACE@35..36 " "
+                          BOOLEAN_KW@36..43 "Boolean"
+                      WHITESPACE@43..44 " "
+                      R_BRACE@44..45 "}"
+                    SEMICOLON@45..46 ";"
             "#]],
         );
     }

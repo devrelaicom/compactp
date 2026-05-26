@@ -136,6 +136,7 @@ pub enum SyntaxKind {
     OPAQUE_TYPE,
     VECTOR_TYPE,
     TUPLE_TYPE,
+    RECORD_TYPE,
     GENERIC_ARG_LIST,
     GENERIC_ARG,
     GENERIC_PARAM_LIST,

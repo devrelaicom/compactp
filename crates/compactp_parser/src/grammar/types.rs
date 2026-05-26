@@ -34,6 +34,7 @@ pub(crate) fn ty(p: &mut Parser) {
         OPAQUE_KW => opaque_type(p),
         VECTOR_KW => vector_type(p),
         L_BRACKET => tuple_type(p),
+        L_BRACE => record_type(p),
         IDENT => type_ref(p),
         _ => {
             p.error("expected type");
@@ -93,6 +94,27 @@ fn tuple_type(p: &mut Parser) {
     comma_sep(p, R_BRACKET, ty);
     p.expect(R_BRACKET);
     m.complete(p, TUPLE_TYPE);
+}
+
+/// `{ id : type (;|,) ... }` — record (object-like) type, used on the RHS of
+/// `type Name = { ... }` declarations for ledger schemas.
+fn record_type(p: &mut Parser) {
+    let m = p.start();
+    p.bump(L_BRACE);
+    while !p.at(R_BRACE) && !p.at_end() {
+        if p.errors_exhausted() {
+            break;
+        }
+        super::patterns::arg(p); // `id : type` → STRUCT_FIELD
+        if !p.eat(SEMICOLON) && !p.eat(COMMA) {
+            if !p.at(R_BRACE) {
+                p.error("expected `;`, `,`, or `}`");
+                break;
+            }
+        }
+    }
+    p.expect(R_BRACE);
+    m.complete(p, RECORD_TYPE);
 }
 
 /// `id gargs?` — a type reference (named type with optional generic args).
