@@ -44,9 +44,6 @@ bugs/pm-17347/example_two.compact                           # upstream-bug-repro
 bugs/pm-20231/example_five.compact                          # upstream-bug-repro: pm-20231
 bugs/pm-20291/examples.compact                              # upstream-bug-repro: pm-20291
 commas/more_commas.compact                                  # grammar-gap: trailing comma after circuit declaration
-composable/cases/contract-in-circuit/main.compact           # grammar-gap: composable contracts (export circuit without return type)
-composable/cases/contract-in-constructor/main.compact       # grammar-gap: composable contracts (nested contract in constructor)
-composable/cases/export-in-definition/main.compact          # grammar-gap: composable contracts (contract A { ... } nested form)
 errors/noimport.compact                                     # grammar-gap: `fold` expression form
 proposal.compact                                            # grammar-gap: type alias form `type Ledger = { ... }`
 reserved/example_10.compact                                 # intentional-strictness: reserved word `delete` used as identifier

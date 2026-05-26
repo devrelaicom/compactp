@@ -190,9 +190,11 @@ fn circuit_def(p: &mut Parser, has_export: bool, has_pure: bool) {
     comma_sep(p, R_PAREN, super::patterns::param);
     p.expect(R_PAREN);
 
-    // Return type
-    p.expect(COLON);
-    super::types::ty(p);
+    // Return type — optional in the composable-contracts forward-looking
+    // syntax (e.g., `export circuit foo() { ... }` with no `:` clause).
+    if p.eat(COLON) {
+        super::types::ty(p);
+    }
 
     // Body
     super::statements::block(p);
@@ -221,9 +223,11 @@ fn circuit_shared(p: &mut Parser, has_export: bool) {
     comma_sep(p, R_PAREN, super::patterns::param);
     p.expect(R_PAREN);
 
-    // Return type
-    p.expect(COLON);
-    super::types::ty(p);
+    // Return type — optional for the composable-contracts forward-looking
+    // syntax (a definition body may follow directly with no `: type`).
+    if p.eat(COLON) {
+        super::types::ty(p);
+    }
 
     // Now decide: body or semicolon?
     if p.at(L_BRACE) {
@@ -259,7 +263,14 @@ fn witness(p: &mut Parser, has_export: bool) {
     m.complete(p, WITNESS_DECL);
 }
 
-/// `export? contract name { circuit-decl... } ;?`
+/// `export? contract name { member... } ;?`
+///
+/// Members are typically `pure? circuit ... ;` (`CONTRACT_CIRCUIT`),
+/// but the composable-contracts forward-looking syntax also permits
+/// other declaration forms inside the body (e.g. `export ledger a : T ;`).
+/// We dispatch by the current token: contract-circuit forms go through
+/// `contract_circuit` (preserving the existing CST shape); anything else
+/// falls back to the general `declaration` dispatcher.
 fn contract(p: &mut Parser, has_export: bool) {
     let m = p.start();
     if has_export {
@@ -273,7 +284,11 @@ fn contract(p: &mut Parser, has_export: bool) {
         if p.errors_exhausted() {
             break;
         }
-        contract_circuit(p);
+        match p.current() {
+            CIRCUIT_KW => contract_circuit(p),
+            PURE_KW if p.nth(1) == CIRCUIT_KW => contract_circuit(p),
+            _ => declaration(p),
+        }
     }
 
     p.expect(R_BRACE);
@@ -1119,6 +1134,144 @@ mod tests {
                       WHITESPACE@30..31 " "
                       FIELD_KW@31..36 "Field"
                     SEMICOLON@36..37 ";"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn decl_export_circuit_without_return_type() {
+        // Composable-contracts forward-looking syntax: an exported
+        // circuit definition with no `: type` clause and a nested
+        // `contract` in statement position. Mirrors
+        // tests/corpus/composable/cases/contract-in-circuit/main.compact.
+        check(
+            "export circuit alejandro() { contract AB { circuit up(x: Field): []; } }",
+            expect![[r#"
+                SOURCE_FILE@0..72
+                  CIRCUIT_DEF@0..72
+                    EXPORT_KW@0..6 "export"
+                    WHITESPACE@6..7 " "
+                    CIRCUIT_KW@7..14 "circuit"
+                    WHITESPACE@14..15 " "
+                    IDENT@15..24 "alejandro"
+                    L_PAREN@24..25 "("
+                    R_PAREN@25..26 ")"
+                    BLOCK@26..72
+                      WHITESPACE@26..27 " "
+                      L_BRACE@27..28 "{"
+                      CONTRACT_DECL@28..70
+                        WHITESPACE@28..29 " "
+                        CONTRACT_KW@29..37 "contract"
+                        WHITESPACE@37..38 " "
+                        IDENT@38..40 "AB"
+                        WHITESPACE@40..41 " "
+                        L_BRACE@41..42 "{"
+                        CONTRACT_CIRCUIT@42..68
+                          WHITESPACE@42..43 " "
+                          CIRCUIT_KW@43..50 "circuit"
+                          WHITESPACE@50..51 " "
+                          IDENT@51..53 "up"
+                          L_PAREN@53..54 "("
+                          STRUCT_FIELD@54..62
+                            IDENT@54..55 "x"
+                            COLON@55..56 ":"
+                            FIELD_TYPE@56..62
+                              WHITESPACE@56..57 " "
+                              FIELD_KW@57..62 "Field"
+                          R_PAREN@62..63 ")"
+                          COLON@63..64 ":"
+                          TUPLE_TYPE@64..67
+                            WHITESPACE@64..65 " "
+                            L_BRACKET@65..66 "["
+                            R_BRACKET@66..67 "]"
+                          SEMICOLON@67..68 ";"
+                        WHITESPACE@68..69 " "
+                        R_BRACE@69..70 "}"
+                      WHITESPACE@70..71 " "
+                      R_BRACE@71..72 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn decl_contract_in_constructor() {
+        // Composable-contracts forward-looking syntax: a constructor
+        // body contains a nested `contract` declaration. Mirrors
+        // tests/corpus/composable/cases/contract-in-constructor/main.compact.
+        check(
+            "constructor() { contract AB { circuit up(x: Field): []; } }",
+            expect![[r#"
+                SOURCE_FILE@0..59
+                  CONSTRUCTOR_DEF@0..59
+                    CONSTRUCTOR_KW@0..11 "constructor"
+                    L_PAREN@11..12 "("
+                    R_PAREN@12..13 ")"
+                    BLOCK@13..59
+                      WHITESPACE@13..14 " "
+                      L_BRACE@14..15 "{"
+                      CONTRACT_DECL@15..57
+                        WHITESPACE@15..16 " "
+                        CONTRACT_KW@16..24 "contract"
+                        WHITESPACE@24..25 " "
+                        IDENT@25..27 "AB"
+                        WHITESPACE@27..28 " "
+                        L_BRACE@28..29 "{"
+                        CONTRACT_CIRCUIT@29..55
+                          WHITESPACE@29..30 " "
+                          CIRCUIT_KW@30..37 "circuit"
+                          WHITESPACE@37..38 " "
+                          IDENT@38..40 "up"
+                          L_PAREN@40..41 "("
+                          STRUCT_FIELD@41..49
+                            IDENT@41..42 "x"
+                            COLON@42..43 ":"
+                            FIELD_TYPE@43..49
+                              WHITESPACE@43..44 " "
+                              FIELD_KW@44..49 "Field"
+                          R_PAREN@49..50 ")"
+                          COLON@50..51 ":"
+                          TUPLE_TYPE@51..54
+                            WHITESPACE@51..52 " "
+                            L_BRACKET@52..53 "["
+                            R_BRACKET@53..54 "]"
+                          SEMICOLON@54..55 ";"
+                        WHITESPACE@55..56 " "
+                        R_BRACE@56..57 "}"
+                      WHITESPACE@57..58 " "
+                      R_BRACE@58..59 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn decl_contract_with_export_ledger() {
+        // Composable-contracts forward-looking syntax: a contract body
+        // may contain `export ledger`. Mirrors
+        // tests/corpus/composable/cases/export-in-definition/main.compact.
+        check(
+            "contract A { export ledger a: A; }",
+            expect![[r#"
+                SOURCE_FILE@0..34
+                  CONTRACT_DECL@0..34
+                    CONTRACT_KW@0..8 "contract"
+                    WHITESPACE@8..9 " "
+                    IDENT@9..10 "A"
+                    WHITESPACE@10..11 " "
+                    L_BRACE@11..12 "{"
+                    LEDGER_DECL@12..32
+                      WHITESPACE@12..13 " "
+                      EXPORT_KW@13..19 "export"
+                      WHITESPACE@19..20 " "
+                      LEDGER_KW@20..26 "ledger"
+                      WHITESPACE@26..27 " "
+                      IDENT@27..28 "a"
+                      COLON@28..29 ":"
+                      TYPE_REF@29..31
+                        WHITESPACE@29..30 " "
+                        IDENT@30..31 "A"
+                      SEMICOLON@31..32 ";"
+                    WHITESPACE@32..33 " "
+                    R_BRACE@33..34 "}"
             "#]],
         );
     }

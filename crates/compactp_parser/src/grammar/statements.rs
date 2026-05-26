@@ -24,6 +24,12 @@ pub(crate) fn stmt(p: &mut Parser) {
         IF_KW => if_stmt(p),
         FOR_KW => for_stmt(p),
         CONST_KW => const_stmt(p),
+        // Composable-contracts forward-looking syntax: a nested
+        // `contract Name { ... }` may appear inside a circuit or
+        // constructor body. Dispatch to the top-level declaration
+        // parser, which produces a `CONTRACT_DECL` node directly
+        // beneath the enclosing BLOCK.
+        CONTRACT_KW => super::declarations::declaration(p),
         _ => expr_or_assign_stmt(p),
     }
 }
