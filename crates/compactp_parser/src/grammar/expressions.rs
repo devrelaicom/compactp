@@ -26,6 +26,25 @@ pub(crate) fn expr(p: &mut Parser) {
     expr_bp(p, 0);
 }
 
+/// Parse a single call-expression argument.
+///
+/// Accepts the ordinary positional form `expr` and the named form
+/// `IDENT = expr`. The named form is selected only when the current token
+/// is an identifier and the immediately following token is `=` — this is
+/// unambiguous inside an argument list because plain assignment is a
+/// statement, not an expression, in Compact.
+fn call_arg(p: &mut Parser) {
+    if p.at(IDENT) && p.nth(1) == EQ {
+        let m = p.start();
+        p.bump(IDENT);
+        p.bump(EQ);
+        expr(p);
+        m.complete(p, NAMED_ARG);
+    } else {
+        expr(p);
+    }
+}
+
 /// Parse an expression sequence: `expr` or `expr, ..., expr, expr`.
 ///
 /// An expr_seq is the comma-separated form used in parenthesized contexts
@@ -112,9 +131,7 @@ fn expr_bp(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
             // Method call: `.id(args)`
             if p.at(L_PAREN) {
                 p.bump(L_PAREN);
-                comma_sep(p, R_PAREN, |p| {
-                    expr(p);
-                });
+                comma_sep(p, R_PAREN, call_arg);
                 p.expect(R_PAREN);
                 lhs = m.complete(p, CALL_EXPR);
             } else {
@@ -132,7 +149,7 @@ fn expr_bp(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
             }
             let m = lhs.precede(p);
             p.bump(L_PAREN);
-            comma_sep(p, R_PAREN, expr);
+            comma_sep(p, R_PAREN, call_arg);
             p.expect(R_PAREN);
             lhs = m.complete(p, CALL_EXPR);
             continue;
@@ -405,7 +422,7 @@ fn ident_expr(p: &mut Parser) -> Option<CompletedMarker> {
             if p.at(L_PAREN) {
                 // Generic function call: `id<args>(exprs)`
                 p.bump(L_PAREN);
-                comma_sep(p, R_PAREN, expr);
+                comma_sep(p, R_PAREN, call_arg);
                 p.expect(R_PAREN);
                 return Some(m.complete(p, CALL_EXPR));
             }
@@ -423,7 +440,7 @@ fn ident_expr(p: &mut Parser) -> Option<CompletedMarker> {
     // Function call: `id(args)`
     if p.at(L_PAREN) {
         p.bump(L_PAREN);
-        comma_sep(p, R_PAREN, expr);
+        comma_sep(p, R_PAREN, call_arg);
         p.expect(R_PAREN);
         return Some(m.complete(p, CALL_EXPR));
     }
@@ -886,6 +903,66 @@ mod tests {
                         SEMICOLON@38..39 ";"
                       WHITESPACE@39..40 " "
                       R_BRACE@40..41 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn expr_call_named_arg() {
+        check(
+            "circuit f() : Field { obj.insert(1, field = 42); return 1 as Field; }",
+            expect![[r#"
+                SOURCE_FILE@0..69
+                  CIRCUIT_DEF@0..69
+                    CIRCUIT_KW@0..7 "circuit"
+                    WHITESPACE@7..8 " "
+                    IDENT@8..9 "f"
+                    L_PAREN@9..10 "("
+                    R_PAREN@10..11 ")"
+                    WHITESPACE@11..12 " "
+                    COLON@12..13 ":"
+                    FIELD_TYPE@13..19
+                      WHITESPACE@13..14 " "
+                      FIELD_KW@14..19 "Field"
+                    BLOCK@19..69
+                      WHITESPACE@19..20 " "
+                      L_BRACE@20..21 "{"
+                      EXPR_STMT@21..48
+                        CALL_EXPR@21..47
+                          NAME_EXPR@21..25
+                            WHITESPACE@21..22 " "
+                            IDENT@22..25 "obj"
+                          DOT@25..26 "."
+                          IDENT@26..32 "insert"
+                          L_PAREN@32..33 "("
+                          LITERAL_EXPR@33..34
+                            INT_LIT@33..34 "1"
+                          COMMA@34..35 ","
+                          NAMED_ARG@35..46
+                            WHITESPACE@35..36 " "
+                            IDENT@36..41 "field"
+                            WHITESPACE@41..42 " "
+                            EQ@42..43 "="
+                            LITERAL_EXPR@43..46
+                              WHITESPACE@43..44 " "
+                              INT_LIT@44..46 "42"
+                          R_PAREN@46..47 ")"
+                        SEMICOLON@47..48 ";"
+                      RETURN_STMT@48..67
+                        WHITESPACE@48..49 " "
+                        RETURN_KW@49..55 "return"
+                        CAST_EXPR@55..66
+                          LITERAL_EXPR@55..57
+                            WHITESPACE@55..56 " "
+                            INT_LIT@56..57 "1"
+                          WHITESPACE@57..58 " "
+                          AS_KW@58..60 "as"
+                          FIELD_TYPE@60..66
+                            WHITESPACE@60..61 " "
+                            FIELD_KW@61..66 "Field"
+                        SEMICOLON@66..67 ";"
+                      WHITESPACE@67..68 " "
+                      R_BRACE@68..69 "}"
             "#]],
         );
     }

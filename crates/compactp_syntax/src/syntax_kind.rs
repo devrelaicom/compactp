@@ -194,6 +194,7 @@ pub enum SyntaxKind {
     PARAM,
     RANGE_EXPR,
     PREFIX_DECL,
+    NAMED_ARG,
 
     // === Node kinds: Version expressions ===
     VERSION_EXPR,
