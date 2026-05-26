@@ -20,6 +20,21 @@ workflows.
 - Library APIs for embedding Compact parsing in Rust tooling
 - Watch mode re-runs any command on `.compact` file changes
 
+## Compact compatibility
+
+| compactp version | Compact language | Tested compiler | JSON schema | MSRV |
+| ---------------- | ---------------- | --------------- | ----------- | ---- |
+| `0.1.0-pre`      | `0.23.101`       | `0.31.0`        | `1`         | not pinned (Rust edition `2024`) |
+
+The exact upstream commit hashes the parser is validated against are
+recorded in `SOURCE_VERSIONS.md`. Known deviations from upstream
+acceptance are enumerated in `tests/corpus_known_failures.txt` (each
+entry annotated with category + reason) and explained in `LS.md`.
+
+> **Note:** This table reflects the *current development target*.
+> Until `0.1.0-beta.1` is tagged, the compatibility contract is
+> provisional and may shift between commits.
+
 ## Installation
 
 From this workspace:
