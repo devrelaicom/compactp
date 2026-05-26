@@ -137,7 +137,11 @@ fn load_manifest(path: &Path) -> BTreeSet<String> {
     text.lines()
         .map(str::trim)
         .filter(|line| !line.is_empty() && !line.starts_with('#'))
-        .map(ToOwned::to_owned)
+        // Strip inline category annotations (everything from the first `#`).
+        // See `tests/corpus_known_failures.txt` for the annotation schema
+        // introduced in WS1 Phase 1 Task 8.
+        .map(|line| line.split('#').next().unwrap_or(line).trim().to_owned())
+        .filter(|s| !s.is_empty())
         .collect()
 }
 

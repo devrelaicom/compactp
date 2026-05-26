@@ -13,74 +13,88 @@
 # tracked here. Paths are corpus-relative with forward-slash separators.
 #
 # Lines starting with `#` and blank lines are ignored.
-assert/example_one.compact
-bugs/issue-139/a.compact
-bugs/pm-16040.compact
-bugs/pm-16059.compact
-bugs/pm-16075.compact
-bugs/pm-16183/multiple_circuit_returns.compact
-bugs/pm-16349/example_one.compact
-bugs/pm-16440.compact
-bugs/pm-16447.compact
-bugs/pm-17347/example_eight.compact
-bugs/pm-17347/example_four.compact
-bugs/pm-17347/example_one.compact
-bugs/pm-17347/example_seven.compact
-bugs/pm-17347/example_six.compact
-bugs/pm-17347/example_three.compact
-bugs/pm-17347/example_two.compact
-bugs/pm-19287.compact
-bugs/pm-19907/examples.compact
-bugs/pm-20231/example_five.compact
-bugs/pm-20239/example_16.compact
-bugs/pm-20239/example_20.compact
-bugs/pm-20291/examples.compact
-bugs/pm-20295/example_eight.compact
-bugs/pm-20295/example_five.compact
-bugs/pm-20295/example_four.compact
-bugs/pm-20295/example_nine.compact
-bugs/pm-20295/example_seven.compact
-bugs/pm-20295/example_two.compact
-bugs/pm-20487/examples.compact
-bytes/test_basic_bytes.compact
-casts/advanced_casts.compact
-commas/more_commas.compact
-composable/cases/contract-in-circuit/main.compact
-composable/cases/contract-in-constructor/main.compact
-composable/cases/export-in-definition/main.compact
-errors/noimport.compact
-modules/selective_examples.compact
-multiconst/multiconst.compact
-proposal.compact
-reserved/example_10.compact
-reserved/example_12.compact
-reserved/example_13.compact
-reserved/example_14.compact
-reserved/example_16.compact
-reserved/example_18.compact
-reserved/example_20.compact
-reserved/example_21.compact
-reserved/example_24.compact
-reserved/example_26.compact
-reserved/example_31.compact
-reserved/example_32.compact
-reserved/example_36.compact
-reserved/example_42.compact
-reserved/example_43.compact
-reserved/example_44.compact
-reserved/example_45.compact
-reserved/example_46.compact
-reserved/example_47.compact
-reserved/example_48.compact
-reserved/example_6.compact
-reserved/example_9.compact
-return/examples.compact
-std_lib/mint.compact
-types/examples.compact
-vectors/slice_part_one.compact
-vectors/spread_part_one.compact
-wpp/constructor_test.compact
-wpp/export_circuit.compact
-wpp/module_wpp.compact
-wpp/pm_16723.compact
-wpp/pm_16774.compact
+#
+# CATEGORIZATION SCHEMA (WS1 Phase 1 Task 8)
+#
+# Each entry below is annotated as:
+#   path/to/file.compact    # CATEGORY[: optional note]
+#
+# Categories:
+#   grammar-gap            -- parser missing a real production; WS1 Phase 2 work
+#   upstream-bug-repro     -- reduced compiler bug; not user code
+#   intentional-strictness -- deliberate parser rejection; see LS.md
+#
+# An uncategorized entry is treated as `unclassified` and MUST be
+# resolved before WS1 Phase 1 is complete.
+#
+assert/example_one.compact                                  # grammar-gap: IIFE arrow-function pattern (() => {...})()
+bugs/issue-139/a.compact                                    # upstream-bug-repro: issue-139
+bugs/pm-16040.compact                                       # upstream-bug-repro: pm-16040
+bugs/pm-16059.compact                                       # upstream-bug-repro: pm-16059
+bugs/pm-16075.compact                                       # upstream-bug-repro: pm-16075
+bugs/pm-16183/multiple_circuit_returns.compact              # upstream-bug-repro: pm-16183
+bugs/pm-16349/example_one.compact                           # upstream-bug-repro: pm-16349
+bugs/pm-16440.compact                                       # upstream-bug-repro: pm-16440
+bugs/pm-16447.compact                                       # upstream-bug-repro: pm-16447
+bugs/pm-17347/example_eight.compact                         # upstream-bug-repro: pm-17347
+bugs/pm-17347/example_four.compact                          # upstream-bug-repro: pm-17347
+bugs/pm-17347/example_one.compact                           # upstream-bug-repro: pm-17347
+bugs/pm-17347/example_seven.compact                         # upstream-bug-repro: pm-17347
+bugs/pm-17347/example_six.compact                           # upstream-bug-repro: pm-17347
+bugs/pm-17347/example_three.compact                         # upstream-bug-repro: pm-17347
+bugs/pm-17347/example_two.compact                           # upstream-bug-repro: pm-17347
+bugs/pm-19287.compact                                       # upstream-bug-repro: pm-19287
+bugs/pm-19907/examples.compact                              # upstream-bug-repro: pm-19907
+bugs/pm-20231/example_five.compact                          # upstream-bug-repro: pm-20231
+bugs/pm-20239/example_16.compact                            # upstream-bug-repro: pm-20239
+bugs/pm-20239/example_20.compact                            # upstream-bug-repro: pm-20239
+bugs/pm-20291/examples.compact                              # upstream-bug-repro: pm-20291
+bugs/pm-20295/example_eight.compact                         # upstream-bug-repro: pm-20295
+bugs/pm-20295/example_five.compact                          # upstream-bug-repro: pm-20295
+bugs/pm-20295/example_four.compact                          # upstream-bug-repro: pm-20295
+bugs/pm-20295/example_nine.compact                          # upstream-bug-repro: pm-20295
+bugs/pm-20295/example_seven.compact                         # upstream-bug-repro: pm-20295
+bugs/pm-20295/example_two.compact                           # upstream-bug-repro: pm-20295
+bugs/pm-20487/examples.compact                              # upstream-bug-repro: pm-20487
+bytes/test_basic_bytes.compact                              # grammar-gap: spread (...) in array/Bytes literal
+casts/advanced_casts.compact                                # grammar-gap: spread (...) in array literal
+commas/more_commas.compact                                  # grammar-gap: trailing comma after circuit declaration
+composable/cases/contract-in-circuit/main.compact           # grammar-gap: composable contracts (export circuit without return type)
+composable/cases/contract-in-constructor/main.compact       # grammar-gap: composable contracts (nested contract in constructor)
+composable/cases/export-in-definition/main.compact          # grammar-gap: composable contracts (contract A { ... } nested form)
+errors/noimport.compact                                     # grammar-gap: `fold` expression form
+modules/selective_examples.compact                          # grammar-gap: spread (...) in array literal with `as` cast
+multiconst/multiconst.compact                               # grammar-gap: IIFE arrow-function pattern (() => {...})()
+proposal.compact                                            # grammar-gap: type alias form `type Ledger = { ... }`
+reserved/example_10.compact                                 # intentional-strictness: reserved word `delete` used as identifier
+reserved/example_12.compact                                 # intentional-strictness: reserved word used as identifier
+reserved/example_13.compact                                 # intentional-strictness: reserved word used as identifier
+reserved/example_14.compact                                 # intentional-strictness: reserved word used as identifier
+reserved/example_16.compact                                 # intentional-strictness: reserved word used as identifier
+reserved/example_18.compact                                 # intentional-strictness: reserved word used as identifier
+reserved/example_20.compact                                 # intentional-strictness: reserved word `if` used as identifier
+reserved/example_21.compact                                 # intentional-strictness: reserved word `import` used as struct name
+reserved/example_24.compact                                 # intentional-strictness: reserved word used as identifier
+reserved/example_26.compact                                 # intentional-strictness: reserved word used as identifier
+reserved/example_31.compact                                 # intentional-strictness: reserved word used as identifier
+reserved/example_32.compact                                 # intentional-strictness: reserved word used as identifier
+reserved/example_36.compact                                 # intentional-strictness: reserved word `new`/`while` at top level
+reserved/example_42.compact                                 # intentional-strictness: reserved word used as identifier
+reserved/example_43.compact                                 # intentional-strictness: reserved word used as identifier
+reserved/example_44.compact                                 # intentional-strictness: reserved word used as identifier
+reserved/example_45.compact                                 # intentional-strictness: reserved word `let` used as statement keyword (Compact has no `let`)
+reserved/example_46.compact                                 # intentional-strictness: reserved word used as identifier
+reserved/example_47.compact                                 # intentional-strictness: reserved word `as` used as alias target
+reserved/example_48.compact                                 # intentional-strictness: reserved word `of` used as expression
+reserved/example_6.compact                                  # intentional-strictness: reserved word `const` used as identifier
+reserved/example_9.compact                                  # intentional-strictness: reserved word `default` used as type-size identifier
+return/examples.compact                                     # grammar-gap: IIFE arrow-function pattern (() => {...})()
+std_lib/mint.compact                                        # grammar-gap: two-word type `Unsigned Integer[64]`
+types/examples.compact                                      # grammar-gap: spread (...) in array literal inside struct init
+vectors/slice_part_one.compact                              # grammar-gap: vector indexing `vector[index - 1]` expression form
+vectors/spread_part_one.compact                             # grammar-gap: spread (...) in array literal
+wpp/constructor_test.compact                                # grammar-gap: IIFE arrow-function pattern (() => {...})()
+wpp/export_circuit.compact                                  # grammar-gap: IIFE arrow-function pattern (() => {...})()
+wpp/module_wpp.compact                                      # grammar-gap: IIFE arrow-function pattern (() => {...})()
+wpp/pm_16723.compact                                        # grammar-gap: IIFE arrow-function pattern (() => {...})() (tracked-as pm-16723)
+wpp/pm_16774.compact                                        # grammar-gap: assignment-as-argument `august.insert(1, field = ...)` (tracked-as pm-16774)
