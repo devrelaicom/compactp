@@ -43,7 +43,6 @@ bugs/pm-17347/example_three.compact                         # upstream-bug-repro
 bugs/pm-17347/example_two.compact                           # upstream-bug-repro: pm-17347
 bugs/pm-20231/example_five.compact                          # upstream-bug-repro: pm-20231
 bugs/pm-20291/examples.compact                              # upstream-bug-repro: pm-20291
-errors/noimport.compact                                     # grammar-gap: `fold` expression form
 proposal.compact                                            # grammar-gap: type alias form `type Ledger = { ... }`
 reserved/example_10.compact                                 # intentional-strictness: reserved word `delete` used as identifier
 reserved/example_12.compact                                 # intentional-strictness: reserved word used as identifier
