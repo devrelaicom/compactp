@@ -145,22 +145,8 @@ fn expr_bp(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
             }
             let m = lhs.precede(p);
             p.bump(L_BRACKET);
-            // Index only accepts nat literals or identifiers (for generic params)
-            match p.current() {
-                INT_LIT | HEX_LIT | OCT_LIT | BIN_LIT => {
-                    let im = p.start();
-                    p.bump_any();
-                    im.complete(p, LITERAL_EXPR);
-                }
-                IDENT => {
-                    let im = p.start();
-                    p.bump(IDENT);
-                    im.complete(p, NAME_EXPR);
-                }
-                _ => {
-                    p.error("expected numeric literal or identifier for index");
-                }
-            }
+            // Index accepts any expression (literals, idents, arithmetic, etc.)
+            expr(p);
             p.expect(R_BRACKET);
             lhs = m.complete(p, INDEX_EXPR);
             continue;
@@ -938,6 +924,50 @@ mod tests {
                         SEMICOLON@33..34 ";"
                       WHITESPACE@34..35 " "
                       R_BRACE@35..36 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn expr_vector_index_with_expr() {
+        check(
+            "circuit f() : Field { return v[i - 1]; }",
+            expect![[r#"
+                SOURCE_FILE@0..40
+                  CIRCUIT_DEF@0..40
+                    CIRCUIT_KW@0..7 "circuit"
+                    WHITESPACE@7..8 " "
+                    IDENT@8..9 "f"
+                    L_PAREN@9..10 "("
+                    R_PAREN@10..11 ")"
+                    WHITESPACE@11..12 " "
+                    COLON@12..13 ":"
+                    FIELD_TYPE@13..19
+                      WHITESPACE@13..14 " "
+                      FIELD_KW@14..19 "Field"
+                    BLOCK@19..40
+                      WHITESPACE@19..20 " "
+                      L_BRACE@20..21 "{"
+                      RETURN_STMT@21..38
+                        WHITESPACE@21..22 " "
+                        RETURN_KW@22..28 "return"
+                        INDEX_EXPR@28..37
+                          NAME_EXPR@28..30
+                            WHITESPACE@28..29 " "
+                            IDENT@29..30 "v"
+                          L_BRACKET@30..31 "["
+                          BINARY_EXPR@31..36
+                            NAME_EXPR@31..32
+                              IDENT@31..32 "i"
+                            WHITESPACE@32..33 " "
+                            MINUS@33..34 "-"
+                            LITERAL_EXPR@34..36
+                              WHITESPACE@34..35 " "
+                              INT_LIT@35..36 "1"
+                          R_BRACKET@36..37 "]"
+                        SEMICOLON@37..38 ";"
+                      WHITESPACE@38..39 " "
+                      R_BRACE@39..40 "}"
             "#]],
         );
     }

@@ -42,7 +42,6 @@ bugs/pm-17347/example_six.compact                           # upstream-bug-repro
 bugs/pm-17347/example_three.compact                         # upstream-bug-repro: pm-17347
 bugs/pm-17347/example_two.compact                           # upstream-bug-repro: pm-17347
 bugs/pm-20231/example_five.compact                          # upstream-bug-repro: pm-20231
-bugs/pm-20291/examples.compact                              # upstream-bug-repro: pm-20291
 proposal.compact                                            # grammar-gap: `ledger` keyword used as expression prefix (e.g., `ledger.field.write(...)`)
 reserved/example_10.compact                                 # intentional-strictness: reserved word `delete` used as identifier
 reserved/example_12.compact                                 # intentional-strictness: reserved word used as identifier
@@ -66,6 +65,4 @@ reserved/example_47.compact                                 # intentional-strict
 reserved/example_48.compact                                 # intentional-strictness: reserved word `of` used as expression
 reserved/example_6.compact                                  # intentional-strictness: reserved word `const` used as identifier
 reserved/example_9.compact                                  # intentional-strictness: reserved word `default` used as type-size identifier
-vectors/slice_part_one.compact                              # grammar-gap: vector indexing `vector[index - 1]` expression form
-vectors/spread_part_one.compact                             # grammar-gap: index expression with arithmetic, e.g. `b[d + 1]`
 wpp/pm_16774.compact                                        # grammar-gap: assignment-as-argument `august.insert(1, field = ...)` (tracked-as pm-16774)
