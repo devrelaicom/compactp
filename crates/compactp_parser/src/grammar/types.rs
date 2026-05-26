@@ -30,6 +30,7 @@ pub(crate) fn ty(p: &mut Parser) {
             m.complete(p, FIELD_TYPE);
         }
         UINT_KW => uint_type(p),
+        UNSIGNED_KW => unsigned_integer_type(p),
         BYTES_KW => bytes_type(p),
         OPAQUE_KW => opaque_type(p),
         VECTOR_KW => vector_type(p),
@@ -53,6 +54,17 @@ fn uint_type(p: &mut Parser) {
     }
     p.expect(GT);
     m.complete(p, UINT_TYPE);
+}
+
+/// `Unsigned Integer [ tsize ]` — two-word legacy form of `Uint<N>`.
+fn unsigned_integer_type(p: &mut Parser) {
+    let m = p.start();
+    p.bump(UNSIGNED_KW);
+    p.expect(INTEGER_KW);
+    p.expect(L_BRACKET);
+    type_size(p);
+    p.expect(R_BRACKET);
+    m.complete(p, UNSIGNED_INTEGER_TYPE);
 }
 
 /// `Bytes < tsize >`
@@ -470,6 +482,58 @@ mod tests {
                       L_BRACE@32..33 "{"
                       WHITESPACE@33..34 " "
                       R_BRACE@34..35 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn type_unsigned_integer() {
+        check(
+            "circuit f(x: Unsigned Integer[64]) : Field { return 1 as Field; }",
+            expect![[r#"
+                SOURCE_FILE@0..65
+                  CIRCUIT_DEF@0..65
+                    CIRCUIT_KW@0..7 "circuit"
+                    WHITESPACE@7..8 " "
+                    IDENT@8..9 "f"
+                    L_PAREN@9..10 "("
+                    PARAM@10..33
+                      IDENT_PAT@10..11
+                        IDENT@10..11 "x"
+                      COLON@11..12 ":"
+                      UNSIGNED_INTEGER_TYPE@12..33
+                        WHITESPACE@12..13 " "
+                        UNSIGNED_KW@13..21 "Unsigned"
+                        WHITESPACE@21..22 " "
+                        INTEGER_KW@22..29 "Integer"
+                        L_BRACKET@29..30 "["
+                        TYPE_SIZE@30..32
+                          INT_LIT@30..32 "64"
+                        R_BRACKET@32..33 "]"
+                    R_PAREN@33..34 ")"
+                    WHITESPACE@34..35 " "
+                    COLON@35..36 ":"
+                    FIELD_TYPE@36..42
+                      WHITESPACE@36..37 " "
+                      FIELD_KW@37..42 "Field"
+                    BLOCK@42..65
+                      WHITESPACE@42..43 " "
+                      L_BRACE@43..44 "{"
+                      RETURN_STMT@44..63
+                        WHITESPACE@44..45 " "
+                        RETURN_KW@45..51 "return"
+                        CAST_EXPR@51..62
+                          LITERAL_EXPR@51..53
+                            WHITESPACE@51..52 " "
+                            INT_LIT@52..53 "1"
+                          WHITESPACE@53..54 " "
+                          AS_KW@54..56 "as"
+                          FIELD_TYPE@56..62
+                            WHITESPACE@56..57 " "
+                            FIELD_KW@57..62 "Field"
+                        SEMICOLON@62..63 ";"
+                      WHITESPACE@63..64 " "
+                      R_BRACE@64..65 "}"
             "#]],
         );
     }

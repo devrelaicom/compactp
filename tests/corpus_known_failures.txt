@@ -66,7 +66,6 @@ reserved/example_47.compact                                 # intentional-strict
 reserved/example_48.compact                                 # intentional-strictness: reserved word `of` used as expression
 reserved/example_6.compact                                  # intentional-strictness: reserved word `const` used as identifier
 reserved/example_9.compact                                  # intentional-strictness: reserved word `default` used as type-size identifier
-std_lib/mint.compact                                        # grammar-gap: two-word type `Unsigned Integer[64]`
 vectors/slice_part_one.compact                              # grammar-gap: vector indexing `vector[index - 1]` expression form
 vectors/spread_part_one.compact                             # grammar-gap: index expression with arithmetic, e.g. `b[d + 1]`
 wpp/pm_16774.compact                                        # grammar-gap: assignment-as-argument `august.insert(1, field = ...)` (tracked-as pm-16774)

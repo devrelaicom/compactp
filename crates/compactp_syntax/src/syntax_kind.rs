@@ -64,6 +64,8 @@ pub enum SyntaxKind {
     BYTES_KW,
     OPAQUE_KW,
     VECTOR_KW,
+    UNSIGNED_KW,
+    INTEGER_KW,
 
     // === Operators ===
     EQ,
@@ -132,6 +134,7 @@ pub enum SyntaxKind {
     BOOLEAN_TYPE,
     FIELD_TYPE,
     UINT_TYPE,
+    UNSIGNED_INTEGER_TYPE,
     BYTES_TYPE,
     OPAQUE_TYPE,
     VECTOR_TYPE,
@@ -253,6 +256,8 @@ impl SyntaxKind {
                 | Self::BYTES_KW
                 | Self::OPAQUE_KW
                 | Self::VECTOR_KW
+                | Self::UNSIGNED_KW
+                | Self::INTEGER_KW
         )
     }
 }

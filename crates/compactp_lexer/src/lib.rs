@@ -460,6 +460,8 @@ fn keyword_or_ident(text: &str) -> SyntaxKind {
         "Bytes" => SyntaxKind::BYTES_KW,
         "Opaque" => SyntaxKind::OPAQUE_KW,
         "Vector" => SyntaxKind::VECTOR_KW,
+        "Unsigned" => SyntaxKind::UNSIGNED_KW,
+        "Integer" => SyntaxKind::INTEGER_KW,
         _ => SyntaxKind::IDENT,
     }
 }
