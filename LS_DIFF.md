@@ -20,68 +20,45 @@ baseline is captured by:
   as: 21 grammar-gap, 28 upstream-bug-repro, 22 intentional-strictness.
 - `LS.md` §18 — three intentional-strictness deviations documented.
 
-### Grammar-gap themes at baseline
+### Grammar-gap themes — WS1 Phase 2 outcome
 
-The 21 grammar-gap entries cluster into a small number of language
-features the parser does not yet accept. WS1 Phase 2 will close these.
-Counts sum to 21. Cross-references below use corpus-relative paths
-(rooted at `tests/corpus/`); the same paths and annotations appear in
-`tests/corpus_known_failures.txt`.
+WS1 Phase 2 closed 18 of the 21 grammar-gap entries identified at
+baseline, plus 14 `bugs/pm-*` entries that turned out to share root
+causes with the planned features. The manifest dropped from 71 → 39.
 
-#### IIFE arrow-function pattern `(() => {...})()` — 7 entries
+Closed themes (with bonus closure counts in parentheses):
 
-An immediately-invoked arrow function used as an expression to compute
-a constant or to run setup logic at definition time. The parser does
-not yet recognize the `(() => { ... })()` call form.
+- **IIFE arrow-function pattern** `(() => {...})()` — 6 of 7 planned closed; 5 bonus `bugs/pm-*` closed (T1)
+- **Spread operator `...` in array/Bytes literals** — 4 of 5 planned closed; 8 bonus `bugs/pm-*` closed (T2)
+- **Composable contracts** — 3 of 3 planned closed (T3)
+- **Trailing-comma / contract-member terminators** — 1 of 1 planned closed (T4)
+- **`fold` expression form** — 1 of 1 planned closed (T5)
+- **Type alias declarations** — feature implemented; fixture not closed (T6, see below)
+- **Two-word type `Unsigned Integer[N]`** — 1 of 1 planned closed (T7)
+- **Vector indexing with expression** — 1 of 1 planned closed; 1 bonus pm closed (T8)
+- **Named-argument call form `name = expr`** — feature implemented; fixture not closed (T9, see below)
 
-- `assert/example_one.compact`
-- `multiconst/multiconst.compact`
-- `return/examples.compact`
-- `wpp/constructor_test.compact`
-- `wpp/export_circuit.compact`
-- `wpp/module_wpp.compact`
-- `wpp/pm_16723.compact` (tracked-as pm-16723)
+### Newly-discovered grammar gaps
 
-#### Spread operator `...` in array/Bytes literals — 5 entries
+Three fixtures had a SECOND, distinct grammar gap revealed only after
+the first gap was fixed. These remain in `tests/corpus_known_failures.txt`
+with updated annotations:
 
-Array and `Bytes` literals using the JavaScript-style spread operator
-to splice another iterable into the literal. Includes spread inside
-struct initializers and spread followed by an `as` cast.
+- `assert/example_one.compact` — **compound-assignment expression** `(x += n)` (discovered during T1; T1 fixed the outer IIFE shape)
+- `proposal.compact` — **`ledger` keyword used as expression prefix** `ledger.field.write(...)` (discovered during T6; T6 implemented type aliases)
+- `wpp/pm_16774.compact` — **parenthesized assignment-as-expression** `(field = expr)` in lambda return body (discovered during T9; T9 implemented named-arg form)
 
-- `bytes/test_basic_bytes.compact`
-- `casts/advanced_casts.compact`
-- `modules/selective_examples.compact` (spread with `as` cast)
-- `types/examples.compact` (spread inside struct init)
-- `vectors/spread_part_one.compact`
+These are candidates for a future WS1 Phase 2.5 or WS2 follow-up plan.
 
-#### Composable contracts — 3 entries
+### Latent issues flagged for follow-up
 
-Forms exercising the composable-contracts feature: `export circuit`
-declared without an explicit return type, contracts nested inside
-constructors, and the `contract A { ... }` nested-definition form.
-
-- `composable/cases/contract-in-circuit/main.compact` (export circuit
-  without return type)
-- `composable/cases/contract-in-constructor/main.compact` (nested
-  contract in constructor)
-- `composable/cases/export-in-definition/main.compact` (nested
-  `contract A { ... }` form)
-
-#### One-offs — 6 entries
-
-Each of the following exercises a distinct grammar gap that does not
-share a theme with any other manifest entry. Each is its own bucket
-of size one.
-
-- `commas/more_commas.compact` — trailing comma after circuit
-  declaration.
-- `errors/noimport.compact` — `fold` expression form.
-- `proposal.compact` — type alias form `type Ledger = { ... }`.
-- `std_lib/mint.compact` — two-word type `Unsigned Integer[64]`.
-- `vectors/slice_part_one.compact` — vector indexing
-  `vector[index - 1]` expression form.
-- `wpp/pm_16774.compact` — assignment-as-argument
-  `august.insert(1, field = ...)` (tracked-as pm-16774).
+- `expr_bp` progress-failure loop discovered during T2 (when a child
+  parse fails silently the loop may produce many empty `EXPR_STMT@N..N`
+  nodes; pre-existing, not introduced by Phase 2).
+- T5's tolerant-recovery hack for the legacy `fold ... over ...`
+  syntax — a future cleanup may prefer moving the fixture
+  `errors/noimport.compact` to `tests/corpus/errors/negative/` and
+  reverting the parser hack.
 
 ## Future refresh procedure
 
