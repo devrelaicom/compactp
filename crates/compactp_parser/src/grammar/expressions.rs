@@ -107,6 +107,21 @@ fn expr_bp(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
             continue;
         }
 
+        // Postfix call: `expr(args)`. Enables IIFE form `(() => { ... })()`
+        // and lets parenthesized expressions be invoked as functions.
+        if op == L_PAREN {
+            let l_bp = 20; // Postfix BP
+            if l_bp < min_bp {
+                break;
+            }
+            let m = lhs.precede(p);
+            p.bump(L_PAREN);
+            comma_sep(p, R_PAREN, expr);
+            p.expect(R_PAREN);
+            lhs = m.complete(p, CALL_EXPR);
+            continue;
+        }
+
         if op == L_BRACKET {
             let l_bp = 20; // Postfix BP
             if l_bp < min_bp {
@@ -1348,6 +1363,141 @@ mod tests {
                         SEMICOLON@40..41 ";"
                       WHITESPACE@41..42 " "
                       R_BRACE@42..43 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn expr_arrow_iife() {
+        // IIFE arrow form used in Compact `return` positions.
+        check(
+            "circuit f() : Field { return (() => { return 1 as Field; })(); }",
+            expect![[r#"
+                SOURCE_FILE@0..64
+                  CIRCUIT_DEF@0..64
+                    CIRCUIT_KW@0..7 "circuit"
+                    WHITESPACE@7..8 " "
+                    IDENT@8..9 "f"
+                    L_PAREN@9..10 "("
+                    R_PAREN@10..11 ")"
+                    WHITESPACE@11..12 " "
+                    COLON@12..13 ":"
+                    FIELD_TYPE@13..19
+                      WHITESPACE@13..14 " "
+                      FIELD_KW@14..19 "Field"
+                    BLOCK@19..64
+                      WHITESPACE@19..20 " "
+                      L_BRACE@20..21 "{"
+                      RETURN_STMT@21..62
+                        WHITESPACE@21..22 " "
+                        RETURN_KW@22..28 "return"
+                        CALL_EXPR@28..61
+                          PAREN_EXPR@28..59
+                            WHITESPACE@28..29 " "
+                            L_PAREN@29..30 "("
+                            LAMBDA_EXPR@30..58
+                              PARAM_LIST@30..32
+                                L_PAREN@30..31 "("
+                                R_PAREN@31..32 ")"
+                              WHITESPACE@32..33 " "
+                              FAT_ARROW@33..35 "=>"
+                              BLOCK@35..58
+                                WHITESPACE@35..36 " "
+                                L_BRACE@36..37 "{"
+                                RETURN_STMT@37..56
+                                  WHITESPACE@37..38 " "
+                                  RETURN_KW@38..44 "return"
+                                  CAST_EXPR@44..55
+                                    LITERAL_EXPR@44..46
+                                      WHITESPACE@44..45 " "
+                                      INT_LIT@45..46 "1"
+                                    WHITESPACE@46..47 " "
+                                    AS_KW@47..49 "as"
+                                    FIELD_TYPE@49..55
+                                      WHITESPACE@49..50 " "
+                                      FIELD_KW@50..55 "Field"
+                                  SEMICOLON@55..56 ";"
+                                WHITESPACE@56..57 " "
+                                R_BRACE@57..58 "}"
+                            R_PAREN@58..59 ")"
+                          L_PAREN@59..60 "("
+                          R_PAREN@60..61 ")"
+                        SEMICOLON@61..62 ";"
+                      WHITESPACE@62..63 " "
+                      R_BRACE@63..64 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn expr_arrow_bare() {
+        // Arrow without immediate invocation (parenthesized, used as a value).
+        check(
+            "circuit f() : Field { const g = (() => { return 1 as Field; }); return g(); }",
+            expect![[r#"
+                SOURCE_FILE@0..77
+                  CIRCUIT_DEF@0..77
+                    CIRCUIT_KW@0..7 "circuit"
+                    WHITESPACE@7..8 " "
+                    IDENT@8..9 "f"
+                    L_PAREN@9..10 "("
+                    R_PAREN@10..11 ")"
+                    WHITESPACE@11..12 " "
+                    COLON@12..13 ":"
+                    FIELD_TYPE@13..19
+                      WHITESPACE@13..14 " "
+                      FIELD_KW@14..19 "Field"
+                    BLOCK@19..77
+                      WHITESPACE@19..20 " "
+                      L_BRACE@20..21 "{"
+                      CONST_STMT@21..63
+                        WHITESPACE@21..22 " "
+                        CONST_KW@22..27 "const"
+                        IDENT_PAT@27..29
+                          WHITESPACE@27..28 " "
+                          IDENT@28..29 "g"
+                        WHITESPACE@29..30 " "
+                        EQ@30..31 "="
+                        PAREN_EXPR@31..62
+                          WHITESPACE@31..32 " "
+                          L_PAREN@32..33 "("
+                          LAMBDA_EXPR@33..61
+                            PARAM_LIST@33..35
+                              L_PAREN@33..34 "("
+                              R_PAREN@34..35 ")"
+                            WHITESPACE@35..36 " "
+                            FAT_ARROW@36..38 "=>"
+                            BLOCK@38..61
+                              WHITESPACE@38..39 " "
+                              L_BRACE@39..40 "{"
+                              RETURN_STMT@40..59
+                                WHITESPACE@40..41 " "
+                                RETURN_KW@41..47 "return"
+                                CAST_EXPR@47..58
+                                  LITERAL_EXPR@47..49
+                                    WHITESPACE@47..48 " "
+                                    INT_LIT@48..49 "1"
+                                  WHITESPACE@49..50 " "
+                                  AS_KW@50..52 "as"
+                                  FIELD_TYPE@52..58
+                                    WHITESPACE@52..53 " "
+                                    FIELD_KW@53..58 "Field"
+                                SEMICOLON@58..59 ";"
+                              WHITESPACE@59..60 " "
+                              R_BRACE@60..61 "}"
+                          R_PAREN@61..62 ")"
+                        SEMICOLON@62..63 ";"
+                      RETURN_STMT@63..75
+                        WHITESPACE@63..64 " "
+                        RETURN_KW@64..70 "return"
+                        CALL_EXPR@70..74
+                          WHITESPACE@70..71 " "
+                          IDENT@71..72 "g"
+                          L_PAREN@72..73 "("
+                          R_PAREN@73..74 ")"
+                        SEMICOLON@74..75 ";"
+                      WHITESPACE@75..76 " "
+                      R_BRACE@76..77 "}"
             "#]],
         );
     }
