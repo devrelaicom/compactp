@@ -49,6 +49,22 @@ pub(crate) fn expr_seq(p: &mut Parser) {
     }
 }
 
+/// Parse a single element of an array or `Bytes[...]` literal.
+///
+/// An element is either an ordinary expression or a spread element of the
+/// form `...expr`, which is wrapped in a `SPREAD_EXPR` node. Spread elements
+/// are accepted anywhere an element is expected (first, middle, or last).
+fn array_element(p: &mut Parser) {
+    if p.at(DOT_DOT_DOT) {
+        let m = p.start();
+        p.bump(DOT_DOT_DOT);
+        expr(p);
+        m.complete(p, SPREAD_EXPR);
+    } else {
+        expr(p);
+    }
+}
+
 /// Pratt parser core: parse an expression with minimum binding power `min_bp`.
 fn expr_bp(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
     let mut lhs = lhs(p)?;
@@ -313,21 +329,21 @@ fn lhs(p: &mut Parser) -> Option<CompletedMarker> {
             Some(m.complete(p, SLICE_EXPR))
         }
 
-        // `Bytes[expr, ...]`
+        // `Bytes[expr, ...]` — Bytes literal, elements may be spread (`...expr`).
         BYTES_KW => {
             let m = p.start();
             p.bump(BYTES_KW);
             p.expect(L_BRACKET);
-            comma_sep(p, R_BRACKET, expr);
+            comma_sep(p, R_BRACKET, array_element);
             p.expect(R_BRACKET);
             Some(m.complete(p, BYTES_EXPR))
         }
 
-        // `[expr, ...]` — array literal
+        // `[expr, ...]` — array literal, elements may be spread (`...expr`).
         L_BRACKET => {
             let m = p.start();
             p.bump(L_BRACKET);
-            comma_sep(p, R_BRACKET, expr);
+            comma_sep(p, R_BRACKET, array_element);
             p.expect(R_BRACKET);
             Some(m.complete(p, ARRAY_EXPR))
         }
@@ -1531,6 +1547,124 @@ mod tests {
                         SEMICOLON@33..34 ";"
                       WHITESPACE@34..35 " "
                       R_BRACE@35..36 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn expr_array_with_spread() {
+        check(
+            "circuit f() : Field { const xs = [1, ...rest, 2]; return xs[0]; }",
+            expect![[r#"
+                SOURCE_FILE@0..65
+                  CIRCUIT_DEF@0..65
+                    CIRCUIT_KW@0..7 "circuit"
+                    WHITESPACE@7..8 " "
+                    IDENT@8..9 "f"
+                    L_PAREN@9..10 "("
+                    R_PAREN@10..11 ")"
+                    WHITESPACE@11..12 " "
+                    COLON@12..13 ":"
+                    FIELD_TYPE@13..19
+                      WHITESPACE@13..14 " "
+                      FIELD_KW@14..19 "Field"
+                    BLOCK@19..65
+                      WHITESPACE@19..20 " "
+                      L_BRACE@20..21 "{"
+                      CONST_STMT@21..49
+                        WHITESPACE@21..22 " "
+                        CONST_KW@22..27 "const"
+                        IDENT_PAT@27..30
+                          WHITESPACE@27..28 " "
+                          IDENT@28..30 "xs"
+                        WHITESPACE@30..31 " "
+                        EQ@31..32 "="
+                        ARRAY_EXPR@32..48
+                          WHITESPACE@32..33 " "
+                          L_BRACKET@33..34 "["
+                          LITERAL_EXPR@34..35
+                            INT_LIT@34..35 "1"
+                          COMMA@35..36 ","
+                          SPREAD_EXPR@36..44
+                            WHITESPACE@36..37 " "
+                            DOT_DOT_DOT@37..40 "..."
+                            NAME_EXPR@40..44
+                              IDENT@40..44 "rest"
+                          COMMA@44..45 ","
+                          LITERAL_EXPR@45..47
+                            WHITESPACE@45..46 " "
+                            INT_LIT@46..47 "2"
+                          R_BRACKET@47..48 "]"
+                        SEMICOLON@48..49 ";"
+                      RETURN_STMT@49..63
+                        WHITESPACE@49..50 " "
+                        RETURN_KW@50..56 "return"
+                        INDEX_EXPR@56..62
+                          NAME_EXPR@56..59
+                            WHITESPACE@56..57 " "
+                            IDENT@57..59 "xs"
+                          L_BRACKET@59..60 "["
+                          LITERAL_EXPR@60..61
+                            INT_LIT@60..61 "0"
+                          R_BRACKET@61..62 "]"
+                        SEMICOLON@62..63 ";"
+                      WHITESPACE@63..64 " "
+                      R_BRACE@64..65 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn expr_bytes_with_spread() {
+        check(
+            "circuit f() : Field { const b = Bytes[...head, 0xff]; return 1; }",
+            expect![[r#"
+                SOURCE_FILE@0..65
+                  CIRCUIT_DEF@0..65
+                    CIRCUIT_KW@0..7 "circuit"
+                    WHITESPACE@7..8 " "
+                    IDENT@8..9 "f"
+                    L_PAREN@9..10 "("
+                    R_PAREN@10..11 ")"
+                    WHITESPACE@11..12 " "
+                    COLON@12..13 ":"
+                    FIELD_TYPE@13..19
+                      WHITESPACE@13..14 " "
+                      FIELD_KW@14..19 "Field"
+                    BLOCK@19..65
+                      WHITESPACE@19..20 " "
+                      L_BRACE@20..21 "{"
+                      CONST_STMT@21..53
+                        WHITESPACE@21..22 " "
+                        CONST_KW@22..27 "const"
+                        IDENT_PAT@27..29
+                          WHITESPACE@27..28 " "
+                          IDENT@28..29 "b"
+                        WHITESPACE@29..30 " "
+                        EQ@30..31 "="
+                        BYTES_EXPR@31..52
+                          WHITESPACE@31..32 " "
+                          BYTES_KW@32..37 "Bytes"
+                          L_BRACKET@37..38 "["
+                          SPREAD_EXPR@38..45
+                            DOT_DOT_DOT@38..41 "..."
+                            NAME_EXPR@41..45
+                              IDENT@41..45 "head"
+                          COMMA@45..46 ","
+                          LITERAL_EXPR@46..51
+                            WHITESPACE@46..47 " "
+                            HEX_LIT@47..51 "0xff"
+                          R_BRACKET@51..52 "]"
+                        SEMICOLON@52..53 ";"
+                      RETURN_STMT@53..63
+                        WHITESPACE@53..54 " "
+                        RETURN_KW@54..60 "return"
+                        LITERAL_EXPR@60..62
+                          WHITESPACE@60..61 " "
+                          INT_LIT@61..62 "1"
+                        SEMICOLON@62..63 ";"
+                      WHITESPACE@63..64 " "
+                      R_BRACE@64..65 "}"
             "#]],
         );
     }
