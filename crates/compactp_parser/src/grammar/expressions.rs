@@ -26,6 +26,34 @@ pub(crate) fn expr(p: &mut Parser) {
     expr_bp(p, 0);
 }
 
+/// Parse an expression that may optionally end in an assignment or
+/// compound-assignment tail (`= rhs`, `+= rhs`, `-= rhs`).
+///
+/// Use this in positions where Compact accepts an assignment as a
+/// sub-expression — `const x = (y = 1)`, `return field = x`,
+/// `(y) => field = y`, parenthesized contexts — but where the
+/// statement-level [`super::statements::ASSIGN_STMT`] form is not
+/// being parsed.
+pub(crate) fn expr_or_assign(p: &mut Parser) {
+    let m = p.start();
+    expr(p);
+    match p.current() {
+        EQ => {
+            p.bump(EQ);
+            expr(p);
+            m.complete(p, ASSIGN_EXPR);
+        }
+        PLUS_EQ | MINUS_EQ => {
+            p.bump_any();
+            expr(p);
+            m.complete(p, COMPOUND_ASSIGN_EXPR);
+        }
+        _ => {
+            m.abandon(p);
+        }
+    }
+}
+
 /// Parse a single call-expression argument.
 ///
 /// Accepts the ordinary positional form `expr` and the named form
@@ -47,20 +75,25 @@ fn call_arg(p: &mut Parser) {
 
 /// Parse an expression sequence: `expr` or `expr, ..., expr, expr`.
 ///
-/// An expr_seq is the comma-separated form used in parenthesized contexts
-/// and expression-statement positions. If there is exactly one expression,
-/// no EXPR_SEQ wrapper is emitted. If there are multiple, they are wrapped
-/// in an EXPR_SEQ node.
+/// Used in parenthesized contexts (`( ... )`, `if ( ... )`,
+/// `for ( const id of ... )`) and in `return` statements. If there
+/// is exactly one element, no `EXPR_SEQ` wrapper is emitted; if there
+/// are multiple, they are wrapped in an `EXPR_SEQ` node.
+///
+/// Each element may itself be an assignment or compound-assignment
+/// form (`lhs = rhs`, `lhs += rhs`, `lhs -= rhs`), wrapped in
+/// `ASSIGN_EXPR` or `COMPOUND_ASSIGN_EXPR`. This matches Compact's
+/// treatment of assignment as an expression in these contexts
+/// (e.g. `(field = x)`, `return counter += y, x * y`).
 pub(crate) fn expr_seq(p: &mut Parser) {
     let m = p.start();
-    expr(p);
+    expr_or_assign(p);
     if p.at(COMMA) && !p.at_end() {
-        // Multiple expressions — need EXPR_SEQ wrapper
         while p.eat(COMMA) {
             if p.at(R_PAREN) || p.at(SEMICOLON) || p.at(R_BRACE) || p.at(R_BRACKET) || p.at_end() {
                 break;
             }
-            expr(p);
+            expr_or_assign(p);
         }
         m.complete(p, EXPR_SEQ);
     } else {
@@ -383,6 +416,17 @@ fn lhs(p: &mut Parser) -> Option<CompletedMarker> {
         // Identifier — could be a function call, struct literal, or plain identifier
         IDENT => ident_expr(p),
 
+        // `ledger` — bare-name reference to the ledger context.
+        // Compact lets circuit bodies write `ledger.field.method(...)`
+        // using `ledger` as an implicit name expression. The keyword
+        // itself produces a `NAME_EXPR`; subsequent `.field` access
+        // is parsed by the normal postfix-operator loop.
+        LEDGER_KW => {
+            let m = p.start();
+            p.bump(LEDGER_KW);
+            Some(m.complete(p, NAME_EXPR))
+        }
+
         _ => {
             p.error("expected expression");
             None
@@ -514,7 +558,12 @@ fn paren_or_lambda(p: &mut Parser) -> Option<CompletedMarker> {
         return Some(lambda(p));
     }
 
-    // Parenthesized expression
+    // Parenthesized expression. Inside a `(...)` we allow assignment
+    // and compound-assignment as expressions (handled inside
+    // `expr_seq`'s element parser), since Compact treats `(x = e)`
+    // and `(x += e)` as valid expression forms when explicitly
+    // parenthesized. The statement forms are still parsed by
+    // `expr_or_assign_stmt`.
     let m = p.start();
     p.bump(L_PAREN);
     expr_seq(p);
@@ -589,11 +638,14 @@ fn lambda(p: &mut Parser) -> CompletedMarker {
 
     p.expect(FAT_ARROW);
 
-    // Body: block or expression
+    // Body: block or expression. The expression form may be an
+    // assignment expression — e.g. `(y) => field = y` is a valid
+    // Compact lambda whose body assigns its argument to a ledger
+    // field.
     if p.at(L_BRACE) {
         super::statements::block(p);
     } else {
-        expr(p);
+        expr_or_assign(p);
     }
 
     m.complete(p, LAMBDA_EXPR)
@@ -1936,6 +1988,351 @@ mod tests {
                       R_BRACE@38..39 "}"
                 errors:
                   expected expression
+            "#]],
+        );
+    }
+
+    #[test]
+    fn expr_assign_in_paren() {
+        check("circuit f() : [] { return (x = 42); }", expect![[r#"
+            SOURCE_FILE@0..37
+              CIRCUIT_DEF@0..37
+                CIRCUIT_KW@0..7 "circuit"
+                WHITESPACE@7..8 " "
+                IDENT@8..9 "f"
+                L_PAREN@9..10 "("
+                R_PAREN@10..11 ")"
+                WHITESPACE@11..12 " "
+                COLON@12..13 ":"
+                TUPLE_TYPE@13..16
+                  WHITESPACE@13..14 " "
+                  L_BRACKET@14..15 "["
+                  R_BRACKET@15..16 "]"
+                BLOCK@16..37
+                  WHITESPACE@16..17 " "
+                  L_BRACE@17..18 "{"
+                  RETURN_STMT@18..35
+                    WHITESPACE@18..19 " "
+                    RETURN_KW@19..25 "return"
+                    PAREN_EXPR@25..34
+                      WHITESPACE@25..26 " "
+                      L_PAREN@26..27 "("
+                      ASSIGN_EXPR@27..33
+                        NAME_EXPR@27..28
+                          IDENT@27..28 "x"
+                        WHITESPACE@28..29 " "
+                        EQ@29..30 "="
+                        LITERAL_EXPR@30..33
+                          WHITESPACE@30..31 " "
+                          INT_LIT@31..33 "42"
+                      R_PAREN@33..34 ")"
+                    SEMICOLON@34..35 ";"
+                  WHITESPACE@35..36 " "
+                  R_BRACE@36..37 "}"
+        "#]]);
+    }
+
+    #[test]
+    fn expr_compound_assign_in_paren() {
+        check(
+            "circuit f() : [] { assert((x += 2) == 0, \"ok\"); }",
+            expect![[r#"
+                SOURCE_FILE@0..49
+                  CIRCUIT_DEF@0..49
+                    CIRCUIT_KW@0..7 "circuit"
+                    WHITESPACE@7..8 " "
+                    IDENT@8..9 "f"
+                    L_PAREN@9..10 "("
+                    R_PAREN@10..11 ")"
+                    WHITESPACE@11..12 " "
+                    COLON@12..13 ":"
+                    TUPLE_TYPE@13..16
+                      WHITESPACE@13..14 " "
+                      L_BRACKET@14..15 "["
+                      R_BRACKET@15..16 "]"
+                    BLOCK@16..49
+                      WHITESPACE@16..17 " "
+                      L_BRACE@17..18 "{"
+                      EXPR_STMT@18..47
+                        CALL_EXPR@18..46
+                          WHITESPACE@18..19 " "
+                          ASSERT_KW@19..25 "assert"
+                          L_PAREN@25..26 "("
+                          BINARY_EXPR@26..39
+                            PAREN_EXPR@26..34
+                              L_PAREN@26..27 "("
+                              COMPOUND_ASSIGN_EXPR@27..33
+                                NAME_EXPR@27..28
+                                  IDENT@27..28 "x"
+                                WHITESPACE@28..29 " "
+                                PLUS_EQ@29..31 "+="
+                                LITERAL_EXPR@31..33
+                                  WHITESPACE@31..32 " "
+                                  INT_LIT@32..33 "2"
+                              R_PAREN@33..34 ")"
+                            WHITESPACE@34..35 " "
+                            EQ_EQ@35..37 "=="
+                            LITERAL_EXPR@37..39
+                              WHITESPACE@37..38 " "
+                              INT_LIT@38..39 "0"
+                          COMMA@39..40 ","
+                          LITERAL_EXPR@40..45
+                            WHITESPACE@40..41 " "
+                            STRING_LIT@41..45 "\"ok\""
+                          R_PAREN@45..46 ")"
+                        SEMICOLON@46..47 ";"
+                      WHITESPACE@47..48 " "
+                      R_BRACE@48..49 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn expr_assign_in_lambda_body() {
+        check(
+            "circuit f() : [] { const g = (y) => field = y; }",
+            expect![[r#"
+                SOURCE_FILE@0..48
+                  CIRCUIT_DEF@0..48
+                    CIRCUIT_KW@0..7 "circuit"
+                    WHITESPACE@7..8 " "
+                    IDENT@8..9 "f"
+                    L_PAREN@9..10 "("
+                    R_PAREN@10..11 ")"
+                    WHITESPACE@11..12 " "
+                    COLON@12..13 ":"
+                    TUPLE_TYPE@13..16
+                      WHITESPACE@13..14 " "
+                      L_BRACKET@14..15 "["
+                      R_BRACKET@15..16 "]"
+                    BLOCK@16..48
+                      WHITESPACE@16..17 " "
+                      L_BRACE@17..18 "{"
+                      CONST_STMT@18..46
+                        WHITESPACE@18..19 " "
+                        CONST_KW@19..24 "const"
+                        IDENT_PAT@24..26
+                          WHITESPACE@24..25 " "
+                          IDENT@25..26 "g"
+                        WHITESPACE@26..27 " "
+                        EQ@27..28 "="
+                        LAMBDA_EXPR@28..45
+                          PARAM_LIST@28..32
+                            WHITESPACE@28..29 " "
+                            L_PAREN@29..30 "("
+                            IDENT_PAT@30..31
+                              IDENT@30..31 "y"
+                            R_PAREN@31..32 ")"
+                          WHITESPACE@32..33 " "
+                          FAT_ARROW@33..35 "=>"
+                          ASSIGN_EXPR@35..45
+                            NAME_EXPR@35..41
+                              WHITESPACE@35..36 " "
+                              IDENT@36..41 "field"
+                            WHITESPACE@41..42 " "
+                            EQ@42..43 "="
+                            NAME_EXPR@43..45
+                              WHITESPACE@43..44 " "
+                              IDENT@44..45 "y"
+                        SEMICOLON@45..46 ";"
+                      WHITESPACE@46..47 " "
+                      R_BRACE@47..48 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn expr_assign_in_return() {
+        check("circuit f() : [] { return field = x; }", expect![[r#"
+            SOURCE_FILE@0..38
+              CIRCUIT_DEF@0..38
+                CIRCUIT_KW@0..7 "circuit"
+                WHITESPACE@7..8 " "
+                IDENT@8..9 "f"
+                L_PAREN@9..10 "("
+                R_PAREN@10..11 ")"
+                WHITESPACE@11..12 " "
+                COLON@12..13 ":"
+                TUPLE_TYPE@13..16
+                  WHITESPACE@13..14 " "
+                  L_BRACKET@14..15 "["
+                  R_BRACKET@15..16 "]"
+                BLOCK@16..38
+                  WHITESPACE@16..17 " "
+                  L_BRACE@17..18 "{"
+                  RETURN_STMT@18..36
+                    WHITESPACE@18..19 " "
+                    RETURN_KW@19..25 "return"
+                    ASSIGN_EXPR@25..35
+                      NAME_EXPR@25..31
+                        WHITESPACE@25..26 " "
+                        IDENT@26..31 "field"
+                      WHITESPACE@31..32 " "
+                      EQ@32..33 "="
+                      NAME_EXPR@33..35
+                        WHITESPACE@33..34 " "
+                        IDENT@34..35 "x"
+                    SEMICOLON@35..36 ";"
+                  WHITESPACE@36..37 " "
+                  R_BRACE@37..38 "}"
+        "#]]);
+    }
+
+    #[test]
+    fn expr_compound_assign_in_const_rhs() {
+        check(
+            "circuit f() : [] { const p = counter += disclose(x); }",
+            expect![[r#"
+                SOURCE_FILE@0..54
+                  CIRCUIT_DEF@0..54
+                    CIRCUIT_KW@0..7 "circuit"
+                    WHITESPACE@7..8 " "
+                    IDENT@8..9 "f"
+                    L_PAREN@9..10 "("
+                    R_PAREN@10..11 ")"
+                    WHITESPACE@11..12 " "
+                    COLON@12..13 ":"
+                    TUPLE_TYPE@13..16
+                      WHITESPACE@13..14 " "
+                      L_BRACKET@14..15 "["
+                      R_BRACKET@15..16 "]"
+                    BLOCK@16..54
+                      WHITESPACE@16..17 " "
+                      L_BRACE@17..18 "{"
+                      CONST_STMT@18..52
+                        WHITESPACE@18..19 " "
+                        CONST_KW@19..24 "const"
+                        IDENT_PAT@24..26
+                          WHITESPACE@24..25 " "
+                          IDENT@25..26 "p"
+                        WHITESPACE@26..27 " "
+                        EQ@27..28 "="
+                        COMPOUND_ASSIGN_EXPR@28..51
+                          NAME_EXPR@28..36
+                            WHITESPACE@28..29 " "
+                            IDENT@29..36 "counter"
+                          WHITESPACE@36..37 " "
+                          PLUS_EQ@37..39 "+="
+                          DISCLOSE_EXPR@39..51
+                            WHITESPACE@39..40 " "
+                            DISCLOSE_KW@40..48 "disclose"
+                            L_PAREN@48..49 "("
+                            NAME_EXPR@49..50
+                              IDENT@49..50 "x"
+                            R_PAREN@50..51 ")"
+                        SEMICOLON@51..52 ";"
+                      WHITESPACE@52..53 " "
+                      R_BRACE@53..54 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn expr_compound_assign_in_for_iter() {
+        check(
+            "circuit f() : [] { for (const y of counter -= u, counter += u) { x; } }",
+            expect![[r#"
+                SOURCE_FILE@0..71
+                  CIRCUIT_DEF@0..71
+                    CIRCUIT_KW@0..7 "circuit"
+                    WHITESPACE@7..8 " "
+                    IDENT@8..9 "f"
+                    L_PAREN@9..10 "("
+                    R_PAREN@10..11 ")"
+                    WHITESPACE@11..12 " "
+                    COLON@12..13 ":"
+                    TUPLE_TYPE@13..16
+                      WHITESPACE@13..14 " "
+                      L_BRACKET@14..15 "["
+                      R_BRACKET@15..16 "]"
+                    BLOCK@16..71
+                      WHITESPACE@16..17 " "
+                      L_BRACE@17..18 "{"
+                      FOR_STMT@18..69
+                        WHITESPACE@18..19 " "
+                        FOR_KW@19..22 "for"
+                        WHITESPACE@22..23 " "
+                        L_PAREN@23..24 "("
+                        CONST_KW@24..29 "const"
+                        WHITESPACE@29..30 " "
+                        IDENT@30..31 "y"
+                        WHITESPACE@31..32 " "
+                        OF_KW@32..34 "of"
+                        EXPR_SEQ@34..61
+                          COMPOUND_ASSIGN_EXPR@34..47
+                            NAME_EXPR@34..42
+                              WHITESPACE@34..35 " "
+                              IDENT@35..42 "counter"
+                            WHITESPACE@42..43 " "
+                            MINUS_EQ@43..45 "-="
+                            NAME_EXPR@45..47
+                              WHITESPACE@45..46 " "
+                              IDENT@46..47 "u"
+                          COMMA@47..48 ","
+                          COMPOUND_ASSIGN_EXPR@48..61
+                            NAME_EXPR@48..56
+                              WHITESPACE@48..49 " "
+                              IDENT@49..56 "counter"
+                            WHITESPACE@56..57 " "
+                            PLUS_EQ@57..59 "+="
+                            NAME_EXPR@59..61
+                              WHITESPACE@59..60 " "
+                              IDENT@60..61 "u"
+                        R_PAREN@61..62 ")"
+                        BLOCK@62..69
+                          WHITESPACE@62..63 " "
+                          L_BRACE@63..64 "{"
+                          EXPR_STMT@64..67
+                            NAME_EXPR@64..66
+                              WHITESPACE@64..65 " "
+                              IDENT@65..66 "x"
+                            SEMICOLON@66..67 ";"
+                          WHITESPACE@67..68 " "
+                          R_BRACE@68..69 "}"
+                      WHITESPACE@69..70 " "
+                      R_BRACE@70..71 "}"
+            "#]],
+        );
+    }
+
+    #[test]
+    fn expr_ledger_keyword_as_name() {
+        check(
+            "circuit f() : [] { ledger.field.write(true); }",
+            expect![[r#"
+                SOURCE_FILE@0..46
+                  CIRCUIT_DEF@0..46
+                    CIRCUIT_KW@0..7 "circuit"
+                    WHITESPACE@7..8 " "
+                    IDENT@8..9 "f"
+                    L_PAREN@9..10 "("
+                    R_PAREN@10..11 ")"
+                    WHITESPACE@11..12 " "
+                    COLON@12..13 ":"
+                    TUPLE_TYPE@13..16
+                      WHITESPACE@13..14 " "
+                      L_BRACKET@14..15 "["
+                      R_BRACKET@15..16 "]"
+                    BLOCK@16..46
+                      WHITESPACE@16..17 " "
+                      L_BRACE@17..18 "{"
+                      EXPR_STMT@18..44
+                        CALL_EXPR@18..43
+                          MEMBER_EXPR@18..31
+                            NAME_EXPR@18..25
+                              WHITESPACE@18..19 " "
+                              LEDGER_KW@19..25 "ledger"
+                            DOT@25..26 "."
+                            IDENT@26..31 "field"
+                          DOT@31..32 "."
+                          IDENT@32..37 "write"
+                          L_PAREN@37..38 "("
+                          LITERAL_EXPR@38..42
+                            TRUE_KW@38..42 "true"
+                          R_PAREN@42..43 ")"
+                        SEMICOLON@43..44 ";"
+                      WHITESPACE@44..45 " "
+                      R_BRACE@45..46 "}"
             "#]],
         );
     }

@@ -53,6 +53,8 @@ fn return_stmt(p: &mut Parser) {
     let m = p.start();
     p.bump(RETURN_KW);
     if !p.at(SEMICOLON) && !p.at(R_BRACE) && !p.at_end() {
+        // Each element may itself be an assignment expression
+        // (e.g. `return field = x;`, `return counter += x, ...`).
         super::expressions::expr_seq(p);
     }
     p.expect(SEMICOLON);
@@ -145,7 +147,9 @@ fn const_binding(p: &mut Parser) {
         super::types::ty(p);
     }
     p.expect(EQ);
-    super::expressions::expr(p);
+    // RHS may itself be an assignment expression (e.g.
+    // `const p = counter += disclose(x);`).
+    super::expressions::expr_or_assign(p);
 }
 
 /// Parse an expression statement or assignment statement.

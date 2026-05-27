@@ -27,7 +27,6 @@
 # An uncategorized entry is treated as `unclassified` and MUST be
 # resolved before WS1 Phase 1 is complete.
 #
-assert/example_one.compact                                  # grammar-gap: compound-assignment expression `(x += n)`
 bugs/issue-139/a.compact                                    # upstream-bug-repro: issue-139
 bugs/pm-16040.compact                                       # upstream-bug-repro: pm-16040
 bugs/pm-16059.compact                                       # upstream-bug-repro: pm-16059
@@ -42,7 +41,6 @@ bugs/pm-17347/example_six.compact                           # upstream-bug-repro
 bugs/pm-17347/example_three.compact                         # upstream-bug-repro: pm-17347
 bugs/pm-17347/example_two.compact                           # upstream-bug-repro: pm-17347
 bugs/pm-20231/example_five.compact                          # upstream-bug-repro: pm-20231
-proposal.compact                                            # grammar-gap: `ledger` keyword used as expression prefix (e.g., `ledger.field.write(...)`)
 reserved/example_10.compact                                 # intentional-strictness: reserved word `delete` used as identifier
 reserved/example_12.compact                                 # intentional-strictness: reserved word used as identifier
 reserved/example_13.compact                                 # intentional-strictness: reserved word used as identifier
@@ -65,4 +63,3 @@ reserved/example_47.compact                                 # intentional-strict
 reserved/example_48.compact                                 # intentional-strictness: reserved word `of` used as expression
 reserved/example_6.compact                                  # intentional-strictness: reserved word `const` used as identifier
 reserved/example_9.compact                                  # intentional-strictness: reserved word `default` used as type-size identifier
-wpp/pm_16774.compact                                        # grammar-gap: parenthesized assignment-expression `(field = disclose(z))` in lambda return (tracked-as pm-16774; named-arg form fixed in T9)

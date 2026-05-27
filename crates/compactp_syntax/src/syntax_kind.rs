@@ -285,6 +285,17 @@ pub enum SyntaxKind {
     BLOCK,
     /// Assignment statement (`lhs = rhs;`, `lhs += rhs;`, etc.).
     ASSIGN_STMT,
+    /// Assignment used as an expression (`lhs = rhs`).
+    ///
+    /// Only valid inside a parenthesized expression context (e.g. the
+    /// body of a lambda or as a parenthesized sub-expression). The
+    /// statement form `lhs = rhs;` is emitted as [`ASSIGN_STMT`](Self::ASSIGN_STMT).
+    ASSIGN_EXPR,
+    /// Compound-assignment used as an expression (`lhs += rhs`, `lhs -= rhs`, ...).
+    ///
+    /// Only valid inside a parenthesized expression context. The
+    /// statement form is emitted as [`ASSIGN_STMT`](Self::ASSIGN_STMT).
+    COMPOUND_ASSIGN_EXPR,
     /// Expression used as a statement (terminated by `;`).
     EXPR_STMT,
     /// `return` statement.

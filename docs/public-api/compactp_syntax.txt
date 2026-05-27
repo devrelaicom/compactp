@@ -31,6 +31,7 @@ pub compactp_syntax::SyntaxKind::AMP_AMP
 pub compactp_syntax::SyntaxKind::ARRAY_EXPR
 pub compactp_syntax::SyntaxKind::ASSERT_KW
 pub compactp_syntax::SyntaxKind::ASSERT_STMT
+pub compactp_syntax::SyntaxKind::ASSIGN_EXPR
 pub compactp_syntax::SyntaxKind::ASSIGN_STMT
 pub compactp_syntax::SyntaxKind::AS_KW
 pub compactp_syntax::SyntaxKind::BANG
@@ -51,6 +52,7 @@ pub compactp_syntax::SyntaxKind::CIRCUIT_DEF
 pub compactp_syntax::SyntaxKind::CIRCUIT_KW
 pub compactp_syntax::SyntaxKind::COLON
 pub compactp_syntax::SyntaxKind::COMMA
+pub compactp_syntax::SyntaxKind::COMPOUND_ASSIGN_EXPR
 pub compactp_syntax::SyntaxKind::CONSTRUCTOR_DEF
 pub compactp_syntax::SyntaxKind::CONSTRUCTOR_KW
 pub compactp_syntax::SyntaxKind::CONST_KW
