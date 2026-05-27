@@ -663,6 +663,105 @@ fn every_subcommand_emits_versioned_envelope() {
     }
 }
 
+/// Schema-parity guard: every JSON envelope must carry the five documented
+/// fields (`tool_version`, `schema_version`, `language_version`, `input`,
+/// `data`). `assert_envelope` already pins their *values* for the current
+/// release, but this test exists as a shape-only contract so a future bump
+/// (e.g. `language_version` rolls to 0.23.0, `schema_version` to 2) only
+/// needs the helper updated — the field set itself remains anchored here.
+#[test]
+fn cli_json_envelope_has_all_documented_fields() {
+    let path = fixture("demo/valid.compact");
+    let output = bin()
+        .args(["--format", "json", "stats", &path])
+        .output()
+        .expect("spawn");
+    assert!(
+        output.status.success(),
+        "stats failed: stderr={}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8(output.stdout).expect("stdout is utf8");
+    let parsed: Value =
+        serde_json::from_str(&stdout).expect("envelope must be valid JSON");
+
+    for field in [
+        "tool_version",
+        "schema_version",
+        "language_version",
+        "input",
+        "data",
+    ] {
+        assert!(
+            parsed.get(field).is_some(),
+            "envelope missing documented field `{field}`\nfull output: {stdout}"
+        );
+    }
+
+    // `schema_version` is the consumer-facing compatibility token; it must
+    // always be a positive integer, never null, a string, or 0.
+    let schema = parsed["schema_version"]
+        .as_u64()
+        .expect("schema_version must be an integer");
+    assert!(
+        schema >= 1,
+        "schema_version must be >= 1, got {schema}\nfull output: {stdout}"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Exit-code coverage map
+//
+// Every `CliError` variant maps to a documented exit code; each must be
+// triggered by at least one test so a future re-mapping cannot pass CI
+// unnoticed. The table below records which tests cover which code so the
+// matrix stays auditable from one place.
+//
+// | Code | Variant                | Covering tests                       |
+// |------|------------------------|--------------------------------------|
+// | 0    | (success)              | parse_exit_zero_on_success,          |
+// |      |                        | help_exits_zero, version_exits_zero, |
+// |      |                        | empty_directory_exits_ok, and every  |
+// |      |                        | happy-path / snapshot test           |
+// | 1    | CliError::runtime      | parse_exit_one_on_errors,            |
+// |      |                        | cst_failure_exit_one_on_invalid_…,   |
+// |      |                        | stats_failure_exit_one_on_invalid_…, |
+// |      |                        | diag_* failure tests                 |
+// | 2    | CliError::io           | missing_file_exits_io_error,         |
+// |      |                        | lex_failure_on_missing_file_is_io_…, |
+// |      |                        | ast_failure_on_missing_file_is_io_…  |
+// | 3    | CliError::usage        | invalid_flag_exits_usage_error,      |
+// |      |                        | watch_without_paths_is_usage_error,  |
+// |      |                        | mixing_stdin_with_file_path_is_…     |
+// | 4    | CliError::internal     | (not directly testable — see test    |
+// |      |                        | `internal_error_exit_code_is_gap`)   |
+// ---------------------------------------------------------------------------
+
+/// Documents the deliberate gap for exit code 4 (`CliError::internal`).
+///
+/// `CliError::internal` is raised in two narrow places:
+///
+///   - `commands/watch.rs`: when `notify-debouncer-full` cannot construct a
+///     debouncer (typically OS-level resource exhaustion).
+///   - `commands/ast.rs`: when the parser's root node is not `SOURCE_FILE`,
+///     which would represent a violation of an invariant inside the parser
+///     itself.
+///
+/// Neither is reachable from the CLI surface using ordinary inputs — both
+/// require fault injection or a parser-internal bug. We intentionally don't
+/// test them here; this test exists so the gap is visible in the test
+/// matrix and a future maintainer who finds a way to trigger code 4 from
+/// inputs alone has an obvious place to slot the test in.
+///
+/// The body merely re-asserts that the *non-internal* exit codes still
+/// behave per the documented mapping, so this test is not silent.
+#[test]
+fn internal_error_exit_code_is_gap() {
+    // Exit code 3 must remain reachable — proves the usage-error path is
+    // still wired up even if the internal-error path can't be exercised.
+    run_expect_code(&["--nonexistent-flag"], 3);
+}
+
 // ---------------------------------------------------------------------------
 // Stdin read path
 // ---------------------------------------------------------------------------
