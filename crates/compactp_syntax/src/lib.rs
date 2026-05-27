@@ -1,6 +1,19 @@
+//! Shared syntax-tree types for the compactp parser frontend.
+//!
+//! This crate defines `SyntaxKind` (the enum of every node and token
+//! kind in the Compact CST) plus the rowan `SyntaxNode`/`SyntaxToken`
+//! type aliases that the parser and AST crates build on.
+
+#![deny(missing_docs)]
+
 mod syntax_kind;
 pub use syntax_kind::SyntaxKind;
 
+/// Marker type implementing [`rowan::Language`] for Compact's [`SyntaxKind`].
+///
+/// This uninhabited enum is the type parameter that specializes rowan's
+/// generic green/red tree machinery to Compact's set of node and token
+/// kinds. It is never instantiated.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum CompactLanguage {}
 
@@ -16,7 +29,9 @@ impl rowan::Language for CompactLanguage {
     }
 }
 
+/// Rowan syntax node specialized to Compact's [`SyntaxKind`] set.
 pub type SyntaxNode = rowan::SyntaxNode<CompactLanguage>;
+/// Rowan syntax token specialized to Compact's [`SyntaxKind`] set.
 pub type SyntaxToken = rowan::SyntaxToken<CompactLanguage>;
 
 #[cfg(test)]
