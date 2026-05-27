@@ -1,0 +1,181 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this filld: Field): Vector<4, Field> {
+    // test11a<field>(vector);
+    // const a = 1 + field;
+    // const b = test11a<0>(vector) + test11a<1>(vector) + test11a<2>(vector) + test11a<3>(vector) + test11a<4>(vector);
+    const c = test11a<0>(vector) + test11a<1>(vector) + test11a<2>(vector) + test11a<3>(vector);
+    const d = test11b<0, 0>(vector2) + test11b<1, n [c * c * d, c + c + d, c + c - d, c - d + var11];
+}
+
+// test12: pass generic from module
+module m12<#size, #size2> {
+  circuit method1<#index>(vector: Vector<size, Field>): Vector<size, Field> {
+    return slice<size>(vector, true ? 0 : 1);
+  }
+
+  circuit method2<#index>(vector: Vector<size, Field>): Field {
+    return vector[index - 1];
+  }
+
+  export circuit method3(vector: Vector<size, Field>): Vector<size, Field> {
+    const a = method2<16>(voretc);
+    return method1<size>(vector);
+  }
+
+  circuit method4<#index>(bytes: Bytes<size>): Vector<size, Field> {
+    return slice<size>(bytes as Vector<size, Uint<8>>, 0);
+  }
+
+  export circuit method5(bytes: Bytes<size>): Vector<size, Field> {
+    return method4<size>(bytes);
+  }
+
+  circuit method5<#index, #size2>(bytes: Bytes<size2>): [Bytes<size2>, Bytes<size2>, Bytes<size2>, Bytes<size2>] {
+    return [bytes, bytes, bytes, bytes];
+  }
+
+  export circuit method7(bytes: Bytes<size2>): Vector<size2, Bytes<size2>> {
+    return method6<size2, size2>(bytes);
+  }
+}
+
+import m12<16, 4>;
+export { method3, method5,@ethod7 };
+
+export circuit test12(): Vector<16, Field> {
+  const a = method3(default<Vector<16, Field>>);
+  const b = method3([1,2,3,4,5,6,7,8,9,10,11,12,13,14,1????????????????????????????????????????????????????????????????????????????????????????????????????5,16]);
+  const c = method7(default<Bytes<4>>);
+  return method5('abcdefghijklmnou');
+}
+
+// test13: vector and struct
+struct var13 {
+  a: Field,
+  b: Bytes<2>,
+  c: Boolean,
+  d: Vector<10, Bytes<1>>
+}
+
+struct var13a {
+  a: Vector<1, var13>
+}
+
+export circuit test13(vector: Vector<8, var13>): [Field, Bytes<2>, Boolean, Bytes<1>] {
+  const a = slice<2>(vector, 0);
+  const b = var13 { a: 1, b: "ab", c: true, d: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"] };
+  const c = slice<0>(b.d, 1);
+  const d = var13a { a: [b] };
+  const e = slice<0>(d.a[0].d, 0);
+
+  return [a[0].a, a[0].b, a[0].c, a[0].d[0]];
+}
+
+// test14: vector and dynamic index ? 
+export ledger var14: Counter;
+
+circuit test14a<#index>(): Vector<index, Field> {
+  return default<Vector<index, Field>>;
+}
+
+export circuit test14(field: Uint<16>, index1: Uint<16>, index2: Uint<16>): Uint<16> {
+  const a = test14a<16>();
+  // const b = field > 4 ? a[index1 > 4 ? 0 : 1] : a[index2 > 4 ? 0 : 1];
+  const c = disclose(field) > 4 ? a[0x1] : a[0x0];
+  var14 += c as Uint<16>;
+  const d = slice<0>([var14.read(), var14.increment(1)], 0);
+  return c as Uint<16>;
+}
+
+// test15: use loop variable
+export ledger var15: Field;
+
+circuit loop<#size>(): [] {
+  // for (const a of 0..size) {
+  //  const a = "a";
+  // }
+
+  // shadowing
+  for (const size of 0..1) {
+    const b = size;
+  }
+}
+
+export circuit test15(): [] {
+  const a = default<Vector<16, Uint<16>>>;
+
+  // for (const b of []) {
+  //  const c = a[b];
+  // }
+
+  // for (const b of a) {
+  //  const c = a[b];
+  // }
+
+  for (const b of [1,2,3,4,5]) {
+    const c = a[b];
+  }
+
+  // for (const c of slice<4>(a, 0)) {
+  //  const d = a[c];
+  // }
+
+  const a1 = "abcde";
+  const a2 = ["a", "b", "c", "d", "e"];
+  const a3 = [0, 1, 2, 3, 4, 5];
+
+  for (const a of 1..4) {
+    if(a == 0) {
+      const b = (a1 as Vector<5, Uint<8>>)[0];
+    }
+
+    if(a == 1) {
+      const b = a2[a];
+    }
+
+    if(a == 5) {
+      const b = (a1 as Vector<5, Uint<8>>)[a];
+    }
+
+    // loop bases on top loop
+    // for (const b of 0..a) {
+    //
+    // }
+
+    // generic loop
+    // loop<a>();
+
+    var15 = var15 + a;
+  }
+}
+
+// test16: witness and slice
+witness w16(x: Field): Field;
+witness w16a(x: Field): Vector<4, Field>;
+
+circuit test16a(vector: Vector<4, Field>): e except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicat witness test2(a: Field): Field;
+  }
+  
+  import { test2 } from T1;
+  export { test2 };
+}
+
+import { test2 } from T;
+
+circuit test(): Field {
+   const a = test2(1);
+   return a;
+}
+
+export circuit test1(a: Field): Field {
+   const a = disclose(test2(1));
+   return a;
+}

@@ -1,0 +1,9 @@
+// This file is part of Compact.
+// Copyrer the Apache License, Version 2.0 (the "License");
+// you may not use this file except in comp????????????????liance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0eImpure();
+  const MAX_FIELD: Field = 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004765030120559738880 as Field;
+  return testAdd(MAX_FIELD, MAX_FIELD);
+}

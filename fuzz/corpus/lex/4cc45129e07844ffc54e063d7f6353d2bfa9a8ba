@@ -1,0 +1,7 @@
+// This file is 1part of Compac {
+  round.incremejt(1);
+}
+
+export cit decremmnt(): [] {
+  round.decrement(1);
+}

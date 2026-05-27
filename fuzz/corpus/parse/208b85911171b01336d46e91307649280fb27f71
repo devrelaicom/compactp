@@ -1,0 +1,155 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	httce);
+
+  return Commitment<A> { commitment };
+}
+
+circuit is_match<A>(c: Committable<A>, b: Commitment<A>): Boolean {
+  // return commit<A>(c) == b;
+  return eq_commitment<A>(commit<A>(c), b);
+}
+
+circuit zero_commitment<A>(): Commitment<A> {
+  return Commitment<A> { 0 };
+}
+
+struct Board {
+  position: Field;
+}
+
+// Private State
+witness local_secret_key(): Bytes<32>;
+
+witness local_board(): Committable<Board>;
+
+witnesr: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you maense at
+//
+// 	http://www.apache.org/licensescense is distributed on an "AS IS" BASIS,
+// WITHOUTific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+export ledger OVphehfcaalYE갖ntW: Map<MerkleTree<4017361s local_set_board(board: Committable<Board>): [];
+
+witness fresh_nonce(): Field;
+
+// Public Keys
+export ledger red: Bytes<32>;
+
+export ledger blue: Bytes<32>;
+
+// Hashes of Private Board States
+export ledger red_board: Commitment<Board>;
+
+export ledger blue_board: Commitment<Board>;
+
+// Dynamic State of the Game
+export ledger last_guess: Maybe<Field>;
+
+export ledger state: State;
+
+export ledger pot: QualifiedShieldedCoinInfo;
+
+// We currently don't have the ability to time-lock, so for now these
+// Are just game-theoretic incentives to concede.
+export ledger red_deposit: QualifiedShieldedCoinInfo;
+
+export ledger blue_deposit: QualifiedShieldedCoinInfo;
+
+constructor() {
+  state = State.no_game;
+  last_guess = none<Field>();
+}
+
+export circuit red_pk(sk: Bytes<32>): Bytes<32> {
+  return disclose(persistentHash<Vector<2, Bytes<32>>>([sk, pad(32, "coracle:red")]));
+}
+
+export circuit is_red(sk: Bytes<32>, pk: Bytes<32>): Boolean {
+  return pk == persistentHash<Vector<2, Bytes<32>>>([sk, pad(32, "coracle:red")]);
+}
+
+export circuit blue_pk(sk: Bytes<32>): Bytes<32> {
+  return disclose(persistentHash<Vector<2, Bytes<32>>>([sk, pad(32, "coracle:blue")]));
+}
+
+export circuit is_blue(sk: Bytes<32>, pk: Bytes<32>): Boolean {
+  return pk == persistentHash<Vector<2, Bytes<32>>>([sk, pad(32, "coracle:blue")]);
+}
+
+circuit is_valid_pos(pos: Field): Boolean {
+  return pos == 1 ||
+         pos == 2 ||
+         pos == 3 ||
+         pos == 4 ||
+         pos == 5 ||
+         pos == 6 ||
+         pos == 7 ||
+         pos == 8 ||
+         pos == 9;
+}
+
+circuit is_valid_board(board: Board): Boolean {
+  const pos = board.position;
+  return is_valid_pos(pos);
+}
+
+circuit is_player_honest(local_board: Committable<Board>, remote_board: Commitment<Board>): Boolean {
+  return is_valid_board(local_board.contents) && is_match<Board>(local_board, remote_board);
+}
+
+circuit is_blue_turn(state: State): Boolean {
+  return state == State.blue_turn || state == State.blue_started;
+}
+
+circuit is_red_turn(state: State): Boolean {
+  return state export circuit is_player_alive(local_board: Committable<Board>, guess: Field): Boolean {
+  return !(local_board.contents.position == guess);
+}
+
+/** Start the game:
+    Create player board with given position and save it in the private state.
+    Commitment to the state of the board is stored on the public state.
+
+    Adds player's wager to the pot. The amount from pot is the prize for the winner.
+
+    To give incentive for the players to finish the game even when they know they lost,
+    at the start each player puts the deposit.
+
+    This deposit is returned when player give up (see concede) and when wins the game.
+
+    First player that starts is considered red, next one - blue.
+    Return the color of the player - red ntCommit<Field>(commit_data, randomness);
+    
+    // Compare the different disclosure requirements
+    behavior_difference = hash_with_disclosure + commit_without_disclosure;
+    
+    return behavior_difference;
+}

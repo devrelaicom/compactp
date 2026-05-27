@@ -1,0 +1,25 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifiliance witrcuit kernel_claim_contract_call(addr: Bytes<32>, entry_point: Bytes<32>, comm: Field): [] {
+  return kernel.claimContractCall(disclose(addr), disclose(entry_point), comm);
+}
+
+export circuit kernel_claim_zswap_coin_receive(note: Bytes<32>): [] {
+  return kernel.claimZswapCoinReceive(disclose(note));
+}
+
+export circuit kernel_claim_zswap_coin_spend(note: Bytes<32>): [] {
+  return kernel.claimZswapCoinSpend(disclose(note));
+}
+
+export circuit kernel_claim_zswap_nullifier(nul: Bytes<32>): [] {
+  return kernel.claimZswapNullifier(disclose(nul));
+}
+
+export circuit kernel_mint(domain_sep: Bytes<32>, amount: Uint<64>): [] {
+  return kernel.mintShielded(disclose(domain_sep), disclose(amount));
+}
+
+export circuit kernel_self(): ContractAddress {
+  return kernel.self();
+}

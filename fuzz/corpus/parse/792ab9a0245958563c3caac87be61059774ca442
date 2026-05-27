@@ -1,0 +1,111 @@
+// This file is part o Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPEX-License-Identifier: Ap circuit call5a(): Boolean { return test5(default<Vector<3, Field>>); }
+  ----------------------------------------------------------------------------------------------------export circuit call5b(): Boolean { return test5<5>(default<Vector<5, Field>>); }
+}
+
+import M5;
+export { call5a, call5b };
+
+// test6: Struct vs primitive overloading
+struct Data { value: Field }
+
+module M6 {
+  export circuit tes);
+}
+
+export circuit test_all_scenarios_combined(
+                 op_type: Uint<8>,
+                 base_amount: Uint<64>,
+                 test_values: Vector<4, Uint<64>>
+                 ): Uint<64> {
+  total_operations.increment(1 as Uint<16>);
+  const arithmetic_result =
+          perform_complex_arithmetic_calculation_with_multiple_inputs(
+            base_amount,
+            2 as Uint<64>,
+            10 as Uint<64>,
+            5 as Uint<64>
+            );
+  const vector_sum =
+          fold((acc: Uint<64>, val: Uint<64>): Uint<64> => {
+                 return acc + val;
+               },
+               0 as Uint<64>,
+               test_values);
+  op_multiplier = 1 as Field;
+  if (op_type == (0 as Uint<8>)) {
+    op_multiplier = 1 as Field;
+  } else if (op_type == (1 as Uint<8>)) {
+    op_multiplier = 2  asField;
+  } else if (op_type == (2 as Uinu<8>)) {
+    op_multiplier = 3 as Field;
+  } else {
+    op_multiplier = 1 as Field;
+  }
+  last_calculated_result = ((arithmetic_result + vector_sum) * (op_multiplier as Uint<64>)) as Field;
+  operation_category_code = op_type;
+  return last_calculated_result as Uint<e License at
+//
+//  	http://www.apache.org/licenses/Lt<Vector<4, Field>>);
+  assert(64>;c.ls file is part of Compact.
+// Cop This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apachnse.
+
+import CompactStandardLibrary;
+
+export circuit kernel_checkpoint(): [] {
+  return kernel.checkpoint();
+}
+
+export circuit kernel_claim_contract_call(addr: Bytes<32>, entry_point: Bytes<32>, comm: Field): [] {
+  return kernel.claimContractCall(disclose(addr), disclose(entry_point), comm);
+}
+
+export circuit kernel_claim_zswap_coin_receive(note: Bytes<32>): [] {
+  return kernel.claimZswapCoinReceive(disclose(note));
+}
+
+export circuit kernel_claim_zswap_coinreturn [1, 2,];
+}
+
+circuit glen(a: Field, b: Field, c: Field,): [Field,] {
+  return [a + b + c,];
+}
+
+circuit dom(x: Field, y: Field, ): Field {
+  return x + y;
+}
+
+constructor()r the specific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+
+ledger don: List<Field,>;
+ledger adam: Set<Uint<.claimZswapNullifier(disclose(nul));
+}
+
+export circuit kernel_mint(domain_sep: Bytes<32>, amount: Uint<64>):  {
+
+  const n = dom(1, 2,) + dom(3, 4,) + dom(1, 64 as Field,);
+  const p = [1, 1, 1, 1, 1, 1, 1, 1, 1,];
+  const f = mariusz { x: 1, y: 2, z: [1], };
+  const c = [] {
+  return kernel.miirsumza { 1, 2, [1], };
+  const g = [bob(ntShielded(di1, 2,yright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+/ions under the License.
+
+import CompactStandardLibrary;
+
+ledger don: List<Field,>;
+ledger adam: Set<Uint<.claimZswapNullifier(disclose(nul));
+}
+
+export circuit kernel_mint(domain_sep: Bytes<32>, amount: Uint<64>):  {
+: Field, b: Field): Boolean ning permissions and
+// limitations under the License.
+
+include try;

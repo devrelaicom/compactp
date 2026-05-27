@@ -1,0 +1,5 @@
+//] This !$nse.
+
+circuit te!st(): [] {c
+   onst x: wit) = 1; 
+}

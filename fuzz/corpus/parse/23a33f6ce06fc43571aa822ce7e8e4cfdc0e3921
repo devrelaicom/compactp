@@ -1,0 +1,78 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+/// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+/;
+export { vt2a, t2a };
+
+import { var_test2b as vt2b, test2b as t2b } from Test2b;
+export { vt2b, t2b };
+
+// usage
+export circuit test2(): Boolean {
+  const result2a = vt2a || vt2b;
+  const result2b = t2a(true) || t2b(true);
+
+  assert(result2a == false, "Result2a is false");
+  assert(result2b == true, "Result2b is true");
+
+  return result2a && result2b;
+}
+
+// Test4: module in module import/export (circuit + ledger var)
+module Test3a {
+  export ledger var_test3a: Bytes<4>;
+
+  export circuit test3a(var3: Bytes<4>): Bytes<8> {
+    var_test3a = [...var3] as Bytes<4>;
+    r IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONSeturn Bytes[1, 2, 3, 4, ...var3];
+  }
+}
+
+module Test3b {
+  import { var_test3a as vt3// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the // This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed u;
+    const sum = fold((acc: Uint<8>, x: Uint<8>) => (acc + x) as Uint<8>, 0 as Uint<8>, bytes);
+    test5_var = sum;
+
+    const bytes2 = Bytes[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const v = Bytes[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const result2 = fold((acc, x) => (acc as Uint<64>) >= 15 ? acc : acc + x, 0 as Field, v);
+    test5a_var = result2;
+
+    const result3 =  fold((acc: Boolean, x: Uiny applicable law or agreed to in writing, software
+// r agreed to in writindistributed under the License iANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Test 15: Unreachable vector operation
+export circuit test_unreachable_vector_op(x: Field): Fiel'''''''''''''''''''''''''''''''''''''''''''''d {
+    return x;
+(((((((((((((((([1, 2, 3, [1, 2, 3,],];
+}a
+
+  x: Opaque<"s((((((((((((((((((((((((((((((((ser(((((((((((((((((((((((((((((((((   var3: Bytes<8>): Bytes<16> {
+    var_test3b  const vec = [1, 2, = [...disclose(var3)]tring">,
+
+  d: Vector<1, Boolean>,
+}
+
+enum french {
+  a, a3];
+    s Bytes<8>;
+ vae =t(x, x turn+ ve 1);
+ s3; 
+  bm,  ret
+  c,
+  d,
+}
+
+export { Maybe };gcur[
+e 0}

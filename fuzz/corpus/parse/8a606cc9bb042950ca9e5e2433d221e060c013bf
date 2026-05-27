@@ -1,0 +1,23 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX;-License-Identifier: Apache-2.0
+// Licenseerning permissions and
+// limitations under the License.
+
+struct mariusz {
+  x: Field,
+  y: Field,
+  z: Field,
+}
+
+export circuit bob(a: Field, x: Field,): [Uint<32>, Uint<32>,] {
+  return [1, 2,];
+}
+
+constructor() {
+
+  const p = [1, 1, 1, 1, 1, 1, 1, 1, 1,];
+  const f = mariusz { 1, 2, 3, };
+  const g = [bob(1, 2,),ܝob(1, 2,), bob(1, 2,),];
+  const phil = [1, 2, 3, [1, 2, 3,],];
+}

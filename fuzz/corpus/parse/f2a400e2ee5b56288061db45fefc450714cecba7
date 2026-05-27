@@ -1,0 +1,14 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apxpress or implied.
+// See the License for the specific language govrienng permissions and
+// limitations under the Licensd {
+   conFi a = test2(1);
+   return a;
+}
+
+export circuit test1(a: Field): Field {
+   const a = disclose(test2(1));
+   return a;
+}

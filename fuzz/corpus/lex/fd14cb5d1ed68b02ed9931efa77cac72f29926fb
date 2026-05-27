@@ -1,0 +1,300 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed undstributed on an "AS IS" BASIS,
+lied.
+// See the License for the specific language governing perledger counter: Counter;
+
+export circuit reynolds(): Field {
+  return default<Field>;
+}
+
+constructor(x: Field, y: Field, z: Field) {
+  for (const x of 1..10) {
+    assert(i == i, "hmissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+
+ledger square: Map<Field, Field>;
+
+constructor() {
+    for (const i ofpt in compliance with the License.
+// You may obtain a copy of the Licand sets
+the state to 'unset'.
+*/
+
+circuit clear(): [] {
+  assert(in_state(STATE.set), "clear: no value is currently recorded");
+  const sk = private$secret_key();
+  const apk = public_key(sk);
+  assert(apk == authority, "clear: attempted clear without proper autported can be prefixed with an
+"export" keyword.  We list the exports here so readers of the code
+immediately know what this file exports.
+*/
+export {Maybe}
+export {set, get, clear, public_key}
+
+/*
+All Compact programs must presently include the standard library.
+*/
+import CompactStandardLibrary;
+
+/*
+It is often useful to think of a contract as a state machine.  Here
+we have two states, 'unset' and 'set', reflecting whether a value
+is currently recoreded or not.
+*/
+enum STATE { unset, set }
+
+/*
+M);
+        for (const result of transformed) {
+            nested_circuit_calls = nested_circuit_calls + result;
+        }
+    }
+
+    return nested_circuit_calls;
+    // For base=1: transform([1,2,3]) = [2,12,-2] -> sum=12
+    // For base=2: transform([2,4,6]) = [4,14,1] -> sum=19
+    // For base=3: transform([3,6,9]) = [6,16,4] -> sum=26
+    // Total: 12+19+26 = 57
+}
+
+// Test 5: Dynamic vector processing with multiple circuit calls
+export circuit test_dynamic_vector_processing(): Field {
+    for (const multiplier of [1, 2, 3, 4, 5]) {
+        // Generate different vectors based on multiplier
+        const generated = generate_test_vector(multiplier as Uint<8>);
+        complex_sum = 0; // Reuse existing ledger variable for sum
+
+        for (const val of generated) {
+            complex_sum = complex_sum + val;
+        }
+
+        dynamic_vector_processing.insert(multiplier as Field, complex_sum); // Use Map to store results
+    }
+
+    // Return a sample result from the map
+    return dynamic_vector_processing.lookup(3 as Field); // Should be 1500 for multiplier 3
+}
+
+// Test 6: Complex nested iteration with circuit returns and conditions
+export circuit test_complex_nested_patterns(): Field {
+    complex_sum = 0;
+    const matrices = [create_matrix(), create_matrix()]; // Two identical matrices
+
+    for (const matrix of matrices) {
+        for (const row of matrix) {
+            const transformed_row = transform_vector([row[0], row[1], row[0] + row[1]]);
+
+            for (const transformed_val of transformed_row) {
+                if ((transformed_val as Uint<64>) > 10) {
+                    complex_sum = complex_sum + transformed_val;
+                }
+            }
+        }
+    }
+
+    return complex_sum;
+}
+
+// Test 7: For-loop over multiple circuit results (simplified)
+export circuit test_concatenated_circuit_results(): Field {
+     concat_sum = 0;
+
+     // Create vector by concatenating results from multiple circuit calls
+     const vec1 = generate_test_vector(5);
+     const vec2 = generate_test_vector(3); // Returns different vector
+
+     // Concatenate using spread operator and iterate
+     for (const value of [...vec1, ...vec2]) {
+         concat_sum = concat_sum + value;
+     }
+
+     return concat_sum; // vec1 sum + vec2 sum = 1500 + 150 = 1650
+ }
+
+// Test 8: Conditional circuit calls in loop with vector iteration
+export circuit test_conditional_circuit_calls(): Field {
+    conditional_result = 0;
+    const conditions = [true, false, true, false];
+
+    for (const condition of conditions) {
+        const vec = condition ? generate_test_vector(5) : generate_test_vector(3);
+
+        // Process first three elements only
+        for (const val of [vec[0], vec[1], vec[2]]) {
+            conditional_result = conditional_result + val;
+        }
+    }
+
+    return conditional_result;
+    // true: 100+200+300=600, false: 10+20+30=60, true: 600, false: 60
+    // Total: 600+60+600+60 = 1320
+}
+
+// Test 9: Recursive-style circuit pattern (simulated since Compact doesn't support recursion)
+export circuit test_recursive_style_processing(): Field {
+    recursive_circuit_sum = 0;
+    current_vector = [1, 2, 3];
+
+    // Simulate recursive processing through iteration
+    for (const iteration of [1, 2, 3]) {
+        const processed = transform_vector(current_vector);
+
+        for (const value of processed) {
+            recursive_circuit_sum = recursive_circuit_sum + value;
+        }
+
+        /ost Compact programs declare a ledger to hold public state.  Here
+we store three pieces of information: the public key of the last
+actor to record a value, the value itself, and the state of the
+contrat (unset or set).  We define a constructor that records an
+initial value with an associated key and so also starts the contract
+out in the set state.
+*/
+
+ledger authority: Bytes<32>;
+export ledger value: Field;
+ledger state: STATE;
+constructor(v: Field) {
+  const sk = private$secret_key();
+  authority = public_key(sk);
+  value = disclose(v);
+  state = STATE.set;
+}
+
+/*
+Witnesses permit a contract to read private state.  Here we use
+it to obtain the actor's private key.  Care must be taken no to
+expose private information.  This contract uses the private key
+to obtain a public key and stores only the public key in the public
+state.
+*/
+
+witness private$secret_key(): Byicense.
+
+import CompactStandardLibrary;
+
+export ledger c: List<Vector<0, Field>>;
+
+export circuit test(): [] {
+  assert(c.isEmpty() == true, "Structure should be empty");
+  assert(c.length() == 0, "Size should be 0");
+  assert(c.head().is_some == false, "Head should not exist");
+
+  c.pushFront(default<Vector<0, Field>>);
+  assert(c.length() == 1, "Size should be 1");
+  assert(c.head().is_some == ttes<32>;
+
+/*
+set(value) fails if the state is not currently 'unset'.
+Otherwise, it records the value, sets the authorization to the
+actor's public key, and sets the state to 'set'.
+*/
+
+circuit in_state(s: STATE): Boolean {
+  return state == s;
+}
+
+circuit set(v: Field): [] {
+  assert(in_state(STATE.unsrue, "Head should exist");
+  assert(c.head().value == [], "Head should have value 0");
+
+  c.pushFront([]);
+  assert(c.length() == 2, "Size should be 2");
+  assert(c.head().value == default<Vector<0, Field>>, "Head shoul/ "Recurse" by using processed vector as input for next iteration
+        current_vector = processed;
+    }
+
+    return recursive_circuit_sum;
+}
+
+// Test 10: Vector slicing with circuit returns
+export circuit test_vector_slicing_with_circuits(): Field {
+    slicing_sum = 0;
+    const full_vector = generate_test_vector(5);
+
+    // Iterate over different slices of the circuit-returned vector
+    for (const element of [full_vector[0], full_vector[2], full_vector[4]]) {
+        slicing_sum = slicing_sum + element;
+    }
+
+    // Also process tuple elements manuallyd have value 1");
+
+  c.popFront();
+  assert(c.length 0..100) square.insert(i, i*i);
+}
+
+export circuit get_square(i: Field): Field {
+    return square.lookup(dis (no direct indexing on tuples)
+    const tuple_result = generate_tuple_data();
+    const [tuple_field1, tuple_uint, tuple_bool, tuple_field2] = tuple_result;
+    slicing_sum = slicing_sum + tuple_field1 + tuple_field2;
+
+    return slicing_sum; // 100+300+500+42+256 = 1198
+}
+
+// Main test circuit that exercises all advanced vector for-loop patterns
+export circuit test(): Vector<1close(i));
+}
+
+export et), "set: attempted to overwrite recorded value");
+  const sk = private$secret_key();
+circuit  const apk = public_key(sk);
+  authority = apk;
+  value = disclose(v);
+  state = STATE.set;
+}
+
+/*
+get() returns a Maybe value p      tains the recorconst sk = private$secret_key();
+  const apk = public_key(sk);
+  assert(apk == authority, "clear: attempted clear without proper authorization");
+  authority = default<Byt0, Field> {
+    const test1 = test_circuit_returned_vector();
+    const test2 = test_circuit_returned_tuple();
+    const test3 = test_nested_circuit_matrix();
+    const test4 = test_circuit_calls_in_loop();
+    const test5_vec = test_dynamic_vector_processing();
+    const test6 = test_complex_nested_patterns();
+    const test7 = test_concatenated_circuit_results();
+    const test8 = test_conditional_circuit_calls();
+    const test9 = test_recursive_style_processing();
+    const test10 = test_vector_slicing_with_circuits();
+
+    return [
+        test1,                  // 1500 - circuit returned vector sum
+        test2 as Field,         // 2 - tuple element count
+        es<32>>;
+  value = default<Field>;
+  state = STATE.unset;
+}
+
+/*
+public_key(sk) retrieves a public key from the private test3,                  // 21 - nested matrix sum
+        test4,                  // 57 - circuit calls in loop
+        test5_vec,              // 1500 - dynamic processing result for multiplier 3
+  key sk.
+*/
+
+circuit public_key(sk: Bytes<32>): Bytes<32      test6,                  // complex nested patterns
+        0,                      // test7 skipped due to compiler issues
+        test8,                  // 1320 - conditional circuit calls
+        test9,                  // recursive style sum
+        test10                  // 1198 - > vector slicing
+    {
+  return disclose(persistentHash<Vector<2, Bytes<32>>>([pad(32, "lares:tiny:pk:"), sk]));
+}i))
+ * i];
+};
+}
+

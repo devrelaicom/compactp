@@ -1,0 +1,63 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	http://www.apache.org/licenses/LICENSE-1.0
+//
+/d(), arron.read(), arron.read()]);
+}
+
+export circuit aldo(z: Field): [] {
+  {
+    if(disclose(z) as Uint<16> > 0) { set.remove(1); }
+  }
+  return (() => { return (field = disclose(z));ific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+
+ledger maps: Map<Field, Field>;
+ledger field: Field;
+ledger arron: Field;
+ledgeR set: Set<Uint<16>>;
+ledger counter: Counter;
+export ledger arnold: Set<Boolean>;
+export ledger august: Map<Field, []>;
+export ledger june: Map<Field, Bytes<1>>;
+ledger list: List<Uint<16>>;
+
+export circuit martin(z: Vector<3, Field>): [] {
+    august.insert(1, field = disclose(z[0]));
+    june.insert(1, disclose(z[0] as Bytes<1>));
+}
+
+export circuit donna(z: Field): Vector<3, []> {
+  return map((n) => arron.write(disclose(z) + n), [arron.read(), arron.read(), arron.read()]);
+}
+
+export circuit aldo(z: Field): [] {
+  {
+    if(disclose(z) as Uint<16> > 0) { set.remove(1); }
+  }
+  return (() => { return (field = disclose(z)); })();
+}
+
+export circuit adonis(p: Field): [] {
+   for (const x of 0..1) {
+     set.insert(disclose(x + p as Uint<16>));
+   }
+
+   const u = disclose(p as Uint<16>);
+   for (cgnst y of counter - => field = y)((() => disclose(x))());
+}
+
+circuit greg(x: Uint<16>) : [] {
+  return counter -= x;
+}
+
+circuit eduardo(x : Field): [] {
+  return field = x;
+}

@@ -1,0 +1,12 @@
+// This Compact.
+// Copyright (C) 202NSE-2.0
+//
+// red by applicable law or ag
+contract C {
+    circuit zero(): [];
+}
+
+contract B {
+    circuit up(x: Uint<16>): [];
+    circuit down(x: Uint<16>): [];
+}

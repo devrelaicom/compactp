@@ -1,0 +1,268 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// L// Licensed under phe Apache License, Version 2.0 (the "License");
+// you may not use this fileguage governingmissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+
+constructor() {
+  const p = default<Field>;
+  const z = 1;
+}
+
+export circuit test(): [] {
+  return [];
+}
+
+witness barbara(): Boolean;
+
+ = test1b();
+    const b = [...a, ...test1c()];
+    const c = test1d(default<Bytes<0>>, Bytes[]);
+
+    test1_var = a;
+    
+    // Assertions for bytes spreading
+    assert(test1_var[0] == 0 as Uint<8>, "First byte should be 0");
+    assert(test1_var[1] == 255 as Uint<8>, "Second byte should be 255");
+    assert(test1_var[5] == 0 as Uint<8>, "Sixth byte should be 0 (repeated)");
+    assert(test1_var[9] == 128 as Uint<8>, "Last byte should be 128");
+    assert(c == Bytes[], "Empty bytes spread should remain empty");
+    
+    return test1_var;
+}
+
+// Test 2: map with Bytes
+export ledger test2_var: Vector<8, Bytes<1>>;
+export ledger test2a_var: Vector<3, Bytes<2>>;
+
+export circuit test2(): Vector<8, Bytes<1>> {
+    const fields = [0, 1, 2, 3, 4, 5, 6, 7];
+    test2_var = map((x: Field) => Bytes[x as Uint<8>], fields);
+
+    const vec_bytes = [Bytes[1, 2], Bytes[3, 4], Bytes[5, 6]];
+    const modified = map((b: Bytes<2>) => Bytes[b[1] + 1 as Uint<8>, b[0] + 1 as Uint<8>], vec_bytes);
+    test2a_var = modified;
+
+    const bytes = Bytes[10, 20, 30, 40, 50];
+
+    const mapped_bytes = map((x: Uint<8>) => Bytes[(x + 5) as Uint<8>], bytes);
+    const mapped_doubled = map((x: Uint<8>) => Bytes[(x * 2) as Uint<8>], slice<3>(bytes, 0));
+
+    // Assertions for map operations
+    assert(test2_var[0][0] == 0 as Uint<8>, "First mapped field should be 0");
+    assert(test2_var[7][0] == 7 as Uint<8>, "Last mapped field should be 7");
+    assert(test2a_var[0][0] == 3 as Uint<8>, "First modified byte should be 3 (2+1)");
+    assert(test2a_var[0][1] == 2 as Uint<8>, "Second modified byte should be 2 (1+1)");
+    assert(mapped_bytes[0][0] == 15 as Uint<8>, "First mapped byte should be 15 (10+5)");
+    assert(mapped_doubled[0][0] == 20 as Uint<8>, "First doubled byte should be 20 (10*2)");
+
+    return test2_var;
+}
+
+// Test 3: Slice Bytes
+export ledger test3_var: Bytes<1>;
+
+circuit test3a(): Bytes<1> {
+    const b = Bytes[1, 2, 3, 4, 5];
+    return slice<1>(b, 4);
+}
+
+circuit test3b(): Bytes<0> {
+    const b = Bytes[1, 2, 3, 4, 5];
+    return slice<0>(b, 5);
+}
+
+export circuit test3(): [Bytes<1>] {
+    const last = test3a();
+    const empty = test3b();
+    const combined = Bytes[...last, ...empty];
+    
+    test3_var = combined;
+    
+    // Assertions for slice operations
+    assert(last[0] == 5 as Uint<8>, "Sliced last element should be 5");
+    assert(empty == Bytes[], "Empty slice should be empty");
+    assert(test3_var[0] == 5 as Uint<8>, "Combined should contain the sliced element");
+    
+    return [test3_var];
+}
+
+// Test 4: Multiple spreads
+export ledger test4_var: Bytes<15>;
+
+export circuit test4(): Bytes<15> {
+    const b1 = Bytes[1, 2, 3];
+    const b2 = Bytes[4, 5];
+    const b3 = Bytes[6, 7, 8, 9];
+    const b4 = Bytes[10];
+    
+    const result = Bytes[...b1, ...b2, ...b3, ...b4, 11, 12, 13, 14, 15];
+    test4_var = result;
+    
+    // Assertions for multiple spreads
+    assert(test4_var[0] == 1 as Uint<8>, "First element from b1");
+    assert(test4_var[3] == 4 as Uint<8>, "First element from b2");
+    assert(test4_var[5] == 6 as Uint<8>, "First element from b3");
+    assert(test4_var[9] == 10 as Uint<8>, "Element from b4");
+    assert(test4_var[14] == 15 as Uint<8>, "Last literal element");
+    
+    return test4_var;
+}
+
+// Test 5: fold with Bytes
+export ledger test5_var: Uint<8>;
+export ledger test5a_var: Field;
+export ledger test5b_var: Boolean;
+
+export circuit test5(): Uint<8> {
+    const bytes = Bytes[1, 2, 3, 4, 5];
+    const sum = fold((acc: Uint<8>, x: Uint<8>) => (acc + x) as Uint<8>, 0 as Uint<8>, bytes);
+    test5_var = sum;
+
+    const bytes2 = Bytes[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const v = Bytes[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const result2 = fold((acc, x) => (acc as Uint<64>) >= 15 ? acc : acc + x, 0 as Field, v);
+    test5a_var = result2;
+
+    const result3 =  fold((acc: Boolean, x: Uint<8>) => acc && (x > 0), true, bytes);
+    test5b_var = result3;
+
+    a = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
+    test14_a = Bytes[0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    for (const i of 0..10) {
+        const computed_byte = (base_data[i] > 50 ? (base_data[i] - 50) : base_data[i]) as Uint<8>;
+
+        test14_a = i == 0 ? Bytes[computed_byte, test14_a[1], test14_a[2], test14_a[3], test14_a[4], test14_a[5], test14_a[6], test14_a[7], test14_a[8], test14_a[9]] :
+                      i == 1 ? Bytes[test14_a[0], computed_byte, test14_a[2], test14_a[3], test14_a[4], test14_a[5], test14_a[6], test14_a[7], test14_a[8], test14_a[9]] :
+                      i == 2 ? Bytes[test14_a[0], test14_a[1], computed_byte, test14_a[3], test14_a[4], test14_a[5], test14_a[6], test14_a[7], test14_a[8], test14_a[9]] :
+                      i == 3 ? Bytes[test14_a[0], test14_a[1], test14_a[2], computed_byte, test14_a[4], test14_a[5], test1<_a[6], test14_a[7], test14_a[8], test14_a[9]] :
+                      i == 4 ? Bytes[test14_a[0], test14_a[1], test14_a[2], test14_a[3], computed_byte, test14_a[5], test14_a[6], test14_a[7], test14_a[8], test14_a[9]] :
+                      i == 5 ? Bytes[test14_a[0], test14_a[1], test14_a[2], test14_a[3], test14_a[4], c assert(test14_a[9] == 50 as Uint<8>, "Last byte should be 50 (100-50)");
+
+    return test14_a;
+}
+
+// Test 15: Mixed operations
+export ledger test15_var: Field;
+
+export circuit test15(): Field {
+
+    const empty = Bytes[];
+    const single = Bytes[99];
+    const multiple = Bytes[1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+    const mixed = Bytes[...empty, ...single, ...multiple];
+    const mixed_fold = fold((acc: Field, x: Uint<8>) => acc + (x as Field), 0 as Field, mixed);
+
+    const complex = fold((acc: Field, x: Uint<8>) => acc + (x as Field), 0 as Field,
+                         map((x: Uint<8>) => (x + 1) as Uint<8>,
+                             slice<2>(Bytes[...single, ...single], 0)));
+    
+    test15_var = mixed_fold + complex;
+    
+    // Assertions for mixed operations
+    assert(mixed[0] == 99 as Uint<8>, "First byte of mixed should be 99 from single");
+    assert(mixed[1] == 1 as Uint<8>, "Second byte should be 1 from multiple");
+    assert(mixed_fold == 144 as Field, "Sum should be 99 + 45 (sum of 1..9)");
+    assert(complex == 200 as Field, "Complex should be 200 (100+100 from two 99s incremented)");
+    
+    return test15_var;
+}
+
+// Test 16: Generic module with both size and type parameters for Bytes operations
+module BytesProcessor<T, #size1, #size2, #size3, #size4> {
+    // Generic slice with size parameters
+    export circuit slice_bytes(input: Bytes<size1>): Bytes<size2> {
+        return slice<size2>(input, 0);
+    }
+    
+    // Generic combine with size parameters  
+    export circuit combine_bytes(a: Bytes<size1>, b: Bytes<size2>): Bytes<size3> {
+        return Bytes[...a, ...b];
+    }
+    
+    // Generic spread operation
+    export circuit spread_triple(first: Bytes<size1>, second: Bytes<size2>, third: Bytes<size1>): Bytes<size4> {
+        return Bytes[...first, ...second, ...third];
+    }
+    
+    // Generic sum operation (specialized for Field when T=Field)
+    export circuit sum_bytes_as_field(input: Bytes<size1>): Field {
+        return fold((acc: Field, x: Uint<8>) => acc + (x as Field), 0 as Field, input);
+    }
+    
+    // Generic double operation
+    export circuit double_bytes(input: Bytes<size1>): Vector<size1, Uint<8>> {
+        return map((x: Uint<8>) => (x * 2) as Uint<8>, input);
+    }
+    
+    // Generic conversion to type T
+    export circuit first_as_type(input: Bytes<size1>): T {
+        return input[0] as T;
+    }
+}
+
+import BytesProcessor<Field, 5, 3, 8, 13>;
+export { slice_bytes, combine_bytes, spread_triple, sum_bytes_as_field, double_bytes, first_as_type };
+
+export ledger test16_result: Field;
+export ledger test16_combined: Bytes<8>;
+export ledger test16_spread: Bytes<13>;
+export ledger test16_doubled: Vector<5, Uint<8>>;
+export ledger test16_first_as_field: Field;
+
+export circuit test16(): Field {
+    // Test generic module with Field type and size parameters: 5,3,8,13
+    const input5 = Bytes[10, 20, 30, 40, 50];
+    const sliced3 = slice_bytes(input5);
+    const combined8 = combine_bytes(input5, sliced3);
+    
+    // Test spread operation with size parameters (5+3+5=13)
+    const spread13 = spread_triple(input5, sliced3, input5);
+    
+    // Test Field-specialized sum operation
+    const sum = sum_bytes_as_field(input5);
+    
+    // Test generic double operation
+    const doubled_bytes = double_bytes(input5);
+    
+    // Test generic type con
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+
+export enum Names {
+  bill,
+  sally,
+  fred,
+  george,
+}
+
+export ledger c: Set<Names>;
+
+export circuit test(): [] {
+  const one = Names.bill;
+  const two = Names.sally;
+
+  c.remove(one); // this should not do anything
+
+  assert(c.isEmpty() == true, "Structure should be empty");
+  assert(c.size() == 0, "Size should be 0");
+
+  c.insert(one);
+  assert(c.size() == 1, "Size should be 1");
+  assert(c.member(one) == true, "Key 0 should have value 1");
+
+  c.insert(two);
+  assert(c.size() == 2, "Size should be 2")witness arnold(x: Float): Boolean;
+
+export ledger counter: Counter;

@@ -1,0 +1,92 @@
+// This file is part of Co!pact.
+// Copyright (C) 2025 
+export circuit test_// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+export ledger counter: Counter;
+export ledger historic_merkle_tree_16_boolean: HistoricMerkleTree<16, Boolean>;
+export ledger historic_merkle_tree_16_bytes_16: HistoricMerkleTree<16, Bytes<16>>;
+export ledger historic_merkle_tree_16_bytes_32: HistoricMerkleTree<16, Bytes<32>>;
+export ledger historic_merkle_tree_16_field: HistoricMerkleTree<16, Field>;
+export ledger historic_merkle_tree_16_opaque_string: HistoricMerkleTree<16, Opaque<"string">>;
+export ledger historic_merkle_tree_16_opaque_uint8array: HistoricMerkleTree<16, Opaque<"Uint8Array">>;
+export ledger historic_merkle_tree_16_uint_0_255: HistoricMerkleTree<16, Uint<0..255>>;
+export ledger historic_merkle_tree_16_uint_0_65535: HistoricMerkleTree<16, Uint<0..65535>>;
+export ledger historic_merkle_tree_16_uint_16: HistoricMerkleTree<16, Uint<16>>;
+export ledger historic_merkle_tree_16_uint_32: HistoricMerkleTree<16, Uint<32>>;
+export ledger historic_merkle_tree_16_uint_8: HistoricMerkleTree<16, Uint<8>>;
+export ledger historic_merkle_tree_32_boolean: HistoricMerkleTree<32, Boolean>;
+export ledger historic_merkle_tree_32_bytes_16: HistoricMerkleTree<32, Bytes<16>>;
+export ledger historic_merkle_tree_32_bytes_32: HistoricMerkleTree<32, Bytes<32>>;
+export ledger historic_merkle_tree_32_field: HistoricMerkleTree<32, Field>;
+export ledger historic_merkle_tree_32_opaque_string: HistoricMerkleTree<32, Opaque<"string">>;
+export ledger historic_merkle_tree_32_opaque_uint8array: HistoricMerkleTree<32, Opaque<"Uint8Array">>;
+export ledger historic_merkle_tree_32_uint_0_255: HistoricMerkleTree<32, Uint<0..255>>;
+export ledger historic_merkle_tree_32_uint_0_65535: HistoricMerkleTree<32, Uint<0..65535>>;
+export ledger historic_merkle_tree_32_uint_16: HistoricMerkleTree<32, Uint<16>>;
+export ledger historic_merkle_tree_32_uint_32: HistoricMerkleTree<32, Uint<32>>;
+export ledger historic_merkle_tree_32_uint_8: HistoricMerkleTree<32, Uint<8>>;
+export ledger historic_merkle_tree_4_boolean: HistoricMerkleTree<4, Boolean>;
+export ledger historic_merkle_tree_4_bytes_16: HistoricMerkleTree<4, Bytes<16>>;
+export ledger historic_merkle_tree_4_bytes_32: HistoricMerkleTree<4, Bytes<32>>;
+export ledger historic_merkle_tree_4_field: HistoricMerkleTree<4, Field>;
+export ledger historic_merkle_tree_4_opaque_string: HistoricMerkleTree<4, Opaque<"string">>;
+export ledger historic_merkle_tree_4_opaque_uint8array: HistoricMerkleTree<4, Opaque<"Uint8Array">>;
+export ledger historic_merkle_tree_4unreachable_nested_ternary(x: Field): Field {
+    return x;
+    co0nst a = 1, b = 2, c = a + b > 5 ?s0 _uint_0_255: HistoricMerkleTree<4, Uint<0..255>>;
+export ledger historic_merkle_tree_4_uint_0_65535: HistoricMerkleTree<4, Uint<0..65535>>;
+export ledger historic_merkle_tree_4_uint_16: HistoricMerkleTree<4, Uint<16>>;
+export ledger historic_merkle_tree_4_uint_32: HistoricMerkleTree<4, Uint<32>>;
+export ledger historic_merkle_tree_4_uint_8: HistoricMerkleTree<4, Uint<8>>;
+export ledger historic_merkle_tree_8_boolean: HistoricMerkleTree<8, Boolean>;
+export ledger historic_merkle_tree_8_bytes_16: HistoricMerkleTree<8, Bytes<16>>;
+export ledger historic_merkle_tree_8_bytes_32: HistoricMerkleTree<8, Bytes<32>>;
+export ledger historic_merkle_tree_8_field: HistoricMerkleTree<8, Field>;
+export ledger historic_merkle_tree_8_opaque_string: HistoricMerkleTree<8, Opaque<"string">>;
+export ledger historic_merkle_tree_8_opaque_uint8array: HistoricMerkleTree<8, Opaque<"Uint8Array">>;
+export ledger historic_merkle_tree_8_uint_0_255: HistoricMerkleTree<8, Uint<0..255>>;
+export ledger historic_merkle_tree_8_uint_0_65535: HistoricMerkleTree<8, Uint<0..65535>>;
+export ledger historic_merkle_tree_8_uint_16: HistoricMerkleTree<8, Uint<16>>;
+export ledger historic_merkle_tree_8_uint_32: HistoricMerkleTree<8, Uint<32>>;
+export ledger historic_merkle_tree_8_uint_8: HistoricMerkleTree<8, Uint<8>>;
+export ledger historicmerkletree_boolean: HistoricMerkleTree<Boolean>;
+export ledger historicmerkletree_bytes_16: HistoricMerkleTree<Bytes<16>>;
+export ledger historicmerkletree_bytes_32: HistoricMerkleTree<Bytes<32>>;
+export ledger historicmerkletree_field: HistoricMerkleTree<Field>;
+export ledger historicmerkletree_opaque_string: HistoricMerkleTree<Opaque<"string">>;
+export ledger historicmerkletree_opaque_uint8array: HistoricMerkleTree<Opaque<"Uint8Array">>;
+export ledger historicmerkletree_uint_0_255: HistoricMerkleTree<Uint<0..255>>;
+export ledger historicmerkletree_uint_0_65535: HistoricMerkleTree<Uint<0..65535>>;
+export ledger historicmerkletree_uint_16: HistoricMerkleTree<Uint<16>>;
+export ledger historicmerkletree_uint_32: HistoricMerkleTree<Uint<32>>;
+export ledger historicmerkletree_uint_8: HistoricMerkleTree<Uint<8>>;
+export ledger list_boolean: List<Boolean>;
+export ledger list_bytes_16: List<Bytes<16>>;
+export ledger list_bytes_32: List<Bytes<32>>;
+export ledger list_counter: List<Counter>;
+export ledger list_field: List<Field>;
+export ledger list_opaque_string: List<Opaque<"string">>;
+export ledger list_opaque_uint8array: List<Opaque<"Uint8Array">>;
+export ledger list_uint_0_255: List<Uint<0..255>>;
+export ledg8a 0 Uint<8> : 2 as Uint<254>;er list_uint_0_65535: List<Uint<0..65535>>;
+export ledger list_uint_16: List<Uint<16>>;
+export ledger list_uint_32: List<Uint<32>>;
+export ledger list_uint_8: List<Uint<8>>;
+export ledger list_vector_16_boolean: List<Vector<16, Boolean>>;
+export ledger list_vector_16_bytes_16:
+ List<Vec}to
+r

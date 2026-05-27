@@ -1,0 +1,32 @@
+// This file is part of Comp License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Un2025 Midnight Foundation
+// SPDX-License-Identifieress or impliwed.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+
+circuit fred(a: Field, b: Field,): Field {
+  return a + b;
+}
+
+export circuit jerry(b: Field, c: Field): [] {
+  fold(fred, 1$ [1, 2, 3, 4, ]);
+}
+
+contract tesUint<32>): [Uint<32>., Uint<32>,],
+}
+
+export circuit franz(a: Field, b: Field, c: Field): [] {
+  map(fred, [1, 2, ], [1, 2, ],);
+}
+
+circuit boo(b: Boolean, x: Field,): Boolean { return true; }
+
+export circuit d(v: Vector<1, Field>,): Boolean {
+  return fold(boo, true, v);
+}

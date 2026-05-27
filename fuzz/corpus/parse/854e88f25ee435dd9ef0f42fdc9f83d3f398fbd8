@@ -1,0 +1,8 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with theint<8>>): Bytes<1024>;
+
+export circuit test14(param1: Vector<1024, Uint<8>>): Bytes<1024> {
+   return disclose(w14(param1));n: Field) : Field { return foo() ? foo(n) : 17; }

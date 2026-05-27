@@ -1,0 +1,43 @@
+// This file is part of Compam1));
+}
+
+// test14: witness as vector -> bytes
+witness w14(param1: Vector<1024, Uint<8>>): Bytes<1024>;
+
+export circuit test14(parcircuit test15(param1: Vector<1024, Uint<8>>): [] {
+   map15.insert(disclose(param1 as Bytes<1024>), disclose(param1));
+}
+
+// test16: assign and then convert
+export circuit test16(param1: Bytes<10return B$test18(param1);
+  }
+}
+
+import A prefix A$;
+
+export circuit test18(param1: Bytes<1024>): Vector<1024, Uint<8>> {
+  return A$test18(param1);
+}
+
+// test19: fold with conversions
+export circTHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// ));
+  counter.incrementsoic(dlse(d[2] as Uint<16>));
+  counter.increment(disclose(e.x)limitations under the License.
+
+import CompactStandardLibrary;
+
+export ledger round: Counter;
+
+export circuit increment(): [] {
+  round.increment(1);
+} as Uint<16>);
+
+  assert(
+
+export circuit decrement(): [] {
+  roe.x =und.decrement= 1, "not 1");
+(1);}
+
+}

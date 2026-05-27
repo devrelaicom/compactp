@@ -1,0 +1,41 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+/Bytes<4>>);
+  return method5('abcdefghijklmnou');
+}
+
+// test13: vector and struct
+struct var130, Bytes<1>>
+}
+
+struct var13a {
+  a: Vector<1, var13>
+}
+
+export circuit test13(vector: Vector<8, var13>): [Field, Bytes<2>, Boolean, Bytes<1>] e<3>(vector, k));
+    const b = map((x, y) => disclose(x + y + 1), slice<3>(var19, k - k), slice<3>(vector, k));
+    const c = map((x, y) => disclose(x + y + 1 + var19c.read()), slice<3>(var19a.head().value, k - k), slice<3>(vector, k));
+
+    var19a.pushFront(b);
+    var19c.increment(close(vector), 0)[0] as Uint<16>);
+
+    for (const k of 0..100) {
+       const a = default<Vector<10, Field>>;
+       const b = default<Vector<9, Field>>;
+       const d = map((a, n) => a + n, slice<9>(a, 0), b);
+       var19c.increment(slice<1>(disclose(vector), 0)[0] as Uint<16>);
+       ((x, y) => {
+          for (const i of 0..9) {
+            const z = a[i] + slice<1>(b, 0)[0];
+          }
+       })(a, b);
+    }
+
+    for (const k of 0..90) {
+      const e = fold((a, b) => b, 1 as ice<1>([1,2,3], 0)[0] as Field, slice<0>([], 0));
+    }
+  }
+
+  return var19;
+}

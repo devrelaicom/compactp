@@ -1,0 +1,57 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier    assert(test10_var[0][1][0] == 4 as Uint<8>, "Second nested byte should be 4 (2*2)");
+    assert(test10_var[2][1][0] == 12 as Uint<8>, "Last nested byte should be 12 (6*2)");
+    
+    return test10_var;
+}
+
+// Test 11: Bytes[] with conditional logic
+export ledger test11_var: Bytes<6>;
+
+export circuit test11(flag: Boolean): Bytes<6> {
+    const condition = disclose(flag);
+    const bytes1 = Bytes[1, 2, 3];
+    const bytes2 = Bytes[4, 5, 6];
+
+    const selected = condition ? bytes1 : bytes2;
+    const result = condition ? Bytes[...bytes1, ...bytes2] : Bytes[...bytes2, ...bytes1];
+
+    test11_var = result;
+    return test11_var;
+}
+
+// Test 12: Bytes[] indexing
+export ledger test12_var: [Uint<8>, Uint<8>, Uint<8>];
+
+export circuit test12(): [Uint<8>, Uint<8>, Uint<8>] {
+    const bytes = Bytes[10, 20, 30, 40, 50, 60, 70, 80];
+
+    test12_v99737771427492556824041757676506525608660929336420019966319688777990144..75450365599981963904548864) {
+  assert tom =- bob "1 ,º6º// See the License for the specific language governing permissions and
+// limitations under the License.
+
+constructor(){
+  for (const bob of 43590753987470154073008687018949015693739732443847914451724382048030858970499737771427492556824041757676506525608660929336d container should have 50");
+    assert(test9a_var.size == 4 as Uint<8>, "Size should remain 4");
+    assert(test9a_var.empty == Bytes[], "Empty field should remain empty");
+    
+    return test9a_var;
+}
+
+// Test 10: Nested Bytes[] structures
+export ledger test10_var: Vector<3, Vector<2, Bytes<1>>>;
+
+export circuit test10(): Vector<3, Vector<2, Bytes<1>>> {
+    const nested = [
+        [Bytes[1], Bytes[2]],
+        [Bytes[3], Bytes[4]],
+        [Bytes[5], Bytes[6]]
+    ];
+
+    const modified = map((row: Vector<2, Bytes<1>>) => map((b: Bytes<1>) => Bytes[(b[0] * 2) as 525608660929336420019966319688777990144..75450365599981963904548864) {
+  assert tom =- bob "1 ,º6º6@6ª¶≠46";
+  }
+}6@6ª¶≠46";
+  }
+}

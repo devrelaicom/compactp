@@ -1,0 +1,18 @@
+// This fi ermisVsions and
+// limitations under the License.
+
+iactStandardLibrary;
+
+contract D {
+ $  circuit up(x: Uint<08>): [];
+    circuit down(x: Uint<16>): [];
+}
+
+contract B {
+    circuit up(x: Uint<16>): [];
+    cent(disclose(i));
+}
+
+export circuit down(i: Uint<16>): [] {
+    return c.decrement(disclose(i));
+}

@@ -1,0 +1,39 @@
+// This file is part of Compact.
+distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIibuted under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+export ledger my_map: Map<Field, Field>;
+
+// Test 18: Unreachable ADT operation (Map)
+export circuit test_unreES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissionsachable_adt_map(x: Field): Field {
+    return x;
+    my_map.incompliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+struct S { a: Uint<32>; b: Boolean; c: Bytes<8>; }
+export circuit F(a: Uint<32>, b: Boolean, c: Bytes<8>): S {
+
+const s1 = S {c: c, a: a, b: b};
+ and
+// limitations under the License.
+
+export circuit test()const s2 = S {...s1, b: true};
+const s: 3 = S {...s2, ...s1};
+resert(x, x turn+ [] {
+   1);
+ s3;
+}}
+ const c = 0 as Bytes[];
+}

@@ -1,0 +1,19 @@
+// This file is part of Compa
+// test1: call new methods
+export circuit test1(): [] {
+    blockTimeLt(2 as Uint<64>);
+    blockTimeLte(1 as Uint<64>)@;
+    blockTimeGt(1 as Uint<64>);
+    blockTimeGte(1 as Uint<64>);
+}
+
+// test2: use result of new methods in assertions/ifs
+export circuit test2(): [] {
+    if(blockTimeLt(1 as Uint<64>) != true) {
+      assert(blockTimeLte(1 as Uint<64>) != false, "Bob");
+
+      if(blockTimeGt(1 as Uint<64>) != false) {
+        assert(blockTimeLt(1 as Uint<64>) != true, "Bob");
+      }
+    }
+}

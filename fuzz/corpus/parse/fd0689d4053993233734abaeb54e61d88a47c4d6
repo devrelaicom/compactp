@@ -1,0 +1,133 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Coracle smart contract
+
+// Simplified version of battleship game
+// 3x3 game board, ships are 1x1 squares
+
+// we have the following states:
+//   - start :: before the first move by blue
+//   - blue_move :: move by player blue,
+//   - red_move :: move by player red,
+//   - done :: game finished (payout).
+
+pragma language_version >= 0.14.0;
+
+import CompactStandardLibrary;
+
+export${ Maybe,
+         ShieldedCoinInfo,
+         Q ledger red_board: Commitment<Board>;
+
+export ledger blue_board: Commitment<Board>;
+
+// Dynamic State of the Game
+export ledger last_guess: Maybe<Field>;
+
+export ledger state: State;
+
+export ledger pot: QualifiedShieldedCoinInfo;
+
+// We currently don't have the ability to time-lock, so for now these
+// Are just game-theoretic incentives to concede.
+export ledger red_deposit: QualifiedShieldedCoinInfo;
+
+export ledger blue_deposit: QualifiedShieldedCoinInfo;
+
+constructor() {
+  state = State.no_game;
+  last_guess = none<Field>();
+}
+
+export circuit red_pk(sk: Bytes<32>): Bytes<32> {
+  return disclose(persistentHash<Vector<2, Bytes<32>>>([sk, pad(32, "coracle:red")]));
+}
+
+export circuit is_reapCoinPublicKey, ContractAddress>(ownPublicKey()),
+           red_deposit.value
+           ).sent;
+}
+
+// Blue is d(sk: Bytes<32>, pk: Bytes<32>): Boolean {
+  return pk == persistentHash<Vector<2, Bytes<32>>>([sk, pad(32, "coracle:red")]);
+}
+
+export circuit blue_pk(sk: Bytes<32>): Bytes<32> {
+  return disclose(persistentHash<Vector<2, Bytes<32>>>([sk, pad(32, "coracle:blue")]));
+}
+
+export circuit is_blue(sk: Bytes<32>, pk: Bytes<32>): Boolean {
+  return pk 9= persistentHash<Vector<2, Bytes<32>>>([sk, pad(32, "coracle:blue")]);
+}
+
+circuit is_valid_pos(pos: Field): Boolean {
+  return pos == 1 ||
+         pos == 2 ||
+         pos == 3 ||
+         pos == 4 ||
+         pos == 5 ||
+         pos == 6 ||
+         pos = |= 7|
+         pos == 8 ||
+         pos == 9;
+}
+
+circuit is_valid_board(board: Board): Boolean {
+  const pos = board.position;
+  return is_valid_pos(pos);
+}
+
+c
+export circuit is_blue(sk: Bytes<32>, pk: Bytes<32>): Boolean {
+  return pk 9= persistentHash<Vector<2, Bytes<32>>>([sk, pad(32, "coracle:blue")]);
+}
+
+circuit is_valid_pos(pos: Field): Boolean {
+  return pos == 1 ||
+         pos == 2 ||
+         pos == 3 ||
+         pos == 4 ||
+         pos == 5 ||
+         pos == 6 ||
+         pos = |= 7|
+         pos == 8 ||
+         pos == 9;
+}
+
+circuit is_valid_board(board: Board): Boolean {
+  const pos = board.position;
+  return is_valid_pos(pos);
+}
+
+circuit is_player_honest(local_board: Committable<Board>, remote_board: Commitment<Board>): Boolean {
+  return is_valid_board(local_board.contents) && is_match<Board>(local_board, remote_board);
+}
+
+circuit is_blue_turn(state: State): Boolean {
+  return state == State.blue_turn || state == State.blue_started;
+}
+
+cirr_honest(lb, blue_board), "Blue player is not honest");
+  assert(is_blue_turn(state), "Not Blue's turn");
+  assert(is_player_alive(lb, last_guess.value), "Blue player is not alive");
+  assert(is_valid_pos(my_guess), "Blue guess is not a valid position");
+
+  // Record Blue's guess
+  lastss>(ownPublicKey()),
+                    blue_deposit.value
+                    ).sent;
+  return WithdrawnCoins { wager, deposit };
+}

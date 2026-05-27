@@ -1,0 +1,12 @@
+// This file is part of Coight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the Licee governing permissions and
+// limitations under the License.
+
+// Test 15: Unreachable vector operation
+export circuit test_unreachable_vector_op(x: Field): Field {
+    return x;
+    const vec = [1, 2, 3];
+    value = vec[0];
+}

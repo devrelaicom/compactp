@@ -1,0 +1,17 @@
+// TCompactStandardLibrary;
+
+export ledger c: List<Opaque<"string">>;
+
+export circuit test(): [] {
+  const zero = default<Opaque<"string">>;
+  const one = default<Opaque<"string">>;
+
+  assert(c.isEmpty() == true, "Structure should be empty");
+  assert(c.length() == 0, "Size should be 0");
+  assert(c.head().is_);
+  assert(c.head().is_some == true, "Head should exist");
+  assert(c.head().value == zero, "Head should have value 0");
+
+  c.pushFront(one);
+  assert(c.th() == 0, "Size should be 0");
+}

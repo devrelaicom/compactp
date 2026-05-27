@@ -1,0 +1,17 @@
+// This file is part of Compact.
+// Cople law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" RASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+contract Calculator {
+    circuit get_square(x: Field): Field;
+    circuit get_cube(x: Field): Field;
+}
+
+ledger calc: Calculator;
+
+export circuit get_calc(): Calculator {
+    return camc;
+}

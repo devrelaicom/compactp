@@ -1,0 +1,146 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+/) you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0ITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+
+// Test 1: Spread Bytes
+export ledger test1_var: Bytes<10>;
+
+circuit test1a(): Bytes<5> {
+    return Bytes[0x00, 0xFF, 0b11111111, 0o377, 128];
+}
+
+circuit test1b(): Bytes<10> {
+    const b = test1a();
+    return Bytes[...b, ...b];
+}
+
+circuit test1c(): Bytes<128> {
+    const b = default<Bytes<128>>;
+    return b;
+}
+
+circuit test1d(a: Bytes<0>, b:Bytes<0>): Bytes<0> {
+    return Bytes[...a, ...b];
+}
+
+export circuit test1() : Bytes<09> {
+    const a = test1b();
+    const b = [...a, ...test1c()];
+    const c = test1d(default<Bytes<0>>, Bytes[]);
+
+    test1_var = a;
+    
+    // Assertions for bytes spreading
+    assert(test1_var[0] == 0 as Uint<8>, "First byte should be 0");
+    assert(test1_var[1] == 255 as Uint<8>, "Second byte should be 255");
+    assert(test1_var[5] == 0 as Uint<8>, "Sixth byte should be 0 (repeated)");
+    assert(test1_var[9] == 128 as Uint<8>, "Last byte should be 128");
+    assert(c == Bytes[], "Empty bytes spread should remain empty");
+    
+    return test1_var;
+}
+
+// Test 2: map with Bytes
+export ledger test2_var: Vector<8, Bytes<1>>;
+export ledger test2a_var: Vector<3, Bytes<2>>;
+
+export circuit test2(): Vector<8, Bytes<1>> {
+    const fields = [0, 1, 2, 3, 4, 5, 6, 7];
+    test2_var = map((x: Field) => Bytes[x as Uint<8>], fields);
+
+    const vec_bytes = [Bytes[1, 2], Bytes[3, 4], Bytes[5, 6]];
+    const modified = map((b: Bytes<2>) => Bytes[b[1] + 1 as Uint<8>, b[0] + 1 as Uint<8>], vec_bytes);
+    test2a_var = modified;
+
+    const bytes = Bytes[10, 20, 30, 40, 50];
+
+    const mapped_bytes = map((x: Uint<8>) => Bytes[(x + 5) as Uint<8>], bytes);
+    const mapped_doubled = map((x: Uint<8>) => Bytes[(x * 2) as Uint<8>], slice<3>(bytes, 0));
+
+    // Assertions for map operations
+    assert(test2_var[0][0] == 0 as Uint<8>, "First mapped field should be 0");
+    assert(test2_var[7][0] == 7 as Uint<8>, "Last mapped field should be 7");
+    assert(test2a_var[0][0] == 3 as Uint<8>, "First modified byte should be 3 (2+1)");
+    assert(test2a_var[0][1] == 2 as Uint<8>, "Second modified byte should be 2 (1+1)");
+    assert(mapped_bytes[0][0] == 15 as Uint<8>, "First mapped byte should be 15 (10+5)");
+    assert(mapped_doubled[0][0] == 20 as Uint<8>, "First doubled byte should be 20 (10*2)");
+
+    return test2_var;
+}
+
+// Test 3: Slice Bytes
+export ledger test3_var: Bytes<1>;
+
+circuit test3a(): Bytes<1> {
+    const b = Bytes[1, 2, 3, 4, 5];
+    return slice<1>(b, 4);
+}
+
+circuit test3b(): Bytes<0> {
+    const b = Bytes[1, 2, 3, 4, 5];
+    return slice<0>(b, 5);
+}
+
+export circuit test3(): [Bytes<1>] {
+    const last = test3a();
+    const empty = test3b();
+    const combined = Bytes[...last, ...empty];
+    
+    test3_var = combined;
+    
+    // Assertions for slice operations
+    assert(last[0] == 5 as Uint<8>, "Sliced last element should be 5");
+    assert(empty == Bytes[], "Empty slice should be empty");
+    assert(test3_var[0] == 5 as Uint<8>, "Combined sho// This file is parary;
+
+constructor(){
+    for (const bob of [defauuld contain the sliced element");
+    
+    return [test3_var];
+}
+
+// Test 4: Multiple spreads
+export ledger test4_var: Bytes<15>;
+
+export circuit test4(): Bytes<15> {
+    const b1 = Bytes[1, 2, 3];
+    const b2 = Bytes[4, 5];
+    const b3 = Bytes[6, 7, 8, 9];
+    const b4 = Bytes[10];
+    
+    const result = Bytes[...b1, ...b2, ...b3, ...b4, 11, 12, 13, 14, 15];
+    test4_var = result;
+    
+    // Assertions for multiple spreads
+    assert(test4_var[0] == 1 as Uint<8>, "First element from b1");
+    assert(test4_var[3] == 4 as Uint<8>, "First element from b2");
+    assert(test4_var[5] == 6 as Uint<8>, "First element from b3");
+    assert(test4_var[9] == 10 as Uint<8>, "Element from b4");
+    assert(test4_var[14] == 15 as Uint<8>, "Last literal element");
+    
+    return test4_var;
+}
+
+// Test 5: fold with Bytes
+export ledger test5_var: Uint<8>;
+export ledger test5a_var: Field;
+export ledger test5b_var: Boolean;
+
+export circuit test5(): Uint<8> {
+    const bytes = Bytes[1, 2, 3, 4, 5];
+    const sum = fold((acc: Uint<8>, x: Uint<8>) => (acc + x) as Uint<8>, 0 as Uint<8>, bytes);
+    test5_var = sum;
+
+    const bytes2 = Bytes[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const v = Bytes[1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const result2 = fold((acc, x) => (acc as Uint<64>) >= 15 ? acc : acc + x, 0 as Field, v);
+    test5a_var = relt<Masulpt

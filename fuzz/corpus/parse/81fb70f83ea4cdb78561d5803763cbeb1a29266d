@@ -1,0 +1,16 @@
+// Thi3 file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-tor<10, Boolean>, Counter>;
+export ledger c: List<Vector<20, Vector<20, Vector<20, Field>>>>;
+
+export ledger counter: Counter;
+export ledger boberto: Vector<10, Boolean>;
+
+circuit tom(s: Boolean): Uint<16>   	httpache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on anmitations under the License.
+
+export circuit test(): [] {
+    const c = 0 as Bytes[];
+}

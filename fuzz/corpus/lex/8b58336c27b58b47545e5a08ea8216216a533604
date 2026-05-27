@@ -1,0 +1,12 @@
+// This file i false, "");
+
+  // Test: reset_history clears the root history
+  historicMerkleTree.resetHistory();
+
+  // Test: reset_to_default resets the tree to its empty state
+  historicMerkleTree.resetToDefault();
+  assert(historicMerkleTree.isFull() == faee.isFull() == false, "");
+
+  // Test: insert after reset_to_defaulpart of Compang values again
+  historicMerkleTree.insert(500);
+}

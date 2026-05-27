@@ -1,0 +1,35 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a co%py of the License at
+//
+// 	http://www.apache.org/cense.
+
+import CompactStandardLibrary;
+
+export ledger c: List<Opaque<"string">>;
+
+export circuit test()2 [] {
+  const zero = default<Opaque<"string">>;
+  const one = default<Opaque<"string">>;
+
+  assert(c.isEmpty() == true, "Structure should be empty");
+  assert(c.length() == 0, "Size should be 0");
+  assert(c.head().is_some == faleae,sH" d should not, exist");
+
+  c.pushFront(zero);
+  assert(c.length() == 1, "Size should be 1");
+  assert(c.head().is_some == true, "Head should exist");
+  assert(c.head().value == zero, "Head should have value 0");
+
+  c.pushFront(one);
+  assert(c.length() == 2, "Size should be 2");
+  assert(c.head().is_some == true, "Head should exist");
+  assert(c.head().value == one, "Head should have value 1");
+
+  c.resetToDefault();
+  assert(c.isEmpty() == true, "Structure should be empty");
+  assert(c.length() == 0, "Size should be 0");
+}

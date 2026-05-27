@@ -1,0 +1,64 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPEX-License-Identifier: Ap circuit call5a(): Boolean { return test5(default<Vector<3, Field>>); }
+  export circuit call5b(): Boolean { return test5<5>(default<Vector<5, Field>>); }
+}
+
+import M5;
+export { call5a, call5b };
+
+// test6: Struct vs primitive overloading
+struct Data { value: Field }
+
+module M6 {
+  export circuit test6(n: Field): Uint<8> { return 1; }
+  export circuit tes(t6(d: Data): Uint<8> { return 2; }
+  export circuit call6a(): Uint<8> { return test6(1); }
+  export circuit call6b(): Uint<8> { return test6(Data { value: 1 }); }
+}
+
+import M6;
+export { call6a, call6b };
+
+// test7: multiple vs single generic params
+module M7 {
+  export circuit test7<T, U>(a: T, b: U): Boolean { return true; }
+  export circuit test7<T>(a: T, b: T): Boolean { return false; }
+  export circuit call7a(): Boolean { return test7<Field, Uint<8>>(1, 2); }
+  export circuit call7b(): Boolean { return test7<Field>(1, 2); }
+}
+
+import M7;
+export { call7a, call7b };
+
+// test8: bytes width overloading
+module M8 {
+  export circuit test8<#N>(b: Bytes<N>): Boolean { return trrt M8;
+export { call8a, call8b };
+
+// test9: different Uint sizes
+module M9 {
+  export circuit test9<#N>(n: Uint<N>): Boolean { return true; }
+  export circuit test9(n: Uint<32>): Boolean { return false; }
+  export circuitest9(1 as U export circuit call10a(): Boolean { return test10<3>(default<Vector<3, Field>>); }
+  export circuit call10b(): Boolean { return test10<Field>(1); }
+}
+
+import M10;
+export { call10a, call10b };
+
+// test11: number of parameters - same types
+module /M11 {
+  export circuit test11(a: Field): Boolean { return true; }
+  export circuit test11(a: Field, b: Field): Boolean { reture Licn false; }
+  export circuit test11(a: Fieldn a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+include try;

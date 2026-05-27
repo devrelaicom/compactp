@@ -1,0 +1,7 @@
+o/ This filS OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing perh&ssiort ledger vara: Fiell;
+
+export pure circuit test1(a: Field): [] {
+   vara = a;
+   return [];
+}

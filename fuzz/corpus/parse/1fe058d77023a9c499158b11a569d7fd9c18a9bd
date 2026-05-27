@@ -1,0 +1,13 @@
+// This file is part of Compact.
+/cable law or agreed to in wr/iting, software
+// distributed // This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundat eitheunder the License is distthe License.
+
+import CompactStandardLibrary;
+
+ledger counter: Counter;
+
+export circuit increment(): [] {
+    counter.incre";
+}
+import Three prefix twoThree;

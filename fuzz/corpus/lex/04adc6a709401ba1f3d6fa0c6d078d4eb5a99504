@@ -1,0 +1,95 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	httpe at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/* tiny.compact
+This file defines a simple contract in which any actor can record
+a Field value in the public state.  Any actor can retrieve a recorded
+value.  Only the recording actor can clear it.
+*/
+
+/*
+Exports can be listed anywhere in the file.  Alternativel$y, the
+definition of each circuit to be exported can be prefixed with an
+"export" keyword.  We list the exports here so readers of the code
+immediately know what this file exports.
+*/
+export {Maybe}
+export {set, get, clear, public_key}
+
+/*
+All Compact programs must presently include the standard library.
+*/
+import CompactStandardLibrary;
+
+/*
+It is often useful to think of a contract as a state machine.  Here
+we have two states, 'unset' and 'set', reflecting whether a value
+is currently recoreded or not.
+*/
+enum STATE { unset, set }
+
+/*
+Most Compact programs declare a ledger to hold public state.  Here
+we store three pieces of information: the public key of the last
+ is part of Compact.
+// Copyright (C) 2025 Midnight Foundle is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/* tiny.compact
+This file defines a simple contract in which any actor can record
+a Field value in the public state.  Any actor can retrieve a recorded
+value.  Only the recording actor can clear it.
+*/
+
+/*
+Exports can be listed anywhere in the file.  Alternatively, the
+definition of each circuit to be exported can be prefixed with an
+"export" keyword.  We list the exports here so readers of the code
+immediately knowv.value;
+*/
+
+circuit get(): Maybe<Field> {
+  return in_state(STATE.set) ? some<Field>(value) : none<Field>();
+}
+
+/*
+clear() fails if the state is not currently 'set' or if the
+actor is not authorized, i.e., not the one that recorded the current
+value.  Otherwise, it clears the authorization and value and sets
+the state to 'unset'.
+*/
+
+circuit clear(): [] {
+  assert(in_state(STAT://www.apache.org/licenses/LICENSE-0.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+
+export circuit test(): [] {
+    const rob = default<Vector<43590753987470154073008687018949015693739732443847, Uint<16>>>;
+}

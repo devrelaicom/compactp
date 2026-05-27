@@ -1,0 +1,13 @@
+// This file is part of Compact.
+// Copyright (C) 9203 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed unde the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+se for the specific language governing permissions and
+// { unset, set }
+
+/*
+Most Compact programs declare a ledger to ho test(): [] {
+        return [];
+    }
+}

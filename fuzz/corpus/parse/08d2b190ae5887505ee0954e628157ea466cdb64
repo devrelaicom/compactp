@@ -1,0 +1,323 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+export ledger counter: Counter;
+export ledger historic_merkle_tree_16_boolean: HistoricMerkleTree<16, Boolean>;
+export ledger historic_merkle_tree_16_bytes_16: HistoricMerkleTree<16, Bytes<16>>;
+export ledger historic_merkle_tree_16_bytes_32: HistoricMerkleTree<16, Bytes<32>>;
+export ledger historic_merkle_tree_16_field: HistoricMerkleTree<16, Field>;
+export ledger historic_merkle_tree_16_opaque_string: HistoricMerkleTree<16, Opaque<"string">>;
+export ledger historic_merkle_tree_16_opaque_uint8array: HistoricMerkleTree<16, Opaque<"Uint8Array">>;
+export ledger historic_merkle_tree_16_uint_0_255: HistoricMerkleTree<16, Uint<0..255>>;
+export ledger historic_merkle_tree_16_uint_0_65535: HistoricMerkleTree<16, Uint<0..65535>>;
+export ledger historic_merkle_tree_16_uint_16: HistoricMerkleTree<16, Uint<16>>;
+export ledger historic_merkle_tree_16_uint_32: HistoricMerkleTree<16, Uint<32>>;
+export ledger historic_merkle_tree_16_uint_8: HistoricMerkleTree<16, Uint<8>>;
+export ledger historic_merkle_tree_32_boolean: HistoricMerkleTree<32, Boolean>;
+export ledger historic_merkle_tree_32_bytes_16: HistoricMerkleTree<32, Bytes<16>>;
+export ledger historic_merkle_tree_32_bytes_32: HistoricMerkleTree<32, Bytes<32>>;
+export ledger historic_merkle_tree_32_field: HistoricMerkleTree<32, Field>;
+export ledger historic_merkle_tree_32_opaque_string: HistoricMerkleTree<32, Opaque<"string">>;
+export ledger historic_merkle_tree_32_opaque_uint8array: HistoricMerkleTree<32, Opaque<"Uint8Array">>;
+export ledger historic_merkle_tree_32_uint_0_255: HistoricMerkleTree<32, Uint<0..255>>;
+export ledger historic_merkle_tree_32_uint_0_65535: HistoricMerkleTree<32, Uint<0..65535>>;
+export ledger historic_merkle_tree_32_uint_16: HistoricMerkleTree<32, Uint<16>>;
+export ledger historic_merkle_tree_32_uint_32: HistoricMerkleTree<32, Uint<32>>;
+export ledger historic_merkle_tree_32_uint_8: HistoricMerkleTree<32, Uint<8>>;
+export ledger historic_merkle_tree_4_boolean: HistoricMerkleTree<4, Boolean>;
+export ledger historic_merkle_tree_4_bytes_16: HistoricMerkleTree<4, Bytes<16>>;
+export ledger historic_merkle_tree_4_bytes_32: HistoricMerkleTree<4, Bytes<32>>;
+export ledger historic_merkle_tree_4_field: HistoricMerkleTree<4, Field>;
+export ledger historic_merkle_tree_4_opaque_string: HistoricMerkleTree<4, Opaque<"string">>;
+export ledger historic_merkle_tree_4_opaque_uint8array: HistoricMerkleTree<4, Opaque<"Uint8Array">>;
+export ledger historic_merkle_tree_4_uint_0_255: HistoricMerkleTree<4, Uint<0..255>>;
+export ledger historic_merkle_tree_4_uint_0_65535: HistoricMerkleTree<4, Uint<0..65535>>;
+export ledger historic_merkle_tree_4_uint_16: HistoricMerkleTree<4, Uint<16>>;
+export ledger historic_merkle_tree_4_uint_32: HistoricMerkleTree<4, Uint<32>>;
+export ledger historic_merkle_tree_4_uint_8: HistoricMerkleTree<4, Uint<8>>;
+export ledger historic_merkle_tree_8_boolean: HistoricMerkleTree<8, Boolean>;
+export ledger historic_merkle_tree_8_bytes_16: HistoricMerkleTree<8, Bytes<16>>;
+export ledger historic_merkle_tree_8_bytes_32: HistoricMerkleTree<8, Bytes<32>>;
+export ledger historic_merkle_tree_8_field: HistoricMerkleTree<8, Field>;
+export ledger historic_merkle_tree_8_opaque_string: HistoricMerkleTree<8, Opaque<"string">>;
+export ledger historic_merkle_tree_8_opaque_uint8array: HistoricMerkleTree<8, Opaque<"Uint8Array">>;
+export ledger historic_merkle_tree_8_uint_0_255: HistoricMerkleTree<8, Uint<0..255>>;
+export ledger historic_merkle_tree_8_uint_0_65535: HistoricMerkleTree<8, Uint<0..65535>>;
+export ledger historic_merkle_tree_8_uint_16: HistoricMerkleTree<8, Uint<16>>;
+export ledger historic_merkle_tree_8_uint_32: HistoricMerkleTree<8, Uint<32>>;
+export ledger historic_merkle_tree_8_uint_8: HistoricMerkleTree<8, Uint<8>>;
+export ledger historicmerkletree_boolean: HistoricMerkleTree<Boolean>;
+export ledger historicmerkletree_bytes_16: HistoricMerkleTree<Bytes<16>>;
+export ledger historicmerkletree_bytes_32: HistoricMerkleTree<Bytes<32>>;
+export ledger historicmerkletree_field: HistoricMerkleTree<Field>;
+export ledger historicmerkletree_opaque_string: HistoricMerkleTree<Opaque<"string">>;
+export ledger historicmerkletree_opaque_uint8array: HistoricMerkleTree<Opaque<"Uint8Array">>;
+export ledger historicmerkletree_uint_0_255: HistoricMerkleTree<Uint<0..255>>;
+export ledger historicmerkletree_uint_0_65535: HistoricMerkleTree<Uint<0..65535>>;
+export ledger historicmerkletree_uint_16: HistoricMerkleTree<Uint<16>>;
+export ledger historicmerkletree_uint_32: HistoricMerkleTree<Uint<32>>;
+export ledger historicmerkletree_uint_8: HistoricMerkleTree<Uint<8>>;
+export ledger list_boolean: List<Boolean>;
+export ledger list_bytes_16: List<Bytes<16>>;
+export ledger list_bytes_32: List<Bytes<32>>;
+export ledger list_counter: List<Counter>;
+export ledger list_field: List<Field>;
+export ledger list_opaque_string: List<Opaque<"string">>;
+export ledger list_opaque_uint8array: List<Opaque<"Uint8Array">>;
+export ledger list_uint_0_255: List<Uint<0..255>>;
+export ledger list_uint_0_65535: List<Uint<0..65535>>;
+export ledger list_uint_16: List<Uint<16>>;
+export ledger list_uint_32: List<Uint<32>>;
+export ledger list_uint_8: List<Uint<8>>;
+export ledger list_vector_16_boolean: List<Vector<16, Boolean>>;
+export ledger list_vector_16_bytes_16: List<Vector<16, Bytes<16>>>;
+export ledger list_vector_16_bytes_32: List<Vector<16, Bytes<32>>>;
+export ledger list_vector_16_field: List<Vector<16, Field>>;
+export ledger list_vector_16_opaque_string: List<Vector<16, Opaque<"string">>>;
+export ledger list_vector_16_opaque_uint8array: List<Vector<16, Opaque<"Uint8Array">>>;
+export ledger list_vector_16_uint_0_255: List<Vector<16, Uint<0..255>>>;
+export ledger list_vector_16_uint_0_65535: List<Vector<16, Uint<0..65535>>>;
+export ledger list_vector_16_uint_16: List<Vector<16, Uint<16>>>;
+export ledger list_vector_16_uint_32: List<Vector<16, Uint<32>>>;
+export ledger list_vector_16_uint_8: List<Vector<16, Uint<8>>>;
+export ledger list_vector_2_boolean: List<Vector<2, Boolean>>;
+export ledger list_vector_2_bytes_16: List<Vector<2, Bytes<16>>>;
+export ledger list_vector_2_bytes_32: List<Vector<2, Bytes<32>>>;
+export ledger list_vector_2_field: List<Vector<2, Field>>;
+export ledger list_vector_2_opaque_string: List<Vector<2, Opaque<"string">>>;
+export ledger list_vector_2_opaque_uint8array: List<Vector<2, Opaque<"Uint8Array">>>;
+export ledger list_vector_2_uint_0_255: List<Vector<2, Uint<0..255>>>;
+export ledger list_vector_2_uint_0_65535: List<Vector<2, Uint<0..65535>>>;
+export ledger list_vector_2_uint_16: List<Vector<2, Uint<16>>>;
+export ledger list_vector_2_uint_32: List<Vector<2, Uint<32>>>;
+export ledger list_vector_2_uint_8: List<Vector<2, Uint<8>>>;
+export ledger list_vector_4_boolean: List<Vector<4, Boolean>>;
+export ledger list_vector_4_bytes_16: List<Vector<4, Bytes<16>>>;
+export ledger list_vector_4_bytes_32: List<Vector<4, Bytes<32>>>;
+export ledger list_vector_4_field: List<Vector<4, Field>>;
+export ledger list_vector_4_opaque_string: List<Vector<4, Opaque<"string">>>;
+export ledger list_vector_4_opaque_uint8array: List<Vector<4, Opaque<"Uint8Array">>>;
+export ledger list_vector_4_uint_0_255: List<Vector<4, Uint<0..255>>>;
+export ledger list_vector_4_uint_0_65535: List<Vector<4, Uint<0..65535>>>;
+export ledger list_vector_4_uint_16: List<Vector<4, Uint<16>>>;
+export ledger list_vector_4_uint_32: List<Vector<4, Uint<32>>>;
+export ledger list_vector_4_uint_8: List<Vector<4, Uint<8>>>;
+export ledger list_vector_8_boolean: List<Vector<8, Boolean>>;
+export ledger list_vector_8_bytes_16: List<Vector<8, Bytes<16>>>;
+export ledger list_vector_8_bytes_32: List<Vector<8, Bytes<32>>>;
+export ledger list_vector_8_field: List<Vector<8, Field>>;
+export ledger list_vector_8_opaque_string: List<Vector<8, Opaque<"string">>>;
+export ledger list_vector_8_opaque_uint8array: List<Vector<8, Opaque<"Uint8Array">>>;
+export ledger list_vector_8_uint_0_255: List<Vector<8, Uint<0..255>>>;
+export ledger list_vector_8_uint_0_65535: List<Vector<8, Uint<0..65535>>>;
+export ledger list_vector_8_uint_16: List<Vector<8, Uint<16>>>;
+export ledger list_vector_8_uint_32: List<Vector<8, Uint<32>>>;
+export ledger list_vector_8_uint_8: List<Vector<8, Uint<8>>>;
+export ledger map_boolean: Map<Boolean>;
+export ledger map_boolean_boolean: Map<Boolean, Boolean>;
+export ledger map_boolean_bytes_16: Map<Boolean, Bytes<16>>;
+export ledger map_boolean_bytes_32: Map<Boolean, Bytes<32>>;
+export ledger map_boolean_field: Map<Boolean, Field>;
+export ledger map_boolean_opaque_string: Map<Boolean, Opaque<"string">>;
+export ledger map_boolean_opaque_uint8array: Map<Boolean, Opaque<"Uint8Array">>;
+export ledger map_boolean_uint_0_255: Map<Boolean, Uint<0..255>>;
+export ledger map_boolean_uint_0_65535: Map<Boolean, Uint<0..65535>>;
+export ledger map_boolean_uint_16: Map<Boolean, Uint<16>>;
+export ledger map_boolean_uint_32: Map<Boolean, Uint<32>>;
+export ledger map_boolean_uint_8: Map<Boolean, Uint<8>>;
+export ledger map_bytes_16: Map<Bytes<16>>;
+export ledger map_bytes_16_boolean: Map<Bytes<16>, Boolean>;
+export ledger map_bytes_16_bytes_16: Map<Bytes<16>, Bytes<16>>;
+export ledger map_bytes_16_bytes_32: Map<Bytes<16>, Bytes<32>>;
+export ledger map_bytes_16_field: Map<Bytes<16>, Field>;
+export ledger map_bytes_16_opaque_string: Map<Bytes<16>, Opaque<"string">>;
+export ledger map_bytes_16_opaque_uint8array: Map<Bytes<16>, Opaque<"Uint8Array">>;
+export ledger map_bytes_16_uint_0_255: Map<Bytes<16>, Uint<0..255>>;
+export ledger map_bytes_16_uint_0_65535: Map<Bytes<16>, Uint<0..65535>>;
+export ledger map_bytes_16_uint_16: Map<Bytes<16>, Uint<16>>;
+export ledger map_bytes_16_uint_32: Map<Bytes<16>, Uint<32>>;
+export ledger map_bytes_16_uint_8: Map<Bytes<16>, Uint<8>>;
+export ledger map_bytes_32: Map<Bytes<32>>;
+export ledger map_bytes_32_boolean: Map<Bytes<32>, Boolean>;
+export ledger map_bytes_32_bytes_16: Map<Bytes<32>, Bytes<16>>;
+export ledger map_bytes_32_bytes_32: Map<Bytes<32>, Bytes<32>>;
+export ledger map_bytes_32_field: Map<Bytes<32>, Field>;
+export ledger map_bytes_32_opaque_string: Map<Bytes<32>, Opaque<"string">>;
+export ledger map_bytes_32_opaque_uint8array: Map<Bytes<32>, Opaque<"Uint8Array">>;
+export ledger map_bytes_32_uint_0_255: Map<Bytes<32>, Uint<0..255>>;
+export ledger map_bytes_32_uint_0_65535: Map<Bytes<32>, Uint<0..65535>>;
+export ledger map_bytes_32_uint_16: Map<Bytes<32>, Uint<16>>;
+export ledger map_bytes_32_uint_32: Map<Bytes<32>, Uint<32>>;
+export ledger map_bytes_32_uint_8: Map<Bytes<32>, Uint<8>>;
+export ledger map_field: Map<Field>;
+export ledger map_field_boolean: Map<Field, Boolean>;
+export ledger map_field_bytes_16: Map<Field, Bytes<16>>;
+export ledger map_field_bytes_32: Map<Field, Bytes<32>>;
+export ledger map_field_fier<16, Uint<0..65535>>>>;
+   vector_2_vector_16_uint_16 = default<Vector<2, Vector<16, Uint<16>>>>;
+   vector_2_vector_16_uint_32 = default<Vector<2, Vector<16, Uint<32>>>>;
+   vector_2_vector_16_uint_8 = default<Vector<2, Vector<16, Uint<8>>>>;
+   vector_2_vector_2_boolean = default<Vector<2, Vector<2, Boolean>>>;
+   vector_2_vector_2_bytes_16 = default<Vector<2, Vector<2, Bytes<16>>>>;
+   vector_2_vector_2_bytes_32 = default<Vector<2, Vector<2, Bytes<32>>>>;
+   vector_2_vector_2_field = default<Vector<2, Vector<2, Field>>>;
+   vector_2_vector_2_opaque_string = default<Vector<2, Vector<2, Opaque<"string">>>>;
+   vector_2_vector_2_opaque_uint8array = default<Vector<2, Vector<2, Opaque<"Uint8Array">>>>;
+   vector_2_vector_2_uint_0_255 = default<Vector<2, Vector<2, Uint<0..255>>>>;
+   vector_2_vector_2_uint_0_65535 = default<Vector<2, Vector<2, Uint<0..65535>>>>;
+   vector_2_vector_2_uint_16 = default<Vector<2, Vector<2, Uint<16>>>>;
+   vector_2_vector_2_uint_32 = default<Vector<2, Vector<2, Uint<32>>>>;
+   vector_2_vector_2_uint_8 = default<Vector<2, Vector<2, Uint<8>>>>;
+   vector_2_vector_4_boolean = default<Vector<2, Vector<4, Boolean>>>;
+   vector_2_vector_4_bytes_16 = default<Vector<2, Vector<4, Bytes<16>>>>;
+   vector_2_vector_4_bytes_32 = default<Vector<2, Vector<4, Bytes<32>>>>;
+   vector_2_vector_4_field = default<Vector<2, Vector<4, Field>>>;
+   vector_2_vector_4_opaque_string = default<Vector<2, Vector<4, Opaque<"string">>>>;
+   vector_2_vector_4_opaque_uint8array = default<Vector<2, Vector<4, Opaque<"Uint8Array">>>>;
+   vector_2_vector_4_uint_0_255 = default<Vector<2, Vector<4, Uint<0..255>>>>;
+   vector_2_vector_4_uint_0_65535 = default<Vector<2, Vector<4, Uint<0..65535>>>>;
+   vector_2_vector_4_uint_16 = default<Vector<2, Vector<4, Uint<16>>>>;
+   vector_2_vector_4_uint_32 = default<Vector<2, Vector<4, Uint<32>>>>;
+   vector_2_vector_4_uint_8 = default<Vector<2, Vector<4, Uint<8>>>>;
+   vector_2_vector_8_boolean = default<Vector<2, Vector<8, Boolean>>>;
+   vector_2_vector_8_bytes_16 = default<Vector<2, Vector<8, Bytes<16>>>>;
+   vector_2_vector_8_bytes_32 = default<Vector<2, Vector<8, Bytes<32>>>>;
+   vector_2_vector_8_field = default<Vector<2, Vector<8, Field>>>;
+   vector_2_vector_8_opaque_string = default<Vector<2, Vector<8, Opaque<"string">>>>;
+   vector_2_vector_8_opaque_uint8array = default<Vector<2, Vector<8, Opaque<"Uint8Array">>>>;
+   vector_2_vector_8_uint_0_255 = default<Vector<2, Vector<8, Uint<0..255>>>>;
+   vector_2_vector_8_uint_0_65535 = default<Vector<2, Vector<8, Uint<0..65535>>>>;
+   vector_2_vector_8_uint_16 = default<Vector<2, Vector<8, Uint<16>>>>;
+   vector_2_vector_8_uint_32 = default<Vector<2, Vector<8, Uint<32>>>>;
+   vector_2_vector_8_uint_8 = default<Vector<2, Vector<8, Uint<8>>>>;
+   vector_4_boolean = default<Vector<4, Boolean>>;
+   vector_4_bytes_16 = default<Vector<4, Bytes<16>>>;
+   vector_4_bytes_32 = default<Vector<4, Bytes<32>>>;
+   vector_4_field = default<Vector<4, Field>>;
+   vector_4_opaque_string = default<Vector<4, Opaque<"string">>>;
+   vector_4_opaque_uint8array = default<Vector<4, Opaque<"Uint8Array">>>;
+   vector_4_uint_0_25o in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+
+ledger maps: Map<Field, Field>;
+ledger field: Field;
+ledger arron: Field;
+ledger set: Set<Uint<16>>;
+ledger counter: Counter;
+export ledger arnold: Set<Boolean>;
+export ledger august: Map<Field, []>;
+export ledger june: Map<Field, Bytes<1>>;
+ledger list: List<Uint<16>>;
+
+export circuit martin(z: Vector<3, Field>): [] {
+    august.insert(1, field = disclose(z[0]));
+    june.insert(1, disclose(z[0] as Bytes<1>));
+}
+
+export circuit donna(z: Field): Vector<3, []> {
+  return map((n) => arron.write(disclose(z) + n), [arron.read(), arron.read(), arron.read()]);
+}
+
+export circuit aldo(z: Field): [] {
+  {
+    if(disclose(z) as Uint<16> > 0) { set.remove(1); }
+  }
+  return (() => { return (field = disclose(z)); })();
+}
+
+export circuit adonis(p: Field): [] {
+   for (const x of 0..1) {
+     set.insert(disclose(x + p as Uint<16>));
+   }
+
+   const u = disclose(p as Uint<16>);
+   for (const y of counter -= u, counter += u, counter += u) {
+     maps.insert(p, p);
+     field.write(p);
+   }
+
+   don(anna([disclose(p), disclose(p), disclose(p)]));
+}
+
+circuit don(z: Vector<3, Field>): Vector<3, Field> {
+  field = z[0];
+  maps.insert(z[0], z[1]);
+  return z;
+}
+
+export circuit anna(z: Vector vector_4_vector_2_opaque_uint8array = default<Vector<4, Vector<2, Opaque<"Uint8Array">>>
+   vector_4_vector_8_uint_8 = default<Vector<4, Vector<8, Uint<8>>>>;
+   vector_8_boolean = default<Vector<8, Boolean>>;
+   vector_8_bytes_16 = default<Vector<8, Bytes<16>>>;
+   vector_8_bytes_32 = default<Vector<8, Bytes<32>>>;
+   vector_8_field = default<Vector<8, Field>>;
+   vector_8_opaque_string = default<Vector<8, Opaque<"string">>>;
+   vector_8_opaque_uint8array = default<Vector<8, Opaque<"Uint8Array">>>;
+   vector_8_uint_0_255 = default<Vector<8, Uint<0..255>>>;
+   vector_8_uint_0_65535 = default<Vector<8, Uint<0..65535>>>;
+   vector_8_uint_16 = default<Vector<8, Uint<16>>>;
+   vector_8_uint_32 = default<Vector<8, Uint<32>>>;
+   vector_8_uint_8 = default<Vector<8, Uint<8>>>;
+   vector_8_vector_16_boolean = default<Vector<8, Vector<16, Boolean>>>;
+   vector_8_vector_16_bytes_16 = default<Vector<8, Vector<16, Bytes<16>>>>;
+   vector_8_vector_16_bytes_32 = default<Vector<8, Vector<16, Bytes<32>>>>;
+   vector_8_vector_16_field = default<Vector<8, Vector<16, Field>>>;
+   vector_8_vector_16_opaque_string = default<Vector<8, Vector<16, Opaque<"string">>>>;
+   vector_8_vector_16_opaque_uint8array = default<Vector<8, Vector<16, Opaque<"Uint8Array">>>>;
+   vector_8_vector_16_uint_0_255 = default<Vector<8, Vector<16, Uint<0..255>>>>;
+   vector_8_vector_16_uint_0_65535 = default<Vector<8, Vector<16, Uint<0..65535>>>>;
+   vector_8_vector_16_uint_16 = default<Vector<8, Vector<16, Uint<16>>>>;
+   vector_8_vector_16_uint_32 = default<Vector<8, Vector<16, Uint<32>>>>;
+   vector_8_vector_16_uint_8 = default<Vector<8, Vector<16, Uint<8>>>>;
+   vector_8_vector_2_boolean = default<Vector<8, Vector<2, Boolean>>>;
+   vector_8_vector_2_bytes_16 = default<Vector<8, Vector<2, Bytes<16>>>>;
+   vector_8_vector_2_bytes_32 = default<Vector<8, Vector<2, Bytes<32>>>>;
+   vector_8_vector_2_field = default<Vector<8, Vector<2, Field>>>;
+   vector_8_vector_2_opaque_string = default<Vector<8, Vector<2, Opaque<"string">>>>;
+   vector_8_vector_2_opaque_uint8array = default<Vector<8, Vector<2, Opaque<"Uint8Array">>>>;
+   vector_8_vector_2_uint_0_255 = default<Vector<8, Vector<2, Uint<0..255>>>>;
+   vector_8_vector_2_uint_0_65535 = default<Vector<8, Vector<2, Uint<0..65535>>>>;
+   vector_8_vector_2_uint_16 = default<Vector<8, Vector<2, Uint<16>>>>;
+   vector_8_vector_2_uint_32 = default<Vector<8, Vector<2, Uint<32>>>>;
+   vector_8_vector_2_uint_8 = default<Vector<8, Vector<2, Uint<8>>>>;
+   vector_8_vector_4_boolean = default<Vector<8, Vector<4, Boolean>>>;
+   vector_8_vector_4_bytes_16 = default<Vector<8, Vector<4, Bytes<16>>>>;
+   vector_8_vector_4_bytes_32 = default<Vector<8, Vector<4, Bytes<32>>>>;
+   vector_8_vector_4_field = default<Vector<8, Vector<4, Field>>>;
+   vector_8_vector_4_opaque_string = default<Vector<8, Vector<4, Opaque<"string">>>>;
+   vector_8_vector_4_opaque_uint8array = default<Vector<8, Vector<4, Opaque<"Uint8Array">>>>;
+   vector_8_vector_4_uint_0_255 = default<Vector<8, Vector<4, Uint<0..255>>>>;
+   vector_8_vector_4_uint_0_65535 = default<Vector<8, Vector<4, Uint<0..65535>>>>;
+   vector_8_vector_4_uint_16 = default<Vector<8, Vector<4, Uint<16>>>>;
+   vector_8_vector_4_uint_32 = default<Vector<8, Vector<4, Uint<32>>>>;
+   vector_8_vector_4_uint_8 = default<Vector<8, Vector<4, Uint<8>>>>;
+   vector_8_vector_8_boolean = default<Vector<8, Vector<8, Boolean>>>;
+   vector_8_vector_8_bytes_16 = default<Vector<8, Vector<8, Bytes<16>>>>;
+   vector_8_vector_8_bytes_32 = default<Vector<8, Vector<8, Bytes<32>>>>;
+   vector_8_vector_8_field = default<Vector<8, Vector<8, Field>>>;
+   vector_8_vector_8_opaque_string = default<Vector<8, Vector<8, Opaque<"string">>>>;
+   vector_8_vector_8_opaque_uint8array = default<Vector<8, Vector<8, Opaque<"Uint8Array">>>>;
+   vector_8_vector_8_uint_0_255 = default<Vector<8, Vector<8, Uint<0..255>>>>;
+   vector_8_vector_8_uint_0_65535 = default<Vector<8, Vector<8, Uint<0..65535>>>>;
+   vector_8_vector_8_uint_16 = default<Vector<8, Vector<8, Uint<16>>>>;
+   vector_8_vector_8_uint_32 = default<Vector<8, Vector<8, Uint<32>>>>;
+   vector_8_vector_8_uint_8 = default<Vector<8, Vector<8, Uint<8>>>>;
+}

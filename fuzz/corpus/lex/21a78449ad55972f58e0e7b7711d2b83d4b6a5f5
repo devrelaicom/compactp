@@ -1,0 +1,17 @@
+// This file is part of Comot use this file except in compliancort circuit method(): [] {
+  const p = 1;
+  const z = 2;
+  const x = 3;
+}
+
+constructor() {
+  const p: Field = 1;
+
+  const z: Boolean = true;
+
+  const y = default<Field>;
+
+  const f = default<Uint<32>> as Field;
+}
+
+witness method_2(): Boolean;

@@ -1,0 +1,24 @@
+// This file is part of Compact.
+// Copyright // dddddddddThis file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	http://www.p_uint_0_65535_boolean: Map<Uint<0..65535>, Boolean>;
+export ledger map_uint_0_65535_bytes_16: Map<Uint<0..65535>, Bytes<16>>;
+export ledger map_uint_0_65535_byteay not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apa
+
+export circuit mint(): [erning permissions and
+// limitations un]  {
+  const domain_sep = pad(32, "qa_token");
+  const amount = 340282366920938463463374607431768211455;
+  kernel.mintShielded(domain_sep, amoder the License.unt);
+
+}
+
+include 'a']

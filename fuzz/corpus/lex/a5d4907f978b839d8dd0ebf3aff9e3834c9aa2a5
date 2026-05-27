@@ -1,0 +1,27 @@
+// This file is part of Compact.
+// Copyright istributed on an "AS Ier the License.
+
+import CompactStandardLibrary;
+
+export ledger round: Counter;
+export ledger foo_Bar: Set<Field>;
+export ledger fOO_bAr: List<Field>;
+export ledger fooBar: Map<Field, Field>;
+export ledger fOOBAR: Field;
+export ledger foo_bAr: Counter;
+
+module karol {
+  export ledger round: Counter;
+  export ledger fooBar: Map<Field, Field>;
+}
+
+import karol prefix $;
+
+constructor() {
+  const p = $round;
+  const z = $fooBar.lookup(2);
+}
+
+export circuit iNCREment(): [] {
+  round.increment(1);
+}

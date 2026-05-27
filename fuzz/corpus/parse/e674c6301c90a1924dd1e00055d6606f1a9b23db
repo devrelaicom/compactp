@@ -1,0 +1,10 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-t.
+// Copyright (C)limitations under the License.
+
+import CompactStandardLibrary;
+
+export circuit test(): [] {
+    const rob = default<Vector<00000000000000000000000000000003091420140124539676, Uint<16>>>;
+}

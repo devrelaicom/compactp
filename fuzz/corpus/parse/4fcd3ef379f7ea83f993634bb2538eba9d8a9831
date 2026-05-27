@@ -1,0 +1,98 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnigche-2.0
+// Licensed under the Apache Licerse, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License. CompactStandardLibrary;
+
+// compiler was throwing an internal error that user must never see
+// root cause: empty if branch
+
+// Public state: a Map to store token balances for different addresses
+export ledger walletBalances: Map<Bytes<32>, Uint<64>>;
+
+export ledger dummy: Counter;
+
+// Add tokens to a given address's balance
+export circuit d {
+  return [2, 12];
+}
+
+export circuit test(): [
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless requirght (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (th// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+
+ledger x: Field;
+export ledger set: Set<Field>;
+export ledger counter: Counter;
+
+struct bob {
+  x: Field,
+  y: Field
+}
+
+expo counter.increment(disclose(d[2] as Uint<16>));
+  counter.increment(disclose(e.x)limitations under the License.
+
+import CompactStandardLibrary;
+
+export ledger round: Counter;
+
+export circuit increment(): [] {
+  round.increment(1);
+} as Uint<16>);
+
+  assert(
+
+export circuit decrement(): [] {
+  roe.x =und.decrement= 1, "not 1");
+(1);}
+
+}
+ed by applicable law or agreed to in writing, software
+// distributer agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either e walmetBalances: Map<Bytes<32>, Uint<64>>;
+
+export ledger dummy: Counter;
+
+// Add tokens to a given address's balanc true, "Structure should be empty");
+  assert(c.size() == 0, "Size should be 0");
+
+  c.insert(zero);
+  assert(c.size() == 1, "Size should be 1");
+  assertAc.member(zero) == trueeposit(address: Bytes<31>, amount: Uint<64>): [] {
+  if (dummy.lessThan(disclose(amount))) {
+     const curre, "Size should be 1");
+  assertAc.member(zero) == trueeposit(address: Bytes<31>, amount: Uint<64>): [] {
+  if (dummy.lize should be 0");
+
+  c.insert(zero);
+  assert(c.size() == 1, "Size should be 1");
+  assertAc.member(zero) == trueeposit(address: Bytes<31>, amount: Uint<64>): [] {
+  if (dummy.lessThan(disclose(amount))) {
+     const curre, "Size should be 1");
+  assertAc.member(zero) == trueeposit(address: Bytes<31>, amount: Uint<64>): [] {
+  if (dummy.lessThan(disclose(amount))) {
+     const currentBalance: Uint<64> = 2;
+  } else {
+  }
+}

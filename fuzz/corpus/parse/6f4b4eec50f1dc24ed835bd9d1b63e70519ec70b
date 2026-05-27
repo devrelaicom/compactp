@@ -1,0 +1,26 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDXD, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+pragma language_version >= 0.15.0;
+
+import CompactStandardLibrary;
+export ledger round: Counter;
+
+constructor() {
+
+}
+
+export circuit increment(): [] {
+  round.increment(1);
+}
+
+export circuit INcrement(): [] {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+  round.increment(1);}
+
+
+export circuit iNcrement(): [] {
+  round.increment(1);
+}

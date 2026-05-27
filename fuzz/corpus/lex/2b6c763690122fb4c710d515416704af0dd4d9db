@@ -1,0 +1,6 @@
+is file equired my = 1;
+if (false) {
+assert(x != 0, 'oops1');
+}
+assert(x != 0, 'oops2');
+}]

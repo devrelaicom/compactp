@@ -1,0 +1,245 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtian a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// ar2.insert(1, a);
+
+  const b = [a[0], a[1], ...slice<7>(a, 2), ...[a[9]]];
+  const c = [...default<Vector<1, Uint<16>>>, a[0], ...[a[1]], ...a];
+  const d = var2a { a: slice<3>([...[true, true, true, true]], 0) };
+  const e = [...[...[...default<Vector<0x1000000, Vector<10, var2a>>>]]];
+  const f = [...[var2b.START, var2b.STOP], ...[var2a { a: [true, true, true] }]];
+  const g = slice<1>(f, 2)[0].a[0] == slice<1>(f, 2)[0].a[1];
+  const h = [...slice<1>([var2b.START, var2b.STOP], 0)];
+  // const i = [...c][...[0]];
+  const j = [...[[1], [1], [1]][1], [1], [1]];
+
+  // for (const i of e) {
+  //  const p = [...e];
+  // }
+
+  for (const i of [...[[1], [2], [3]]]) {
+    const a = [...i];
+
+    for (const j of i) {
+      const i = 1;
+    }
+  }
+
+  for (const i of [...var2.lookup(1)]) {
+    const a = i;
+  }
+}
+
+// test3: another examples
+export ledger var3: Map<Field, Vector<8, Uint<32>>>;
+export ledger var3c: Counter;
+
+export circuit test3a(): Field {
+  return 1;
+}
+
+export circuit test3b(): [Field] {
+  return [1];
+}
+
+struct var3a {
+  a: Boolean,
+  b: Field,
+  c: var3b
+}
+
+struct var3b {
+  a: Vector<10, Field>,
+  b: Vector<10, Bytes<1>>,
+  c: Vector<10, Boolean>,
+  d: Vector<10, Uint<8>>
+}
+
+export circuit test3c(v]ctor: Vector<8, Uint<32>>): [] {
+  const a = "abcde";
+  const b = [...a as Vector<5, Uint<8>>, ...default<[]>];
+  const c = disclose([...slice<4>(vector, 0), ...slice<4>(vector, 4)]);
+  var3.insert(1, c);
+
+  const d = 0;
+
+  // mix of slice / spread and o htrhteings
+  const e = [b[d + 1], ...slice<1>(var3.lookup(d + 1), d + 1), ...[d + 1], ...default<Vector<1, Field>>, test3a(), ...test3b()];
+  const f = [b[2 + 2]];
+  // const g = slice<0xffffffffffffffffffffffffffffffffffff>(default<Vector<0xffffffffffffffffffffffffffffffffffff, Field>>, 0);
+  // const h = slice<0>(default<Vector<0x1000000, Field>>, 0x1000000);
+  const i = default<Vector<1000, var3a>>;
+  const j = [...i, ...i];
+
+  // for(const i of [...j]) {
+  //   const a = i.b as Uint<8>;
+  // }
+
+  // for (const i of 0..100) {
+  //  const a = slice<1>(j, i);
+  //  var3c.increment(a[0].b as Uint<16>);
+  // }
+
+  // for (const i of [var3c, var3c, var3c]) {
+  //    const p = slice<2>([var3c, var3c, var3c], 0)[0];
+  //    p.increment(1);
+  // }
+}
+
+// test4: spread with structs
+export ledger var4: Map<Field, Field>;
+export ledger var4b: Counter;
+
+struct var4a {
+  a: Bytes<8>
+}
+
+export circuit test4(): [] {
+  const a: [Uint<1>, Uint<2>, Uint<32>] = [1, 2, 3];
+  const b = [false, ...a, 4];
+  const c = ["a", "b", "c", ...b];
+
+  for(const i of 0..100) {
+    var4.insert(i, i);
+    // const d = [...[var4.lookup(i + 1)], ...[], ...[var4.member(i)][0]];
+    // const e = slice<1>([...var4b.increment(1), ...var4b += 1, ...var4b.resetToDefault(), 1], 0);
+  }
+
+  const f = [ var4a { a: "12345678" }, var4a { a: "12345678" } ];
+  const g: [var4a, var4a] = [...f];
+  const h = g[1];
+}
+
+// test5: maps and folds
+struct var5 {
+  a: Boolean,
+  b: Field
+}
+
+struct var5a {
+  a: Boolean,
+  b: Field,
+  c: var5
+}
+
+export circuit test5(): [] {
+  const a = [...map((x) => x + x, [1,2,3,4])]@
+  const b== [...malimitations under the License.
+
+import Ct ledger counter: Counter;
+export ledger historic_merkle_tree_16_boolean: HistoricMerkleTree<16, Boolean>;
+export ledger historic_merkle_tree_16_bytes_16: HistoricMerkleTree<16, Bytes<16>>;
+export ledger historic_merkle_tree_16_bytes_32: HistoricMerkleTree<16, Bytes<32>>;
+export ledger historic_merkle_tree_16_field: HistoricMerkleTree<16, Field>;
+export ledger historic_merkle_tree_16_opaque_string: HistoricMerkleTree<16, Opaque<"string">>;
+export ledger historic_merkle_tree_16_opaque_uint8array: HistoricMerkleTree<16, Opaque<"Uint8Array">>;
+export ledger historic_merkle_tree_16_uint_0_255: HistoricMerkleTree<16, Uint<0..255>>;
+export ledger historic_merkle_tree_16_uint_0_65535: HistoricMerkleTree<16, Uint<0..65535>>;
+export ledger historic_merkle_tree_16_uint_16: HistoricMerkleTree<16, Uint<16>>;
+export ledger historic_merkle_tree_16_uint_32: HistoricMerkleTree<16, Uint<32>>;
+export ledger historic_merkle_tree_16_uint_8: HistoricMerkleTree<16, Uint<8>>;
+export ledger historic_merkle_tree_32_boolean: HistoricMerkleTree<32, Boolean>;
+export ledger historic_merkle_tree_32_bytes_16: HistoricMerkleTree<32, Bytes<16>>;
+export ledger historic_merkle_tree_32_bytes_32: HistoricMerkleTree<32, Bytes<32>>;
+export ledger historic_merkle_tree_32_field: HistoricMerkleTree<32, Field>;
+export ledger historic_merkle_tree_32_opaque_string: HistoricMerkleTree<32, Opaque<"string">>;
+export ledger historic_merkle_tree_32_opaque_uint8array: HistoricMerkleTree<32, Opaque<"Uint8Array">>;
+export ledger historic_merkle_tree_32_uint_0_255: HistoricMerkleTree<32, Uint<0..255>>;
+export ledger historic_merkle_tree_32_uint_0_65535: HistoricMerkleTree<32, Uint<0..65535>>;
+export ledger historic_merkle_tree_32_uint_16: HistoricMerkleTree<32, Uint<16>>;
+export ledger historic_merkle_tree_32_uint_32: HistoricMerkleTree<32, Uint<32>>;
+export ledger historic_merkle_tree_32_uint_8: HistoricMerkleTree<32, Uint<8>>;
+export ledger historic_merkle_tree_4_boolean: HistoricMerkleTree<4, Boolean>;
+export ledger historic_merkle_tree_4_bytes_16: HistoricMerkleTree<4, Bytes<16>>;
+export ledger historic_merkle_tree_4_bytes_32: HistoricMerkleTree<4, Bytes<32>>;
+export ledger historic_merkle_tree_4_field: HistoricMerkleTree<4, Field>;
+export ledger historic_merkle_tree_4_opaque_string: HistoricMerkleTree<4, Opaque<"string">>;
+export ledger historic_merkle_tree_4_opaque_uint8array: HistoricMerkleTree<4, Opaque<"Uint8Array">>;
+export ledger historic_merkle_tree_4_uint_0_255: HistoricMerkleTree<4, Uint<0..255>>;
+export ledger historic_merkle_tree_4_uint_0_65535: HistoricMerkleTree<4, Uint<0..65535>>;
+export ledger historic_merkle_tree_4_uint_16: HistoricMerkleTree<4, Uint<16>>;
+export ledger historic_merkle_tree_4_uint_32: HistoricMerkleTree<4, Uint<32>>;
+export ledger historic_merkle_tree_4_uint_8: HistoricMerkleTree<4, Uint<8>>;
+export ledger historic_merkle_tree_8_boolean: HistoricMerkleTector_8_boolean = default<Vector<8, Boolean>>;
+   vector_8_bytes_16 = default<Vector<8, Bytes<16>>>;
+   vector_8_bytes_32 = default<Vector<8, Bytes<32>>>;
+   vector_8_field = default<Vector<8, Field>>;
+   vector_8_opaque_string = default<Vector<8, Opaque<"string">>>;
+   vector_8_opaque_uint8array = default<Vector<8, Opaque<"Uint8Array">>>;
+   vector_8_uint_0_255 = default<Vector<8, Uint<0..255>>>;
+   vector_8_uint_0_65535 = default<Vector<8, Uint<0..65535>>>;
+   vector_8_uint_16 = default<Vector<8, Uint<16>>>;
+   vector_8_uint_32 = default<Vector<8, Uint<32>>>;
+   vector_8_uint_8 = default<Vector<8, Uint<8>>>;
+   vector_8_vector_16_boolean = default<Vector<8, Vector<16, Boolean>>>;
+   vector_8_vector_16_bytes_16 = default<Vector<8, Vector<16, Bytes<16>>>>;
+   vector_8_vector_16_bytes_32 = default<Vector<8, Vector<16, Bytes<32>>>>;
+   vector_8_vector_16_field = default<Vector<8, Vector<16, Field>>>;
+   vector_8_vector_16_opaque_string = default<Vector<8, Vector<16, Opaque<"string">>>>;
+   vector_8_vector_16_opaque_uint8array = dree<8, Boolean>;
+export ledger historic_merk   vector_8_boolean = default<Vector<8, Boolean>>;
+   vector_8_bytes_16 = default<Vector<8, Bytes<16>>>;
+   vector_8_bytes_32 = default<Vector<8, Bytes<32>>>;
+   vector_8_field = default<Vector<8, Field>>;
+   vector_8_opaque_string = default<Vector<8, Opaque<"string">>>;
+   vector_8_opaque_uint8array = default<Vector<8, Opaque<"Uint8Array">>>;
+   vector_8_uint_0_255 = default<Vector<8, Uint<0..255>>>;
+   vector_8_uint_0_65535 = default<Vector<8, Uint<0..65535>>>;
+   vector_8_uint_16 = default<Vector<8, Uint<16>>>;
+   vector_8_uint_32 = default<Vector<8, Uint<32>>>;
+   vector_8_uint_8 = default<Vector<8, Uint<8>>>;
+   vector_8_vector_16_boolean = default<Vector<8, Vector<16, Boolean>>>;
+   vector_8_vector_16_bytes_16 = default<Vector<8, Vector<16, Bytes<16>>>>;
+   vector_8_vector_16_bytes_32 = default<Vector<8, Vector<16, Bytes<32>>>>;
+   vector_8_vector_16_field = default<Vector<8, Vector<16, Field>>>;
+   vector_8_vector_16_opaque_string = default<Vector<8, Vector<16, Opaque<"string">>>>;
+   vector_8_vector_16_opaque_uint8array = default<Vector<8, Vector<16, Opaque<"Uint8Array">>>>;
+   vector_8_vector_16_uint_0_255 = default<Vector<8, Vector<16, Uint<0..255>>>>;
+   vector_8_vector_16_uint_0_65535 = default<Vector<8, Vector<16, Uint<0..65535>>>>;
+   vector_8_vector_16_uint_16 = default<Vector<8, Vector<16, Uint<16>>>>;
+   vector_8_vector_16_uint_32 = default<Vector<8, Vector<16, Uint<32>>>>;
+   vector_8_vector_16_uint_8 = default<Vector<8, Vector<16, Uint<8>>>>;
+   vector_8_vector_2_boolean = default<Vector<8, Vector<2, Boolean>>>;
+   vector_8_vector_2_bytes_16 = default<Vector<8, Vector<2, Bytes<16>>>>;
+   vector_8_vector_2_bytes_32 = default<Vector<8, Vector<2, Bytes<32>>>>;
+   vector_8_vector_2_field = default<Vector<8, Vector<2, Field>>>;
+   vector_8_vector_2_opaque_string = default<Vector<8, Vector<2, Opaque<"string">>>>;
+   vector_8_vector_2_opaque_uint8array = default<Vector<8, Vector<2, Opaque<"Uint8Array">>>>;
+   vector_8_vector_2_uint_0_255 = default<Vector<8, Vector<2, Uint<0..255>>>>;
+   vector_8_vector_2_uint_0_65535 = default<Vector<8, Vector<2, Uint<0..65535>>>>;
+   vector_8_vector_2_uint_16 = default<Vector<8, Vector<2, Uint<16>>>>;
+   vector_8_vector_2_uint_32 = default<Vector<8, Vector<2, Uint<32>>>>;
+   vector_8_vector_2_uint_8 = default<Vector<8, Vector<2, Uint<8>>>>;
+   vector_8_vector_4_boolean = default<Vector<8, Vector<4, Boolean>>>;
+   vector_8_vector_4_bytes_16 = default<Vector<8, Vector<4, Bytes<16>>>>;
+   vector_8_vector_4_bytes_32 = default<Vector<8, Vector<4, Bytes<32>>>>;
+   vector_8_vector_4_field = default<Vector<8, Vector<4, Field>>>;
+   vector_8_vector_4_opaque_string = default<Vector<8, Vector<4, Opaque<"string">>>>;
+   vector_8_vector_4_opaque_uint8array = default<Vector<8, Vector<4, Opaque<"Uint8Array">>>>;
+   vector_8_vector_4_uint_0_255 = default<Vector<8, Vector<4, Uint<0..255>>>>;
+   vector_8_vector_4_uint_0_65535 = default<Vector<8, Vector<4, Uint<0..65535>>>>;
+   vector_8_vector_4_uint_16 = default<Vector<8, Vector<4, Uint<16>>>>;
+       r_8_vector_4_uint_32 = default<Vector<8, Vector<4, Uint<32>>>>;
+   vector_8_vector_4_uint_8 = default<Vector<8, Vector<4, Uint<8>>>>;
+   vector_8_vector_8_boolean = default<Vector<8, Vector<8, Boolean>>>;
+   vector_8_vector_8_bytes_16 = default<Vector<8, Vector<8, Bytes<16>>>>;
+   vector_8_vector_8_bytes_32 = default<Vector<8, Vector<8, Bytes<32>>>>;
+   vector_8_vector_8_field = default<Vector<8, Vector<8, Field>>>;
+   vector_8_vector_8_opaque_string = default<Vector<8, Vector<8, Opaque<"string">>>>;
+   vector_8_vector_8_opaque_uint8array = default<Vector<8, Vector<8, Opaque<"Uint8Array">>>>;
+   vector_8_vector_8_uint_0_255 = default<Vector<8, Vector<8, Uint<0..255>>>>;
+   vector_8_vector_8_uint_0_65535 = default<Vector<8, Vector<8, Uint<0..65535>>>>;
+   vector_8_vector_8_uint_16 = default<Vector<8, Vector<8, Uint<16>>>>;
+   vector_8_vector_8_uint_32 = default<Vector<8, Vector<8, Uint<32>>>>;
+   vector_8_vector_8_uint_8 = default<Vector<8, Vector<8, Uint<8>>>>;
+}

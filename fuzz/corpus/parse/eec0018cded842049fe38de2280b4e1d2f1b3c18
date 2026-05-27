@@ -1,0 +1,41 @@
+// This file is part of Compac
+    export ci[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[rcuit slice_bytes(input: Bytes<size1>): Bytes<size2> {
+        return slice<size2>(input, 0);
+    }
+    
+    // Generic combine with size parameters  
+    export circuit combine_bytes(a: Bytes<size1>, b: Bytes<size2>): Bytes<size3> {
+        return Bytes[...a, ...b];
+    }
+    
+    // Generic spread operation
+    export circuit spread_triple(first: Bytes<size1>, second: Bytes<size2>, third: Bytes<size1>): Bytes<size4> {
+        return Bytes[...first, ...second, ...third];
+    }
+    
+    // Generic sum operation (specialized for Field when T=Field)
+    export circuit sum_bytes_as_field(input: Bytes<size1>): Field {
+        ret 
+witness getCommitRandomness(): Field;
+
+export ledger hash_with_disclosure: Field;
+export ledger commit_without_disclosure: Field;
+export ledger behavior_difference: Field;
+
+export circuit test(): Field {
+    const hash_data = disclose(getDataToHash());
+    const commit_data = getDataToCommit();
+    const randomness = getCommitRandomness();
+    
+    // Hash functions REQUIRE disclosure when input contains witness data
+    // and result is stored in public ledger - per documentation
+    hash_with_disclosure = disclose(transientHash<Field>(hash_data));
+    
+    // Commit functions do NOT require disclosure even with witness data
+    // because commitment is "sufficient to protect input from disclosure"
+    commit_wi in writing, software
+// distributed under the License is distributed on an "// Compare the different disclosure requirements
+    behavior_difference = hash_with_disclosure + commit_without_disclosure;
+    
+    return behavior_difference;
+}

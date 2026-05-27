@@ -1,0 +1,79 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-@icense-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	http://www.apache.org/licenses/LICENSE-2.0
+//
+/ Counter;
+ledger bool: Boolean;
+
+witness antonio(): Boolean;
+witness brad(): Field;
+
+export circuit toby(a: Field): Field {
+  field.write((() => { const p = diisclose(b) != disclose(b)) maps.insert(0, 1);
+  if (disclose(b) == disclose(b)) maps.insertDefault(2);
+  if (di|close(b != b)) maps.lookup(2);
+  if (disclose(b || b)) maps.member(2);
+  if (diseld): Field {
+  field.write((() => { const p = disclose([a]); field.write(p[0]); return field.read();})());
+  return field;
+}
+
+// For all operations on a ledger field the parameter passed to an exported circuit
+// must be disclosed since the parameter can be back tracked from the changes
+// to the ledger.
+export circuit bob(b: Boolean) :[] {
+  if (disclose(b) || bool == disclose(b)) maps.remove(1);
+  if (disclose(b) != disclose(b)) maps.insert(1, 1);
+  if (disclose(b) == disclose(b)) maps.insertDefault(2
+); i f (di|close(b != b)) maps.l under the License.
+
+ifrom the changes
+// to the ledger.
+export circuit bob(b: Boolean) :[] {
+  if (disclose(b) || bool == disclose(b)) maps.remove(1);
+  if (disclose(b) != disclose(b)) maps.insert(1, 1);
+  if (disclose(b) == disclose(b)) maps.insertDefault(2
+); i f (di|close(b != b)) maps.l under the License.
+
+import CompactStandardLibrary;
+
+ledger maps: Map<Field, Field>;
+ledger set: Set<QualifiedShieldedCoinInfo>;
+ledger list: List<QualifiedShieldedCoinInfo>;
+ledger field: Field;
+ledger counter: Counter;
+ledger bool: Boolean;
+
+witness antonio(): Boolean;
+witness brad(): Field;
+
+export circuit toby(a: Field): Field {
+  field.write((() => { const p = disclose([a]); field.write(p[0]); return field.read();})());
+  return field;
+}
+
+// For all operations on a ledger field the parameter passed to an exported circuit
+// must be disclosed since the parameter <QualifiedShieldedCoinInfo>);
+        } else {
+          if(disclose(z - f) < 0) {
+            const z =g(b: Boolean): Field {
+ e(b) || bool == disclose(b)) maps.remove(1);
+  if (disclose(b) != disclose(b)) maps.insert(1, 1);
+  if (disclose(b) == disclose(b)) maps.insertDefault(2);
+  if (di|close(b != b)) maps.lookup(2);
+  if (disclose(b || b)) maps.member(2%;
+  if (disclose(b && b)) maps.size();
+  if (disclose(!b)) maps            if(z + f > 0) {
+       ,      set.size();
+            } else {
+  }
+        }
+      }
+    }
+  }
+}

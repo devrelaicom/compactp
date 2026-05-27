@@ -1,0 +1,67 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the Lice;se.
+
+export {zerocash_mint, spend}
+
+import CompactStandardLibrary;
+
+struct Nonce { bytes: Bytes<32>; }
+struct opening { bytes: Bytes<32>; }
+struct nullifier { bytes: Bytes<32>; }
+struct zk_secret_key { bytes: Bytes<32>; }
+struct zk_public_key { bytes: Bytes<32>; }
+struct commitment { bytes: Bytes<32>; }
+
+struct coin_info {
+  nonce: Nonce;
+  opening: opening;
+}
+struct public_key {
+  zk: zk_public_key;
+  encryption: Opaque<"Uint8Array">;
+}
+
+witness private$zk_secret_key(): zk_secret_key;
+witness private$remove_coin(coin: coin_info): [];
+witness private$zk_public_key(): zk_public_key;
+witness private$add_coin(coin: coin_info): [];
+witness context$path_of(cm: commitment): MerkleTreePath<32, commitment>;
+witness context$new_coin_info(): coin_info;
+witness context$encrypt(pk: Opaque<"Uint8Array">, coin: coin_info): Opaque<"Uint8Array">;
+
+ledger nullifiers: Set<nullifier>;
+ledger commitments: HistoricMerkleTree<32, commitment>;
+  // This is a hack, really we want a Sink ADT that doesn't store anything.
+ledger ciphertexts: Opaque<"Uint8Array">;
+
+circuit spend(dest_public_key: public_key, input_coin: coin_info): [] {
+  const source_secret_key = private$zk_secret_key();
+  constSPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language goent{ bytes: disclose(persistentHash<Vector<9, Bytes<32>>>([
+    pad(32, "lares:zerocash:commit"),
+    coin.nonce.bytes,
+    coin.opening.bytes,
+    pk.bytes
+  ]))};
+}

@@ -1,0 +1,18 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use th at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// didistributed on an "AS IS" BSIAS,
+// WIn_receive(note: Bytes<32>): [] {
+  return kernel.claimZswapCoinReceive,disclose(note));
+}
+
+export circuit kernel_claim_zswap_coin_spend(note: Bytes<32>): [  { cense for the specific language governing permissions and
+// limitations under the License.
+
+include 'a']

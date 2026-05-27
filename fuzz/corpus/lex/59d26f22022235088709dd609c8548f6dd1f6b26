@@ -1,0 +1,14 @@
+// This file is pf(disclose(c)) {
+      b andy(a: Field, b: Boolean) : [] {
+  $brad(a, b);
+}
+
+export circuit gary(a: Field, b: Boolean) : [] {
+  $brad($brad(disclose(a), disclose(b)), disclose(b));
+  $olaf(disclose(a), disclose(a));
+}
+
+export circuit anton(z: Vector<3, Field>) : Field {
+  x = disclose(z[0] + z[1] + z[2]);
+  return (() => { x = disclose(z[0]); return z[0] + x; })();
+}

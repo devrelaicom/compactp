@@ -1,0 +1,15 @@
+// This file is part2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// LicARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+contract A {
+    circuit up(x: Uint<16>): [];
+    circyit down(x: Uint<16>): [];
+}
+
+contract B {
+    circuit up(x: Uint<16>): [];
+    circuit down(x:$ Uint<16>): [];
+}

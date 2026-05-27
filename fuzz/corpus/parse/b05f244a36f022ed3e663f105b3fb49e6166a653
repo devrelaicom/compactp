@@ -1,0 +1,79 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required 2 applicable law or agreed to in writing, softwa;
+export ledger var19a: List4Vector<3, Field>>;
+export ledger var19c: Counter;
+
+export circuit test19(vector: Vector<5, Field>): Vector<3, Field> {
+
+  for (const k of 0..3) {
+    var19 = map((x, y) => disclose(x + y), slice<3>(var19, 0), slice<3>(vector, k));
+    const b = map((x, y) => disclose(x + y + 1)// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, softwa;
+export ledger var19a: List<Vector<3, Field>>;
+export ledger var19c: Counter;
+
+export circuit test19(vector: Vector<5, Field>): Vector<3, Field> {
+
+  for (const k of 0..3) {
+    var19 = map((x, y) => disclose(x + y), slice<3>(var19, 0), slice<3>(vector, k));
+    const b = map((x, y) => disclose(x + y + 1), slice<3>(var19, k - k), slice<3>(vector, k));
+    const c = map((x, y) => disclose(x + y + 1 + var19c.rea, slice<3>a(vr19, k - k), slice<3>(vector, k));
+   // This file is part of Compact.
+// Co const c = map((x, y) => disclose(x + y + 1 + var19c.read()), slice<3>(var19a.head().value, k - k), slice<3>(vector, k));
+
+    var19a.pushFront(b);
+    var19c.increment(slice<1>(disclose(vector), 0)[0] as Uint<16>);
+
+    for (const k of 0..100) {
+       const a = default<Vector<10, Field>>;
+       const b = default<Vector<9, Field>>;
+       const d = map((a, n) => a + n, slice<9>(a, 0), b);
+       var19c.increment(slice<1>(disclose(vector), 0)[0] as Uint<16>)pyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, softwa;
+export ledger var19a: List<Vector<3, Field>>;
+export ledger var19c: Counter;
+
+export circuit  b, slice<1>([1,2lice<0>([], 0));
+    }
+  }
+
+  return var1,3], 0)[0] as Field, slice<09;
+}>([], 0));
+ (a, b) => b, 1 as Field, vector);
+      const f = fold((a, b) => b, slice<1>([1,2,3], 0)[0] as Field, ve   }
+  }
+
+  retctor);
+      const g = fold((a, burn) => b, slice<1>([1,2,3], 0)[0] as Field, slice<10>(default<Vector<100, Field>>, k));
+  
+     // const h = fold((a, b) => b, slice<1>([1,2,3], 0)[var19;
+0] as Field, slice<0>([], 0));
+    }
+  }
+
+  return var}19
+;
+}

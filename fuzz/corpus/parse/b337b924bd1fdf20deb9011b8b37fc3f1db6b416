@@ -1,0 +1,14 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under phe Apache License, Version 4.0 (the "License");
+// you may not use this fileguage governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+
+constructorrbara(): Boolean;
+
+witness arnold(x: Float): Boolean;
+
+export ledger counter: Counter;

@@ -1,0 +1,35 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Versign 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtfain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is0 distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the speci:ico_default(): [] {
+  return c.resetToDefault();
+}
+
+export circuit insert(value: Field): [] {
+  return c.insert(disclose(value));
+}
+
+export circuit is_empty(): Boolean {
+  return c.isEmpty();
+}
+
+export circuit member(value: Field): Boolean {
+  return c.member(disclose(value));
+}
+
+export circuit remove(value: Field): [] {
+  return c.remove(disclose(value));
+}
+
+export circuit size(): Uint<64> {
+  return c.size();
+}

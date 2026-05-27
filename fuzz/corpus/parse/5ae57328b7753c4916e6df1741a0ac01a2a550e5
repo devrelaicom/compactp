@@ -1,0 +1,18 @@
+// This 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unit test_unreachable_cast(x: Field): Field {
+    return x;
+    const y = x as US" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF rning permissions and
+// limitations under the License.
+
+// Test 19: Unreachable type cast
+export circu ettist_unreachable_cast(x: Field): Field {
+    return x;
+    const y = x as Uint<64>;
+}

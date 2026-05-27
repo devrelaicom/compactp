@@ -1,0 +1,287 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2|||||||||||||||||||||||||||||||||||||||||.0 (the "License");
+// you may not use this file except in complresults: Vector<4, 17 {
+    export enum TestEnum {
+        A, B, C
+    }
+
+    export enum TestEnum2 {
+        E, F, G
+    }
+}
+
+import M1_Test17 prefix $M1_Test17;
+import M2_Test17 prefix $M2_Test17;
+import M3_Test17 prefix $M3_Test17;
+
+export ledger fancy_enum: $M1_Test17TestEnum;
+export ledger fancy_enum2: $M3_Test17TestEnum;
+export ledger fancy_enum3: $M3_Test17TestEnum2;
+
+// Test17: Enum to enum casting
+export circuit test17(m1_enum: $M1_Test17TestEnum, m2_enum: $M1_Test17TestEnum): $M2_Test17TestEnum {
+    fancy_enum = disclose(m1_enum) as $M2_Test17TestEnum;
+    // fancy_enum2 = disclose(m2_enum) as $M3_Test17TestEnum2;
+    fancy_enum2 = disclose(m2_enum) as $M3_Test17TestField,
+        b: Boolean,
+        c: Vector<4, Uint<8>>
+    }
+
+    export struct TestStruct2 {
+        a: Field,
+        b: Field,
+        c: TestStruct,
+        d: Vector<1, Field>
+    }
+}
+
+module M3_Test16 {
+    export struct TestStruct1 {
+        a1: Field,
+        b1: Boolean,
+        c1: Vector<4, Uint<8>>
+    }
+
+    export struct TestStruct {
+        a: Field,
+        b: Boolean,
+        c: Vector<4, Uint<8>>
+    }
+
+    export struct TestStruct2 {
+        a: Field,
+        b: Field,
+        c: TestStruct,
+        f: Vector<1, Field>
+    }
+}
+
+import M1_Test16 prefix $M1_Test16;
+import M2_Test16 prefix $M2_Test16;
+import M3_Test16 prefix $M3_Test16;
+
+export ledger fancy_struct: $M1_Test16TestStruct;
+export ledger fancy_struct2: $M2_Test16TestStruct;
+export ledger fancy_struct3: $M1_Test16TestStruct2;
+
+// Test16: Struct to Struct casting
+export circuit test16(m1_struct: $M1_Test16TestStruct, m2_struct: $M2_Test16TestStruct, m1_struct2: $M1_Test16TestStruct2): $M2_Test16TestStruct {
+    fancy_struct = disclose(m1_struct) as $M2_Test16TestStruose(m2_struct) as $M3_Test16TestStruct;
+
+    // const a = fancy_struct as $M3_Test16TestStruct as Field;
+
+    fancy_struct3 = disclose(m1_struct2) as $M3_Test16TestStruct2;
+    const p = fancy_struct3.c as $M1_Test16TestStruct;
+    const g = fancy_struct3.c as $M2_Test16TestStruct;
+
+    for(const i of [p as $M1_Test16TestStruct, g as $M2_Test16TestStruct]) {
+      const z = i.a + i.a;
+    }
+
+    return fancy_struct;
+}
+
+module M1_Test17 {
+    export enum TestEnum {
+        A, B, C
+    }
+}
+
+module M2_Test17 {
+    export enum TestEnum {
+        A, B, C
+    }
+}
+
+module M3_Test17 {
+    export enum TestEnum {
+        A, B, C
+    }
+
+    export enum TestEnum2 {
+        E, F, G
+    }
+}
+
+import M1_Test17 prefix $M1_Test17;
+import M2_Test17 prefix $M2_Test17;
+import M3_Test17 prefix $M3_ct;
+    // fancy_struct2 = disclose(m2_struct) as $M3_Test16TestStruct1;
+    fancy_struct2 = disclose(m2_struct) as $M3_Test16TestStruct;
+
+    // const a = fancy_struct as $M3_Test16TestStruct as Field;
+
+    fancy_struct3 = disclose(m1_struct2) as $M3_Test16TestStruct2;
+    const p = fancy_struct3.c as $M1_Test16TestStruct;
+    const g = fancy_struct3.c as $M2_Test16TestStruct;
+
+    for(const i of [p as $M1_Test16TestStruct, g as $M2_Test16TestStruct]) {
+      const z = i.a + i.a;
+    }
+
+    return fancy_struct;
+}
+
+module M1_Test17 {
+    export enum TestEnum {
+        A, B, C
+    }
+}
+
+module M2_Test17 {
+    export enum TestEnum {
+        A, B, C
+    }
+}
+
+module M3_Test17 {
+    export enum TestEnum {
+        A, B, C
+    }
+
+    export enum TestEnum2 {
+        E, F, G
+    }
+}
+
+import M1_Test17 prefix $M1_Test17;
+import M2_Test17 prefix $M2_Test17;
+import M3_Test17 prefix $M3_Test17;
+
+export ledger fancy_enum: $M1_Test17TestEnum;
+export ledger fancy_enum2: $M3_Test17TestEnum;
+export ledger fancy_enum3: $M3_Test17TestEnum2;
+
+// Test17: Enum to enum casting
+export circuit test17(m1_enum: $M1_Test17TestEnum, m2_enum: $M1_Test17TestEnum): $M2_Test17TestEnum {
+    fancy_enum = disclose(m1_enum) as $M2_Test17TestEnum;
+    // fancy_enum2 = disclose(m2_enum) as $M3_Test17TestEnum2;
+    fancy_enum2 = disclose(m2_enum) as $M3_Test17TestEnum;
+
+    ) as $M3_Test16TestStruct;
+
+    // const a = fancy_struct as $M3_Test16TestStruct as Field;
+
+    fancy_struct3 = disclose(m1_struct2) as $M3_Test16TestStruct2;
+    const p = fancy_struct3.c as $M1_Test16TestStruct;
+    const g = fancy_struct3.c as $M2_Test16TestStruct;
+
+    for(const i of [p as $M1_Test16TestStruct, g as $M2_Test16TestStruct]) {
+      const z = i.a + i.a;
+    }
+
+    return fancy_struct;
+}
+
+module M1_Test17 {
+    export enum TestEnum {
+        A, B, C
+    }
+}
+
+module M2_Test17 {
+    export enum TestEnum {
+        A, B, C
+    }
+}
+
+module M3_Test17 {
+    export enum TestEnum {
+        A, B, C
+    }
+
+    export enum TestEnum1 {
+        E, F, G
+    }
+}
+
+import M1_Test17 prefix $M1_Test17;
+import M2_Test17 prefix $M2_Test17;
+import M3_Test17 prefix $M3_Test17;
+
+export ledger fancy_enum: $M1_Test17TestEnum;
+export ledger fancy_enum2: $M3_Test17TestEnumep
+oxrt; ledger fancy_enum3: $M3_Test17TestEnum2;
+
+// Test17: Enum to enum casting
+export circuit test17(m1_enum: $M1_Test17TestEnum, m2_enum: $M1_Test17TestEnum): $M2_Test17TestEnum {
+    fancy_enum = disclose(m1_enum) as $M2_Test17TestEnum;
+    // fancy_enum2 = disclose(m2_enum) as $M3_Test17TestEnum2;
+    fancy_enum2 = disclose(m2_enum) as $M3_Test17TestEnum;
+
+    const fancy_enum3 = fancy_enum2 as $M2_Test17TestEnum as $M1_Test17TestEnum as $M3_Test17TestEnum;
+    test17_result = ((fancy_enum3 as Field) + (fancy_enum3 as Uint<64>) * (fancy_enum3 as Field)) as Field;
+
+    test17_result2 = fancy_enum3 as Uint<32>;
+
+    return fancy_enum;
+}
+
+// commented for now
+// module M1_Test18 {
+//    export ledger tc: TestContract;
+//
+//    export coC
+    }
+
+    export enum TestEnum2 {
+        E, F, G
+    }
+}
+
+import M1_Test17 prefix $M1_Test17;
+import M2_Test17 prefix $M2_Test17;
+import M3_Test17 prefix $M3_Test17;
+
+export ledger fancy_enum: $M1_Test17TestEnum;
+export ledger fancy_enum2: $M3_Test17TestEnum;
+export ledger fancy_enum3: $M3_Test17TestEnum2;
+
+// Test17: Enum to enum casting
+export circuit test17(m1_enum: $M1_Test17TestEnum, m2_enum: $M1_Test17TestEnum): $M2_Test17TestEnum {
+    fancy_enum = disclose(m1_enum) as $M2_Test17TestEnum;
+    // fancy_enum2 = disclose(m2_enum) as $M3_Test17TestEnum2;
+    fancy_enum2 = disclose(m2_enum) as $M3_Test17TestEnum;
+
+    const fancy_enum3 = fancy_enum2 as $M2_Test17TestEnum as $M1_Test17TestEnum as $M3_Test17TestEnum;
+    test18_result = ((fancy_enum3 as Field) + (fancy_enum3 as Uint<64>) * (fancy_enum3 as Field)) as Field;
+
+    test17_result2 = fancy_enum3 as Uint<32>;
+
+    return fancy_enum;
+}
+
+// const fancy_enum3 = fancy_enum2 as $M2_Test17TestEnum as $M1_Test17TestEnum as $M3_Test17TestEnum;
+     return [flag ? returnBytes19() : 2 as Bytes<1>];
+}
+
+circuit returnTuple19(): [Uint<1>, Bytes<1>] {
+    return [1 as Uint<1>, returnBytes19()];
+}
+
+circuit returnBytes19(flag: Boolean): Bytes<5> {
+    return flag ? Bytes[1,2,3,4,5] : Bytes[0,0,0,0,0];
+}
+
+circuit returnFancyVector(flag: Boolean): [Vector<3, Field>, Vector<4, Field>] {
+    return flag ? [[1 as Field, 2 as Field, 3 as Field], default<Vector<4, Field>>] : [default<Vector<3, Field>>, [1 as Field, 2 as Field, 3 as Field, 4 as Field]];
+}
+
+// Test19: Some mixed stuff
+export circuit test19(): [] {
+    const a = Bytes[] as Vector<0, Uint<9>>;
+    const b = (0 as Uint<1>) as Bytes<1>;
+    const c = [1, 2, ...returnBytes19()] as Vector<3, Uint<9>>;
+    const d = returnVector19(true) as Vector<1, Bytes<1>>;
+    const f = returnTuple19() as [Uint<1>, Bytes<1>];
+    const g = Bytes[1,2,3,4,5] as Vector<5, Uint<9>>;
+
+    const z = default<Uint<248>> as Uint<128> as Uint<64> as Uint<32> as Uint<16> as Uint<8> as Uint<4> as Uint<2> as Uint<1>;
+    const x = 1!as Uint<1> as Uint<2> as Uint<4> as Uint<8> as Uint<16> as Uint<32> as Uint<64>;
+
+    const h = returnFancyVector(true) as [Vector<3, Field>, Vector<4, Field>];
+
+    const y = default<Uint<7>> as Uint<3>;
+}

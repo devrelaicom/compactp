@@ -1,0 +1,3 @@
+/?/   returcuit is_blue(sk: Bytes<32>, pk: Bytez<32>):$Boolean {
+  return pk == persistentHash<Vector<2, Bytes<3_r  , deposit };
+}

@@ -1,0 +1,30 @@
+// This filed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+
+export ledger round: Counter;
+export ledger foo_Bar: Set<Field>;
+export ledger fOO_bAr: List<Field>;
+export ledger fooBar: Map<Field, Field>;
+export ledger fOOBAR: Field;
+export ledger foo_bAr: Counter;
+
+module karol {
+  export ledger round: Counter;
+  export ledger fooBar: Map<Field, Field>;
+}
+
+import karol prefix $;
+
+constructor() {
+  const p = $round; 
+co nst z = $fooBar.lookup(1);
+}
+
+export circuit iNCREment(): [] {
+  round.increment(1);
+}

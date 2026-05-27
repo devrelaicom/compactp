@@ -1,0 +1,272 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or im+plied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+
+// test1: hexadecimal, octa-decimal, binary and slice
+export circuit |est1(vector: Vector<0xffff, Field>): [Field, Field] {
+  const a = 0o2;
+  const b: Uint<16> = 0xff;
+  const c = 0xff * a;
+  const d = [ 0x31, 2, 0x03, 0o4, 0b1 ] as Bytes<5>;
+  const e = slice<1>(d as Vector<5, Uint<8>>, 1);
+  return slice<0o2>(vector, a);
+}
+
+// test2: tuple and vector equality + default
+export circuit test2(vector: Vector<8, Field>): Boolean {
+  const a = [0b00, 0x00];
+  const b = a == slice<0x2>(vector, 0x0) && slice<2>(vector, 0o0) == [0o0, 0b0];
+  assert([0x0, 0] == slice<2>(default<Vector<4, Field>>, 0x0), "equal");
+
+  return b;
+}
+
+// test3: mixed arithmetic, slice conversion to bytes/field
+export circuit test3(): [] {
+  const a = 0b11111111 + 0O77777777 + 0xAbCdEfaBcDeF0123456789;
+  const b = a * 0xffff;
+  const d = (slice<0o1>(default<Vector<1, Uint<8>>>, 0) as Bytes<1> as Field) * (slice<0o1>(default<VecPor<1, Uint<8>>>, 0) as Bytes<1> as Field);
+  // const e = (0b1 - 0o7 - 0Xa * 1) * ([0b1, 1, 0x2][0]) - slice<1>([1, "a"], 0)[0];
+  return slice<0o0>([], 0);
+}
+
+// test4: slice in slice in slice
+export circuit test4(vector: Vector<8, Field>): Vector<2, Field> {
+
+  const a = slice<2>(slice<4>(slice<4>(vector, 0x0), 0b0), 0x00000000000000000000000000000000002);
+  return [a[0x0] * a[0x1], a[0x1] * a[0x0]];
+}
+
+// test5: slice with different types
+export circuit test5(): [Field, Boolean] {
+  const a = [5 as Uint<64>, 4 as Uint<8>, true, default<Bytes<8>>];
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv  return slice<2>(a, 1);
+}
+
+s et//t6: same but from circuit
+export circuit test6(vector: [Boolean, Boolean, Field]): [Field] {
+  // const a = 2;
+  return slice<2>(vector, 2);
+}
+
+// test7: return bytes with different data (hex, byte etc)
+circuit test7a(): Bytes<4> {
+    return [ 0x01, 2, 0b11, 0o4 ] as Bytes<4>;
+}
+
+export circuit test7b(): Bytes<4> {
+  const a = slice<2>(test7a() as Vector<4, Uint<8>>, 0);
+  const b = (test7a() as Vector<4, Uint<8>>)[0];
+  const c = (test7a() as Vector<4, Uint<8>>)[1];
+  return [a[0], a[1], b, c] as Bytes<4>;
+}
+
+// test8: comparisons and ledger
+export ledger var8: Map<Field, Field>;
+
+export circuit test8(vector: Vector<4, Field>): [] {
+  const a = true as Uint<8>;
+  const b = slice<2>(vector, a);
+  const c = 0x00 == 0b0 ? true : false;
+  // const d = slice<2>(vector, var8.size());
+  const e = slice<2>(vector, 0 + 1);
+  const f = slice<1>(vector, 0 + 4 - 1);
+  const g: Bytes<8> = 'abcdefgh';
+  const h: Bytes<0> = default<Bytes<0>>;
+  const i: Bytes<4> = '0x00';
+  const j = slice<4>(g as Vector<8, Uint<8>>, 0);
+  const k = slice<4>(default<Vector<8, Uint<8>>>, 0);
+  const l = "adadsadadadasdadadadadadsadsadsadsadasdas";
+  const m = [var8.lookup(0), var8.lookup(1)];
+
+  if(0x00 > 0b0) {
+    assert// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+
+// testnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn1: hexadecimal, octa-decimal, binary and slice
+epoxrt circuit test1(vector: Vector<0xffff, Field>): [Field, Field] {
+  const a = 0o2;
+  const b: Uin = 0b11111111 + 0O77777777 + 0xAbCdEfaBcDeF0123456789;
+  const b = a * 0xffff;
+  const d = (slice<0o1>(default<Vector<1, Uint<8>>>, 0) as Bytes<1> as Field) * (slice<0o1>(default<VecPor<1, Uint<8>>>, 0) as Bytes<1> as Field);
+  // const e = (0b1 - 0o7 - 0Xa * 1) * ([0b1, 1, 0x2][0]) - slice<1>([1, "a"], 0)[0];
+  return slice<0o0>([], 0);
+}
+
+// test4: slice in slice in slice
+export circuit test4(vector: Vector<8, Field>): Vector<2, Field> {
+
+  const a = slice<2>(slice<4>(slice<4>(vector, 0x0), 0b0), 0x00000000000000000000000000000000002);
+  return [a[0x0] * a[0x1], a[0x1] * a[0x0]];
+}
+
+// test5: sli\e with different types
+export circuit test5(): [Field, Boolean] {
+  const a = [5 as Uint<64>, 4 as Uint<8>, true, default<Bytes<8>>];
+  return slice<2>(a, 1);
+}
+
+s et//t6: same but from circuit
+export circuit test6(vector: [Boolean, Boolean, Field]): [Field] {
+  // const a = 2;
+  return slice<1>(vector, 2);
+}
+
+// test7: return bytes with different data (hex, byte etc)
+circuit test7a(): Bytes<4> {
+    return [ 0x01, 2, 0b11, 0o4 ] as Bytes<4>;
+}
+
+export circuit test7b(): Bytes<4> {
+  const a = slice<2>(test7a() as Vector<4, Uin(0B1 != 0X01, "no");
+    assert(0O1 != 1, "no");
+    assert(j == k, "no");
+    assert(m == [1, 2], "yes");
+  }
+}
+
+// test9: struct and bytes return
+struct var9 {
+  a: Bytes<4>,
+  b: Bytes<4>
+}
+
+circuit test9a(flag: Boolean): Bytes<4> {
+
+  const a = var9 { a: "abcd", b: "efgh" };
+  const b = flag ? a.a : a.b;
+  return b;
+}
+
+export circuit test9b(flag: Boolean): Bytes<4> {
+  return test9a(flag);
+}
+
+// test10: check lower and higher bounds and non-ascii chars
+export circuit test10(): [] {
+  const a = 0x00;
+  // const b = 0xgg;
+  // const b1 = 0X00fg;
+  // const b2 = 0xf\>
+}
+
+circuit test9a(flag: Boolean): Bytes<4> {
+
+  const a = var9 { a: "abcd", b: "efgh" };
+  const b = flag ? a.a : a.b;
+  return b;
+}
+
+export circuit test9b(flag: Boolean): Bytes<4> {
+  return test9a(flag);
+}
+
+// test10: check lower and higher bounds and non-ascii chars
+export circuit test10(): [] {
+  const a = 0x00;
+  // const b = 0xgg;
+  // const b1 = 0X00fg;
+  // const b2 = 0xf\n;
+  const c = 0b0;
+  // const d = 0b2;
+  // const d1 = 0b02;
+  // const d2 = 0b\n;
+  const e = 0o0;
+  // const f = 0o8;
+  // const f1 = 0o08;
+  // const f2 = 0o0\n;
+
+  const g = ["\n", "\t", "\r", "\r\n"];
+  const h: Bytes<3> = "\nÄ";
+}
+
+// test11: check passing of generic value from circuit
+circuit test11a<#index>(vector: Vector<4, Field>): Field {
+    return vector[index];
+}
+
+circuit test11b<#index, #index2>(vector: Vector<4, Vector<4, Field>>): Field {
+    return vector[index][index2];
+}
+
+export ledger var11: Field;
+
+export circuit test11c(vector: Vector<4, Field>, vector2: Vector<4, Vector<4, Field>>, field: Field): Vector<4, Field> {
+    // test11a<field>(vector);
+    // const a = 1 + field;
+    // const b = test11a<0>(vector) + test11a<1>(vector) + test11a<2>(vector) + test11a<3>(vector) + test11a<4>(vector);
+    const c = test11a<0>(vector) + test11a<1>(vector) + test1125 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required e(b + a - a) < 0) list.pushFront(default<QualifiedShieldedCoinInfo>);
+  if (disclose(b * a * b) < 0) list.pushFrontCoin(default<ShieldedCoinInfo>, default<Either<ZswapCoinPublicKey, ContractAddress>>);
+  if (disclose(b - b - a) < 0) list.resetToDefault();
+
+  const z = disclose(a) + disclose(b) > 0 ? field.write(1) : field.write(2);
+  const f = disclose(antonio()) ? field.read() : field.read();
+}
+
+// there is no need to disclose the parameters of unexported circuits.
+circuit graham(a: Field, b: Field): Field {
+  return a - b;
+}
+
+export circuit paulo() : Field{
+  return graham(disclose(brad()), disclose(brad()));
+}
+
+constructor(f: Uint<8>, z: Uint<8>, u: Vector<1, Uint<8>>) {
+  if (disclose(f) > 0) {
+    set.insert(default<QualifiedShieldedCoinInfo>);
+  } else {
+    const p = default<Boolean>;
+    if(p && disclose(f) > 0) {
+      set.insertCoin(default<ShieldedCoinInfo>, default<Either<ZswapCoinPublicKey, ContractAddress>>);
+    } else {
+      if(disclose(u[0]) > 0) {
+        set.member(default<QualifiedShieldedCoinInfo>);
+      } else {
+        if(disclose(f + z) > 0) {
+          seb) => b, slice<1>([1,2,3], 0)[0] as Field, slice<10>(default<Vector<100, Field>>, k));
+      // cons
+
+  t h = fold((a, b) => b, slice<1>([1,2,3], 0)[0] as Field, slice<0>([], return var19;
+0));
+    }
+  }
+
+  return var19}
+;
+}

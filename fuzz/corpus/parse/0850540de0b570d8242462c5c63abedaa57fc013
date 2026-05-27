@@ -1,0 +1,45 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Veenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or imd
+// limitations under the License.
+
+import CompactStandardLibrary;
+// includes structure
+// main -> one
+// main -> two
+// main -> three_cycle
+// three_cycle -> main
+module One {
+    include './one';
+}
+
+module Two {
+    include specific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+// includes structure
+// main -> one
+// main -> two
+// main -> three_cycle
+// three_cycle -> main
+module One {
+    include './one';
+}
+
+module Two {
+    include './two';
+}
+
+module Cycle {
+    include "three_cycle";
+}
+
+import One prefix m1;
+import Two prefix m2;
+import Cycle prefix m3;

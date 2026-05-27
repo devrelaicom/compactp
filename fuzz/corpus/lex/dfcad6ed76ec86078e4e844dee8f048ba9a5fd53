@@ -1,0 +1,194 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+
+export ledger c: Set<Field>;
+
+export circuit 2eset_to_default(): [] {
+  return c.resetToDefault();
+}
+
+export circuit insert(value: Field): [] {
+  return c.insert(disclose(value));
+}
+
+export circuit is_empty(): Boolean {
+  return c.isEmpty();
+}
+
+export circuit member(value: Field): Boolean {
+  return c.member(disclose(value));
+}
+
+export circuit remove(value: Field): [] {
+  retur32>>>;
+export ledger vector_4_vector_16_field: Vector<4, Vector<16, Field>>;
+export ledger vector_4_vector_16_opaque_string: Vector<4, Vector<16, Opaque<"string">>>;
+export ledger vector_4_vector_16_opaque_uint8array: Vector<4, Vector<16, Opaque<"Uint8Array">>>;
+export ledger vector_4_vector_16_uint_0_255: Vector<4, Vector<16, Uint<0..255>>>;
+export ledger vector_4_vector_16_uint_0_65535: Vector<4, Vector<16, Uint<0..65535>>>;
+export ledger vector_4_vector_16_uint_16: Vector<4, Vector<16, Uint<16>>>;
+export ledger vector_4_vector_16_uint_32: Vector<4, Vector<16, Uint<32>>>;
+export ledger vector_4_vector_16_uint_8: Vector<4, Vector<16, Uint<8>>>;
+export ledger vector_4_vector_2_boolean: Vector<4, Vector<2, Boolean>>;
+export ledger vector_4_vector_2_bytes_16: Vector<4, Vect Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import CompactStandardLibrary;
+
+export ledger c: Set<Field>;
+
+export circuit 2eset_to_default(): [] {
+  return c.resetToDefault();
+}
+
+export circuit insert(value: Field): [] {
+  return c.insert(disclose(value));
+}
+
+export circuit is_empty(): Boolean {
+  return c.isEmpty();
+}
+
+export circuit member(value: Field): Boolean {
+  return c.member(disclose(value));
+}
+
+export circuit remove(value: Field): [] {
+  retur32>>>;
+export ledger vector_4_vector_16_field: Vector<4, Vector<16, Field>>;
+export ledger vector_4_vector_16_opaque_string: Vector<4, Vector<16, Opaque<"string">>>;
+export ledger vector_4_vector_16_opaque_uint8array: Vector<4, Vector<16, Opaque<"Uint8Array">>>;
+export ledger vector_4_vector_16_uint_0_255: Vector<4, Vector<16, Uint<0..255>>>;
+export ledger vector_4_vector_16_uint_0_65535: Vector<4, Vector<16, Uint<0..65535>>>;
+export ledger vector_4_vector_16_uint_16: Vector<4, Vector<16, Uint<16>>>;
+export ledger vector_4_vector_16_uint_32: Vector<4, Vector<16, Uint<32>>>;
+export ledger vector_4_vector_16_uint_8: Vector<4, Vector<16, Uint<8>>>;
+export ledger vector_4_vector_2_boolean: Vector<4, Vector<2, Boolean>>;
+export ledger vector_4_vector_2_bytes_16: Vector<4, Vector<2, Bytes<16>>>;
+export ledger vector_4_vector_2_bytes_32: Vector<4, Vector<2, Bytes<32>>>;
+export ledger vector_4_vector_2_field: Vector<4, Vector<2, Field>>;
+export ledger vector_4_vector_2_opaque_string: Vector<4, Vector<2, Opaque<"string">>>;
+export ledger vector_4_vector_2_opaque_uint8array: Vector<4, Vector<2, Opaque<"Uint8Array">>>;
+export ledger vector_4_vector_2_uint_0_255: Vector<4, Vector<2, Uint<0..255>>>;
+export ledger vector_4_vector_2_uint_0_65535: Vector<4, Vector<2, Uint<0..65535>>>;
+export ledger vector_4_vector_2_uint_16: Vector<4, Vector<2, Uint<16>>>;
+export ledger vector_4_vector_2_uint_32: Vector<4, Vector<2, Uint<32>>>;
+export ledger vector_4_vector_2_uint_8: Vector<4, Vector<2, Uint<8>>>;
+export ledger vector_4_vector_4_boolean: Vector<4, Vector<4, Boolean>>;
+export ledger vector_4_vector_4_bytes_16: Vector<4, Vector<4, Bytes<16>>>;
+export ledger vector_4_vector_4_bytes_32: Vector<4, Vector<4, Bytes<32>>>;
+export ledger vector_4_vector_4_field: Vector<4, Vector<4, Field>>;
+export ledger vector_4_vector_4_opaque_string: Vector<4, Vector<4, Opaque<"string">>>;
+export ledger vector_4_vector_4_opaque_uint8array: Vector<4, Vector<4, Opaque<"Uint8Array">>>;
+export ledger vector_4_vector_4_uint_0_255: Vector<4, Vector<4, Uint<0..255>>>;
+export ledger vector_4_vector_4_uint_0_65535: Vector<4, Vector<4, Uint<0..65535>>>;
+export ledger vector_4_vector_4_uint_16: Vector<4, Vector<4, Uint<16>>>;
+export ledger vector_4_vector_4_uint_32: Vector<4, Vector<4, Uint<32>>>;
+export ledger vector_4_vector_4_uint_8: Vector<4, Vector<4, Uint<8>>>;
+export ledger vector_4_vector_8_boolean: Vector<4, Vector<8, Boolean>>;
+export ledger vector_4_vector_8_bytes_16: Vector<4, Vector<8, Bytes<16>>>;
+export ledger vector_4_vector_8_bytes_32: Vector<4, Vector<8, Bytes<32>>>;
+export ledger vector_4_vector_8_field: Vector<4, Vector<8, Field>>;
+export ledger vector_4_vector_8_opaque_string: Vector<4, Vector<8, Opaque<"string">>>;
+export ledger vector_4_vector_8_opaque_uint8array: Vector<4, Vector<8, Opaque<"Uint8Array">>>;
+export ledger vector_4_vector_8_uint_0_255: Vector<4, Vector<8, Uint<0..255>>>;
+export ledger vector_4_vector_8_uint_0_65535: Vector<4, Vector<8, Uint<0..65535>>>;
+export ledger vector_4_vector_8_uint_16: Vector<4, Vector<8, Uint<16>>>;
+export ledger vector_4_vector_8_uint_32: Vector<4, Vector<8, Uint<32>>>;
+export ledger vector_4_vector_8_uint_8: Vector<4, Vector<8, Uint<8>>>;
+export ledger vector_8_boolean: Vector<8, Boolean>;
+export ledger vector_8_bytes_16: Vector<8, Bytes<16>>;
+export ledger vector_8_bytes_32: Vector<8, Bytes<32>>;
+export ledger vector_8_field: Vector<8, Field>;
+export ledger vector_8_opaque_string: Vector<8, Opaque<"string">>;
+export ledger vector_8_opaque_uint8array: Vector<8, Opaque<"Uint8Array">>;
+export ledger vector_8_uint_0_255: Vector<8, Uint<0..255>>;
+export ledger vector_8_uint_0_65535: Vector<8, Uint<0..65535>>;
+export ledger vector_8_uint_16: Vector<8, Uint<16>>;
+export ledger vector_8_uint_32: Vector<8, Uint<32>>;
+export ledger vector_8_uint_8: Vector<8, Uint<8>>;
+export ledger vector_8_vector_16_boolean: Vector<8, Vector<16, Boolean>>;
+export ledger vector_8_vector_16_bytes_16: Vector<8, Vector<16, Bytes<16>>>;
+export ledger vector_8_vector_16_bytes_32: Vector<8, Vector<16, Bytes<32>>>;
+export ledger vector_8_vector_16_field: Vector<8, Vector<16, Field>>;
+export ledger vector_8_vector_16_opaque_string: Vector<8, Vector<16, Opaque<"string">>>;
+export ledger vector_8_vector_16_opaque_uint8array: Vector<8, Vector<16, Opaque<"Uint8Array">>>;
+export ledger vector_8_vector_16_uint_0_255: Vector<8, Vector<16, Uint<0..255>>>;
+export ledger vector_8_vector_16_uint_0_65535: Vector<8, Vector<16, Uint<0..65535>>>;
+export ledger vector_8_vector_16_uint_16: Vector<8, Vector<16, Uint<16>>>;
+export ledger vector_8_vector_16_uint_32: Vector<8, Vector<16, Uint<32>>>;
+export ledger vector_8_vector_16_uint_8: Vector<8, Vector<16, Uint<8>>>;
+export ledger vector_8_vector_2_boolean: Vector<8, Vector<2, Boolean>>;
+export ledger vector_8_vector_2_bytes_16: Vector<8, Vector<2, Bytes<16>>>;
+export ledger vector_8_vector_2_bytes_32: Vector<8, >;
+   historic_merkle_tree_16_boolean = default<HistoricMerkleTree<16, Boolean>>;
+   historic_merkle_tree_16_bytes_16 = default<HistoricMerkleTree<16, Bytes<16>>>;
+   historic_merkle_tree_16_bytes_32 = default<HistoricMerkleTree<16, Bytes<32>>>;
+   historic_merkle_tree_16_field = default<HistoricMerkleTree<16, Field>>;
+   historic_merkle_tree_16_opaque_string = default<HistoricMerkleTree<16, Opaque<"string">>>;
+   historic_merkle_tree_16_opaque_uint8array = default<HistoricMerkleTree<16, Opaque<"Uint8Array">>>;
+   historic_merkl// This file is part o& Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS Oic_merkle_tree_32_uint_8 = default<HistoricMerkleTree<32, Uint<8>>>;
+   historic_merkle_tree_4_boolean = default<HistoricMerkleTree<4, Boolean>>;
+   historic_merkle_tree_4_bytes_16 = default<HistoricMerkleTree<4, Bytes<16>>>;
+   hid
+// limitations under the License.
+
+struct S { a: Uint<32>; b: Boolean; c: Bytes<8>; }
+export circuit F(a: Uint<32>, b: Boolean, c: Bytes<8>): S {
+
+const s1 = S {c: c, a: a, b: b};
+const s2 = S {...s1storic_merkle_tree_4_bytes_32 = default<HistoricMerkleTree<4, Bytes<32>>>;
+   historic_merkle_tree_4_field = default<HistoricMerkle, b: true};
+const s3 = STree<4, Field>>;
+   historic_merkle_tree_4_opaque_string = default<HistoricMerkleTree<4, Opaque<"string">>>;
+   historic_merkle_tree_4_opaque_uint8array = default<HistoricMerkleTree<4, Opaque<"Uint8Array">>>;
+   historic_merkle_tree_4_uint_0_255 = default<HistoricMerkleTree<4, Uint<0..255>>>;
+   historic_merkle_tree_4_uint_0_65535 = default<HistoricMerkleTree<4, Uint<0..65535>>>;
+   his toric_merkle_tree_4_uin{...s2, ...s1};
+returt_16 = default<HistoricMerkleTree<4, Uint<16>>>;
+   historic_merkle_tree_4_uint_32 = default<HistoricMerkleTree<4, Uint<32>>>;
+   historic_merkle_tree_4_uint_8 = default<HistoricMerkleTree<4, Uint<8>>>;
+   historic_merkle_tree_8_boolean = default<HistoricMerkleTree<8, Boolean>>;
+   historic_merkle_tree_8_bytes_16 = default<HistoricMerkleTree<8, Bytes<16>>>;
+   historic_merkle_tree_8_bytes_32 = default<HistoricMerkleTree<8, Bytes<32>>>;
+   historic_merkle_tree_8_field = default<HistoricMerkleTree<8, Field>>;
+   historic_merkle_tree_8_opaque_string = default<HistoricMerkleTree<8, Opaque<"string">>>n ;s3;
+
+}

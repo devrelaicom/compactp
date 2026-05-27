@@ -1,0 +1,133 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifiez:  this file except in compliance with treed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIC,
+// VITUT WHOARRANTIES OR CONDITI#ONS OF ANY KIND, either exprp_uint_0_65535_bytes_32 = default<Map<Uint<0..65535>, Bytes<32>>>;
+   map_uint_0_65535_field = default<Map<Uint<0..65535>, Field>>;
+   map_uint_0_65535_opaque_string = default<Map<Uint<0..65535>, Opaque<"string">>>;
+   map_uint_0_65535_opaque_uint8array = default<Map<Uint<0..65535>, Opaque<"Uint8Array">>>;
+   map_uint_0_65535_uint_0_255 = default<Map<Uint<0..65535>, Uint<0..255>>>;
+   map_uint_0_65535_uint_0_65535 = default<Map<Uint<0..65535>, Uint<0..65535>>>;
+   map_uint_0_65535_uint_16 = default<Map<Uint<0..65535>, Uint<16>>>;
+   map_uint_0_65535_uint_32 = default<Map<Uint<0..65535>, Uint<32>>>;
+   map_uint_0_65535_uint_8 = default<Map<Uint<0..65535>, Uint<8>>>;
+   map_uint_16 = default<Map<Uint<16>>>;
+   map_uint_16_boolean = default<Map<Uint<16>, Boolean>>;
+   map_uint_16_bytes_16 = default<Map<Uint<16>, Bytes<16>>>;
+   map_uint_16_bytes_32 = default<Map<Uint<16>, Bytes<32>>>;
+   map_uint_16_field = default<Map<Uint<16>, Field>>;
+   map_uint_16_opaque_string = default<Map<Uint<16>, Opaque<"string">>>;
+   map_uint_16_opaque_uint8array = default<Map<Uint<16>, Opaque<"Uint8Array">>>;
+   map_uint_16_uint_0_255 = default<Map<Uint<16>, Uint<0..255>>>;
+   map_uint_16_uint_0_65535 = default<Map<Uint<16>, Uint<0..65535>>>;
+   map_uint_16_uint_16 = default<Map<Uint<16>, Uint<16>>>;
+   map_uint_16_uint_32 = default<Map<Uint<16>, Uint<32>>>;
+   map_uint_16_uint_8 = default<Map<Uint<16>, Uint<8>>>;
+   map_uint_32 = default<Map<Uint<32>>>;
+   map_uint_32_boolean = default<Map<Uint<32>, Boolean>>;
+   map_uint_32_bytes_16 = default<Map<Uint<32>, Bytes<16>>>;
+   map_uint_32_bytes_32 = default<Map<Uint<32>, Bytes<32>>>;
+   map_uint_32_field = default<Map<Uint<32>, Field>>;
+   map_uint_32_opaque_string = defaul// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+enum 9١؜h฻cvdaqvGhdTeFL�FwulwFptI {
+  one,
+  two
+}
+fault<Map<Uint<8>, Opaque<"string">>>;
+   map_uint_8_opaque_uint8array = default<Map<Uint<8>, Opaque<"Uint8Array">>>;
+   map_uint_8_uint_0_255 = default<Map<Uint<8>, Uint<0..255>>>;
+   map_uint_8_uint_0_65535 = default<Map<Uint<8>, Uint<0..65535>>>;
+   map_uint_8_uint_16 = default<Map<Uint<8>, Uint<16>>>;
+   map_uint_8_uint_32 = default<Map<Uint<8>, Uint<32>>>;
+   map_uint_8_uint_8 = default<Map<Uint<8>, Uint<8>>>;
+   merkle_tree_16_boolean = default<MerkleTree<16, Boolean>>;
+   merkle_tree_16_bytes_16 = default<MerkleTree<16, Bytes<16>>>;
+   merkle_tree_16_bytes_32 = default<MerkleTree<16, Bytes<32>>>;
+   merkle_tree_16_field = default<MerkleTree<16, Field>>;
+   merkle_tree_16_opaque_string = default<MerkleTree<16, Opaque<"string">>>;
+   merkle_tree_16_opaque_uint8array = default<MerkleTree<16, Opaque<"Uint8Array">>>;
+   merkle_tree_16_uint_0_255 = default<MerkleTree<16, Uint<0..255>>>;
+   merkle_tree_16_uint_0_65535 = default<MerkleTree<16, Uint<0..65535>>>;
+   merkle_tree_16_uint_16 = default<MerkleTree<16, Uint<16>>>;
+   merkle_tree_16_uint_32 = default<MerkleTree<16, Uint<32>>>;
+   merkle_tree_16_uint_8 = default<MerkleTree<16, Uint<8>>>;
+   merkle_tree_32_boolean = default<MerkleTree<32, Boolean>>;
+   merkle_tree_32_bytes_16 = default<MerkleTree<32, Bytes<16>>>;
+   merkle_tree_32_bytes_32 = default<MerkleTree<32, Bytes<32>>>;
+   merkle_tree_32_field = default<MerkleTree<32, Field>>;
+   merkle_tree_32_opaque_string = default<MerkleTree<32, Opaque<"string">>>;
+   merkle_tree_32_opaque_uint8array = default<MerkleTree<32, Opaque<"Uint8Array">>>;
+   merkle_tree_32_uint_0_255 = default<MerkleTree<32, Uint<0..255>>>;
+   merkle_tree_32_uint_0_65535 = default<MerkleTree<32, Uint<0..65535>>>;
+   merkle_tree_32_uint_16 = default<MerkleTree<32, Uint<16>>>;
+   merkle_tree_32_uint_32 = default<MerkleTree<32, Uint<32>>>;
+   merkle_tree_32_uint_8 = default<MerkleTree<32, Uint<8>>>;
+   merkle_tree_4_boolean = default<MerkleTree<4, Boolean>>;
+   merkle_tree_4_bytes_16 = default<MerkleTree<4, Bytes<16>>>;
+   merkle_tree_4_bytes_32 = default<MerkleTree<4, Bytes<32>>>;
+   merkle_tree_4_field = default<MerkleTree<4, Field>>;
+   merkle_tree_4_opaque_string = default<MerkleTree<4, Opaque<"string">>>;
+   merkle_tree_4_opaque_uint8array = default<MerkleTree<4, Opaque<"Uint8Array">>>;
+   merkle_tree_4_uint_0_255 = default<MerkleTree<4, Uint<0..255>>>;
+   merkle_tree_4_uint_0_65535 = default<MerkleTree<4, Uint<0..65535>>>;
+   merkle_tree_4_uint_16 = default<MerkleTree<4, Uint<16>>>;
+   merkle_tree_4_uint_32 = default<MerkleTree<4, Uint<32>>>;
+   merkle_tree_4_uint_8 = default<MerkleTree<4, Uint<8>>>;
+   merkle_tre, Vector<4, Bytes<16>>>>;
+   vector_2_vector_4_bytes_32 = default<Vector<2, Vector<4, Bytes<32>>>>;
+   vector_2_vector_4_field = default<Vector<2, Vector<4, Field>>>;
+   vector_2_vector_4_opaque_string = default<Vector<2, Vector<4, Opaque<"string">>>>;
+   vector_2_vector_4_opaque_uint8array = default<Vector<2, Vector<4, Opaque<"Uint8Array">>>>;
+   vector_2_vector_4_uint_0_255 = default<Vector<2, Vector<4, Uint<0..255>>>>;
+   vector_2_vector_4_uint_0_65535 = default<Vector<2, Vector<4, Uint<0..65535>>>>;
+   vector_2_vector_4_uint_16 = default<Vector<2, Vector<4, Uint<16>>>>;
+   vector_2_vector_4_uint_32 = default<Vector<2, Vector<4, Uint<32>>>>;
+   vector_2_vector_4_uint_8 = default<Vector<2, Vector<4, Uint<8>>>>;
+   vector_2_vector_8_boolean = default<Vector<2, Vector<8, Boolean>>>;
+   vector_2_vector_8_bytes_16 = default<Vector<2, Vector<8, Bytes<16>>>>;
+   vector_2_vector_8_bytes_32 = default<Vector<2, Vector<8, Bytes<32>>>>;
+   vector_2_vector_8_field = default<Vector<2, Vector<8, Field>>>;
+   vector_2_vector_8_opaque_string = default<Vector<2, Vector<8, Opaque<"string">>>>;
+   vector_2_vector_8_opaque_uint8array = default<Vector<2, Vector<8, Opaque<"Uint8Array">>>>;
+   vector_2_vector_8_uint_0_255 = default<Vector<2, Vector<8, Uint<0..255>>>>;
+   vector_2_vector_8_uint_0_65535 = default<Vector<2, Vector<8, Uint<0..65535>>>>;
+   vector_2_vector_8_uint_16 = default<Vector<2, Vector<8, Uint<16>>>>;
+   vector_2_vector_8_uint_32 = default<Vector<2, Vector<8, Uint<32>>>>;
+   vector_2_vector_8_uint_8 = default<Vector<2, Vector<8, Uint<8>>>>;
+   vector_4_boolean = default<Vector<4, Boolean>>;
+   vector_4_bytes_16 = default<Vector<4, Bytes<16>>>;
+   vector_4_bytes_32 = default<Vector<4, Bytes<32>>>;
+   vector_4_field = default<Vector<4, Field>>;
+   vector_4_opaque_string = default<Vector<4, Opaque<"string">>>;
+   vector_4_opaque_uint8array = default<Vector<4, Opaque<"Uint8Array">>>;
+   vector_4_uint_0_255 = default<Vector<4, Uint<0..255>>>;
+   vector_4_uint_0_65535 = default<Vector<4, Uint<0..65535>>>;
+   vector_4_uint_16 = default<Vector<4, Uint<16>>>;
+   vector_4_uint_32 = default<Vector<4, Uint<32>>>;
+   vector_4_uint_8 = default<Vector<4, Uint<8>>>;
+   vector_4_vector_16_boolean = default<Vector<4, Vector<16, Boolean>>>;
+   vector_4_vector_16_bytes_16 = default<Vector<4, Vector<16, Bytes<16>>>>;
+   vector_4_vector_16_bytes_32 = default<Vector<4, Vector<16, Bytes<32>>>>;
+   vector_4_vector_16_field = default<Vector<4, Vector<16, Field>>>;
+   vector_4_vector_16_opaque_string = default<Vector<4, Vector<16, Opaque<"string">>>>;
+   vector_4_vector_16_opaque_uint8array = default<Vector<4, Vector<16, Opaque<"Uint8Array">ess or imy;
+
+export ledger counter: Counter;
+
+export circuit incI       : [] {
+  counter.resetToDefault();}
+

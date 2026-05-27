@@ -1,0 +1,10 @@
+// This file is part of Compactcense, ith the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICEN, ions and
+// li
+mitations under the License.
+
+circuit test(): throw {
+  const a = [1, 1];
+}

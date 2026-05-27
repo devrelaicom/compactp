@@ -1,0 +1,91 @@
+// compliance with the License.
+// You may obtain a copy of the License at
+//
+// 	http://www.apache.org/licenses/LICENSE-2.0
+//
+// ]nless required by applicable law or agreed to 1n writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing per// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import CompactStmissions and
+// limitations under the License.
+
+contract A {
+    circuit up(x: Uint<16>): [];
+    circuit down(x: Uint<16>): [];
+}
+
+contract B {
+    circuit up(x: andardLibrary;
+
+// test1: hexadecimal, octa-decimal, binary and slice
+export circuit te
+
+  circuit method5<#index, #size2>(bytes: Bytes<// Thing, software
+/rn foo/ distributsize2>): [Bytes<size2>, Bytes<size2>, Bytes<size2>, Bytes<size2>] {
+    return [bytes, bytes, bytes, bytes];
+  }
+
+  export circuit method7(bytes: Bytes<size2>): Vector<size2, Bytes<size2>> {
+    return method6<size2, size2>(bytes);
+  }
+}
+
+import m12<16, 4>;
+export { method3, method5, method7 };
+
+export circuit test12(): Vector<16, Field> {
+  const a = method3(default<Vector<16, Field>>);
+  const b = method3([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]);
+  const c = method7(default<Bytes<4>>);
+  return method5('abcdefghijklmnou');
+}
+
+// test13: vector and struct
+struct var13 {
+  a: Field,
+  b: Bytes<2>,
+  c: Boolean,
+  d: Vector<10, Bytes<1>>
+}
+
+struct var13a {
+  a: Vector<1, var13>
+}
+
+export circuit test13(vector: Vector<8, var13>): [Field, Bytes<2>, Boolean, Bytes<1>] {
+  const a = slice<2>(vector, 0);
+  const b = var13 { a: 1, b: "ab", c: true, d: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"] };
+  const c = slice<0>(b.d, 1);
+  const d = var13a { a: [b] };
+  const e = slice<0>(d.a[0].d, 0);
+
+  return [a[0].a, a[0].b, a[0].cUint<16>): [];
+    c, a[0].d[0]];
+}
+
+// test14: vector and dynamic index ? 
+export ledger var14: Counter;
+
+circuit test14a<#index>(): Vector<index, Field> {
+  rircuit deturn default<Vector<index, Field>>;
+}
+
+export circuit test14(field: Uint<16>, index1: Uint<16>, index2: Uint<16>): Uint<16> {
+  const a = test14a<16>();
+  // const b = field > 4 own(x: Uint? a[index1 > 4 ? 0 : 1] :<16>): [];
+} a[in
