@@ -416,6 +416,64 @@ fn watch_without_paths_is_usage_error() {
 }
 
 // ---------------------------------------------------------------------------
+// Per-subcommand success + failure grid
+//
+// Every subcommand must have at least one success-path test and one
+// failure-path test. The happy-path snapshots above cover most success
+// paths; the blocks below gap-fill the missing direction so the matrix
+// (lex/parse/cst/ast/diag/stats/watch × success/failure) is complete.
+//
+// Notes:
+// - `lex` and `ast` are total over well-formed UTF-8: the lexer accepts
+//   any byte and the AST projection ignores parse-error recovery, so
+//   their only natural failure mode is I/O (missing file → exit 2).
+// - `diag` on a clean fixture must exit 0 with zero diagnostics — that is
+//   the contract the success path proves.
+// ---------------------------------------------------------------------------
+
+#[test]
+fn lex_failure_on_missing_file_is_io_error() {
+    // The lexer is total (accepts any byte), so its only failure path is
+    // I/O. Use a clearly-bogus path; the binary must exit 2.
+    run_expect_code(&["lex", "/nonexistent/path/file.compact"], 2);
+}
+
+#[test]
+fn cst_failure_exit_one_on_invalid_input() {
+    let path = fixture("demo/invalid.compact");
+    run_expect_code(&["cst", &path], 1);
+}
+
+#[test]
+fn ast_failure_on_missing_file_is_io_error() {
+    // The AST projection elides parse-error recovery and so exits 0 on a
+    // syntactically broken input. The only natural failure mode is I/O.
+    run_expect_code(&["ast", "/nonexistent/path/file.compact"], 2);
+}
+
+#[test]
+fn diag_success_on_valid_input_emits_zero_diagnostics() {
+    let path = fixture("demo/valid.compact");
+    let output = run_expect_code(&["--format", "json", "diag", &path], 0);
+    let json = parse_json(&output);
+    assert_envelope(&json, &path);
+    let diags = json["data"]["diagnostics"]
+        .as_array()
+        .expect("diagnostics array");
+    assert!(
+        diags.is_empty(),
+        "diag on a clean fixture must emit zero diagnostics, got {diags:?}"
+    );
+    assert_eq!(json["data"]["error_count"].as_u64(), Some(0));
+}
+
+#[test]
+fn stats_failure_exit_one_on_invalid_input() {
+    let path = fixture("demo/invalid.compact");
+    run_expect_code(&["stats", &path], 1);
+}
+
+// ---------------------------------------------------------------------------
 // Help / version
 // ---------------------------------------------------------------------------
 
