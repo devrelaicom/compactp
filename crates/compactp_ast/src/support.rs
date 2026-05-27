@@ -10,7 +10,7 @@ use rowan::NodeOrToken;
 use crate::AstNode;
 
 /// Find the first direct child token with the given `SyntaxKind`.
-pub fn child_token(parent: &SyntaxNode, kind: SyntaxKind) -> Option<SyntaxToken> {
+pub(crate) fn child_token(parent: &SyntaxNode, kind: SyntaxKind) -> Option<SyntaxToken> {
     parent
         .children_with_tokens()
         .filter_map(NodeOrToken::into_token)
@@ -18,11 +18,11 @@ pub fn child_token(parent: &SyntaxNode, kind: SyntaxKind) -> Option<SyntaxToken>
 }
 
 /// Find the first direct child node that can be cast to the target AST type `N`.
-pub fn child_node<N: AstNode>(parent: &SyntaxNode) -> Option<N> {
+pub(crate) fn child_node<N: AstNode>(parent: &SyntaxNode) -> Option<N> {
     parent.children().find_map(N::cast)
 }
 
 /// Iterate over all direct child nodes that can be cast to the target AST type `N`.
-pub fn children_nodes<N: AstNode>(parent: &SyntaxNode) -> impl Iterator<Item = N> {
+pub(crate) fn children_nodes<N: AstNode>(parent: &SyntaxNode) -> impl Iterator<Item = N> {
     parent.children().filter_map(N::cast)
 }

@@ -141,6 +141,60 @@ fn ast_human_output() {
 }
 
 #[test]
+fn ast_include_bodies_dumps_stmts_and_exprs() {
+    // The demo fixture has a circuit with a call-expression body and another
+    // with a return-expression body — `--include-bodies` should surface
+    // Block/Stmt/Expr typed-walk output for both.
+    let path = fixture("demo/valid.compact");
+    let out = stdout(run_ok(&["ast", "--include-bodies", &path]));
+    assert!(
+        out.contains("Block"),
+        "expected Block in --include-bodies output, got:\n{out}"
+    );
+    assert!(
+        out.contains("Stmt::"),
+        "expected Stmt:: in --include-bodies output, got:\n{out}"
+    );
+    assert!(
+        out.contains("Expr::"),
+        "expected Expr:: in --include-bodies output, got:\n{out}"
+    );
+    // The flag should be inert when omitted.
+    let plain = stdout(run_ok(&["ast", &path]));
+    assert!(
+        !plain.contains("Block") && !plain.contains("Stmt::"),
+        "ast without --include-bodies should not surface body nodes, got:\n{plain}"
+    );
+}
+
+#[test]
+fn ast_include_bodies_json_walks_typed_ast() {
+    let path = fixture("declarations/all_declarations.compact");
+    let output = run_ok(&[
+        "--format",
+        "json",
+        "--pretty",
+        "ast",
+        "--include-bodies",
+        &path,
+    ]);
+    let json = parse_json(&output);
+    let items = json["data"]["items"]
+        .as_array()
+        .expect("items should be array");
+    // Find at least one CircuitDef and verify body/stmts are present.
+    let has_walked_body = items.iter().any(|item| {
+        item["kind"] == "CircuitDef"
+            && item["body"].is_object()
+            && item["body"]["stmts"].is_array()
+    });
+    assert!(
+        has_walked_body,
+        "expected at least one CircuitDef with a walked body: {json}"
+    );
+}
+
+#[test]
 fn diag_human_output() {
     let path = fixture("recovery/broken_expressions.compact");
     let out = stdout(run_expect_code(&["diag", "--color", "never", &path], 1));

@@ -1,5 +1,4 @@
 pub mod compactp_parser
-pub mod compactp_parser::grammar
 pub struct compactp_parser::ParseOptions
 pub compactp_parser::ParseOptions::max_errors: usize
 pub compactp_parser::ParseOptions::recover: bool
@@ -23,5 +22,4 @@ impl core::marker::UnsafeUnpin for compactp_parser::ParseResult
 impl core::panic::unwind_safe::RefUnwindSafe for compactp_parser::ParseResult
 impl core::panic::unwind_safe::UnwindSafe for compactp_parser::ParseResult
 pub fn compactp_parser::parse(&str) -> compactp_parser::ParseResult
-pub fn compactp_parser::parse_file(&std::path::Path) -> core::result::Result<compactp_parser::ParseResult, std::io::error::Error>
 pub fn compactp_parser::parse_with(&str, compactp_parser::ParseOptions) -> compactp_parser::ParseResult

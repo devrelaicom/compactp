@@ -1978,10 +1978,6 @@ impl core::marker::Unpin for compactp_ast::WitnessDecl
 impl core::marker::UnsafeUnpin for compactp_ast::WitnessDecl
 impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::WitnessDecl
 impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::WitnessDecl
-pub mod compactp_ast::support
-pub fn compactp_ast::support::child_node<N: compactp_ast::AstNode>(&compactp_syntax::SyntaxNode) -> core::option::Option<N>
-pub fn compactp_ast::support::child_token(&compactp_syntax::SyntaxNode, compactp_syntax::syntax_kind::SyntaxKind) -> core::option::Option<compactp_syntax::SyntaxToken>
-pub fn compactp_ast::support::children_nodes<N: compactp_ast::AstNode>(&compactp_syntax::SyntaxNode) -> impl core::iter::traits::iterator::Iterator<Item = N>
 pub enum compactp_ast::Expr
 pub compactp_ast::Expr::Array(compactp_ast::expr::ArrayExpr)
 pub compactp_ast::Expr::Binary(compactp_ast::expr::BinaryExpr)

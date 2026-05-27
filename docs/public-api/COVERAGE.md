@@ -8,15 +8,15 @@ doctest that compiles via `cargo test --doc` (which serves as the
 consumer).
 
 Baseline lines per crate (from `cargo public-api`, captured in
-WS2 T2):
+WS2 T2 and re-snapshotted in WS2 T4 after demotions):
 
-| Crate                  | Baseline lines |
-| ---------------------- | -------------- |
-| `compactp_lexer`       | 2              |
-| `compactp_syntax`      | 232            |
-| `compactp_diagnostics` | 91             |
-| `compactp_parser`      | 27             |
-| `compactp_ast`         | 3743           |
+| Crate                  | Baseline lines | Δ since T2 |
+| ---------------------- | -------------- | ---------- |
+| `compactp_lexer`       | 2              | —          |
+| `compactp_syntax`      | 230            | −2 (`is_keyword`, `SyntaxElement` removed) |
+| `compactp_diagnostics` | 91             | —          |
+| `compactp_parser`      | 25             | −2 (`grammar` module demoted, `parse_file` removed) |
+| `compactp_ast`         | 3739           | −4 (`support` module demoted to `pub(crate)`) |
 
 Each baseline line is roughly one public item — top-level types,
 functions, free items, plus per-type accessor methods and the standard
@@ -67,13 +67,15 @@ the `rowan` glue. Every `SyntaxKind` variant appears in CST output
 | `pub mod compactp_syntax`                         | all                        | module root                                                                                            |
 | `enum SyntaxKind` (all variants)                  | `lex`, `cst`, `ast`, `stats` | every variant flows through tokens (lex) or tree (cst/stats/ast) at least for the wider corpus       |
 | `SyntaxKind::ERROR`                               | `stats`                    | counted by `count_error_nodes` as the recovery metric                                                  |
-| `SyntaxKind::is_trivia`                           | (internal)                 | used inside `compactp_parser` (sink, parser); no CLI codepath touches it directly. **Orphan from the CLI’s perspective.** |
-| `SyntaxKind::is_keyword`                          | (none)                     | **Orphan** — defined but never called inside the workspace.                                            |
+| `SyntaxKind::is_trivia`                           | doctest                    | Used inside `compactp_parser` (sink, parser); kept `pub` and exercised by a doctest in T4 — see `SyntaxKind::is_trivia` in `crates/compactp_syntax/src/syntax_kind.rs`. |
 | `SyntaxKind: Clone/Debug/Eq/Hash/Copy/From/Ord`   | `cst`, `stats`             | `{:?}` formatting (cst), `==` comparisons (stats), `From` conversions in parser sink                   |
 | `enum CompactLanguage` + `Language` impl          | `cst`, `ast`, `stats`      | every `SyntaxNode`/`SyntaxToken` instantiation goes through `CompactLanguage::kind_from_raw`           |
 | `type SyntaxNode`                                 | `cst`, `ast`, `stats`      | the rooted tree the CLI walks                                                                          |
 | `type SyntaxToken`                                | `cst`, `ast`               | tokens are formatted in `cst` and read for identifiers in `ast`                                        |
-| `type SyntaxElement`                              | (none)                     | **Orphan** — type alias, no consumer in this workspace.                                                |
+
+`SyntaxKind::is_keyword` and `type SyntaxElement` were removed in T4
+(zero callers anywhere in the workspace; trivial to resurrect from git
+history if a future consumer needs them).
 
 ### `compactp_diagnostics` (91 baseline lines)
 
@@ -103,13 +105,16 @@ parser crate, so they are not candidates for demotion.
 | Public item                                   | Subcommand(s)                          | Notes                                                                                  |
 | --------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------- |
 | `pub mod compactp_parser`                     | all                                    | module root                                                                            |
-| `pub mod compactp_parser::grammar`            | (none)                                 | **Orphan** — `grammar` is `pub mod` but every consumer (its own submodules, in-crate tests) accesses it via `crate::grammar`. T4 should make this `pub(crate)`. |
 | `struct ParseOptions { max_errors, recover }` | `parse`, `diag`, `ast`                 | constructed in each subcommand’s `run`                                                 |
 | `ParseOptions::default`                       | `cst`, `stats` (transitively)          | `parse()` calls `parse_with(source, ParseOptions::default())`; `cst` and `stats` both call `parse()`                  |
 | `struct ParseResult { errors, green }`        | `parse`, `cst`, `ast`, `diag`, `stats` | returned by `parse` / `parse_with`; `.errors` and `.green` read by every subcommand    |
 | `fn parse(&str) -> ParseResult`               | `cst`, `stats`                         | the no-options entry point                                                             |
 | `fn parse_with(&str, ParseOptions) -> ParseResult` | `parse`, `diag`, `ast`            | the options-aware entry point                                                          |
-| `fn parse_file(&Path) -> Result<ParseResult, io::Error>` | (none)                      | **Orphan** — CLI reads source via `resolve_inputs` and calls `parse_with`. No caller in the workspace. |
+
+`compactp_parser::grammar` was demoted to `pub(crate)` in T4 (every
+consumer accesses it via `crate::grammar`); `parse_file` was removed
+(zero callers in the workspace, and the CLI reads source via
+`resolve_inputs` + `parse_with`).
 
 ### `compactp_ast` (3743 baseline lines)
 
@@ -167,66 +172,54 @@ listed in `Item` is therefore reached by the `ast` subcommand.
 | Family member                                                | Subcommand(s) | Notes                                                              |
 | ------------------------------------------------------------ | ------------- | ------------------------------------------------------------------ |
 | `GenericParamList`, `GenericParam`, `GenericArgList`, `GenericArg` | `ast`   | reached via `TypeDecl::generic_params()` and other `.generic_params()` accessors |
-| `PrefixDecl`                                                 | `ast`         | reached via `Import::prefix()` (exposed but the `Import` variant is opaque in the CLI output) — **technically uncalled by the CLI** but on the same `Import` family that *is* matched. Flag for T4. |
-| `ImportSpecifier`                                            | (none)        | **Orphan from the CLI** — `Import` is matched as an opaque variant; `ImportSpecifier` and the import-specifier list it belongs to are never destructured. |
+| `PrefixDecl`                                                 | doctest       | Kept `pub` and exercised by a doctest on the struct itself (`crates/compactp_ast/src/nodes.rs`) — reached at runtime via `Import::prefix()`. |
+| `ImportSpecifier`                                            | doctest       | Kept `pub` and exercised by a doctest on the struct itself; walks `import { foo, bar } from "x";` and pulls each specifier's `name()`. |
 
 #### `Stmt` / `Pat` / `Type` families and the entire `expr` module
 
-The `ast` subcommand stops at `Item` and does **not** walk into
-circuit bodies, statement lists, expression trees, or type annotations
-beyond the type names exposed on the items themselves. Everything
-below is *exported* by `compactp_ast` but **not reached by any CLI
-subcommand**:
+T4 added the `--include-bodies` flag to the `ast` subcommand
+(`crates/compactp/src/commands/ast.rs`). With the flag set, the CLI
+walks every `CircuitDef`/`ConstructorDef` body into its `Block`, then
+matches each `Stmt`, `Pat`, `Type`, and `Expr` variant. Without the
+flag the CLI behaviour is unchanged.
 
 | Family                                                                                                                                  | Coverage status |
 | --------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `enum Stmt` + `Assert`/`Assign`/`Block`/`Const`/`Expr`/`For`/`If`/`MultiConst`/`Return` newtypes                                        | **Orphan from the CLI.** Reachable transitively via `CircuitDef::body() -> Block::stmts()`, but the CLI never calls `.body()` past `body.is_some()`. |
-| `enum Pat` + `IdentPat`/`StructPat`/`StructPatField`/`TuplePat`/`TuplePatElt`                                                           | **Orphan from the CLI.** |
-| `enum Type` + `BooleanType`/`BytesType`/`FieldType`/`OpaqueType`/`RecordType`/`TypeRef`/`TupleType`/`UintType`/`UnsignedIntegerType`/`VectorType` + `TypeSize` | **Orphan from the CLI.** `LedgerDecl::ty()`, `TypeDecl::aliased_type()`, `StructField::ty()` etc. return `Option<Type>`, but no CLI codepath inspects the returned `Type`. |
-| `mod expr` — `enum Expr` + 22 expression newtypes (`ArrayExpr`, `BinaryExpr`, `BytesExpr`, `CallExpr`, `CastExpr`, `DefaultExpr`, `DiscloseExpr`, `FoldExpr`, `IndexExpr`, `LambdaExpr`, `LiteralExpr`, `MapExpr`, `MemberExpr`, `NameExpr`, `PadExpr`, `ParenExpr`, `SliceExpr`, `SpreadExpr`, `StructExpr`, `StructFieldInit`, `StructUpdate`, `TernaryExpr`, `UnaryExpr`) | **Orphan from the CLI.** No subcommand walks expressions. |
-| `Param`, `ParamList`                                                                                                                    | **Orphan from the CLI.** Exposed on `CircuitDef::params()` / `CircuitDecl::params()` / `LambdaExpr::param_list()` but the CLI never calls `params()`. |
-| `Block`                                                                                                                                 | **Orphan from the CLI.** Returned by `.body()` accessors; CLI only checks `body.is_some()`. |
+| `enum Stmt` + `AssertStmt`/`AssignStmt`/`Block`/`ConstStmt`/`ExprStmt`/`ForStmt`/`IfStmt`/`MultiConstStmt`/`ReturnStmt` newtypes        | `ast --include-bodies`. `dump_stmt`/`stmt_json` match every variant; `cli::ast_include_bodies_dumps_stmts_and_exprs` asserts the dump. |
+| `enum Pat` + `IdentPat`/`StructPat`/`StructPatField`/`TuplePat`/`TuplePatElt`                                                           | `ast --include-bodies`. `dump_pat`/`pat_json` match every variant. |
+| `enum Type` + `BooleanType`/`BytesType`/`FieldType`/`OpaqueType`/`RecordType`/`TypeRef`/`TupleType`/`UintType`/`UnsignedIntegerType`/`VectorType` + `TypeSize` | `ast --include-bodies`. `type_summary` matches every variant; reached via `ConstStmt::ty()`, `CastExpr::ty()`, `DefaultExpr::ty()`, `Param::ty()`, and `CircuitDef::return_type()`. `TypeSize` is reached transitively via `UintType::sizes()` / `VectorType::size()` / `BytesType::size()`. |
+| `mod expr` — `enum Expr` + 22 expression newtypes (`ArrayExpr`, `BinaryExpr`, `BytesExpr`, `CallExpr`, `CastExpr`, `DefaultExpr`, `DiscloseExpr`, `FoldExpr`, `IndexExpr`, `LambdaExpr`, `LiteralExpr`, `MapExpr`, `MemberExpr`, `NameExpr`, `PadExpr`, `ParenExpr`, `SliceExpr`, `SpreadExpr`, `StructExpr`, `StructFieldInit`, `StructUpdate`, `TernaryExpr`, `UnaryExpr`) | `ast --include-bodies`. `dump_expr`/`expr_json` match every `Expr` variant; `StructFieldInit` and `StructUpdate` are reached via `StructExpr::field_inits()` and `StructExpr::update()` respectively. |
+| `Param`, `ParamList`                                                                                                                    | `ast --include-bodies`. `param_json` reads `Param::pattern()` and `Param::ty()`; `ParamList` is reached transitively via `LambdaExpr::param_list()`. |
+| `Block`                                                                                                                                 | `ast --include-bodies`. `block_json` reads `Block::stmts()` recursively. |
 
 #### `support` module
 
-| Public item                                            | Subcommand(s) | Notes                                          |
-| ------------------------------------------------------ | ------------- | ---------------------------------------------- |
-| `support::child_node`, `support::child_token`, `support::children_nodes` | (none) | **Orphan from the CLI.** Used internally by generated `AstNode` impls inside `compactp_ast` itself (paths without the `compactp_ast::` prefix). Either keep `pub` and document them as a stable extension API, or demote to `pub(crate)` in T4. |
+The `support` module was demoted to `pub(crate)` in T4 (used only by
+`compactp_ast`'s own generated accessors; no external consumer in the
+workspace). It no longer appears in the public surface.
 
 ## Orphans (items not exercised by any CLI subcommand)
 
-Summary table consolidating the "Orphan" entries above. These are the
-inputs to WS2 Task 4.
+**No orphans.** All public items identified in WS2 T3 have been resolved
+in T4 via one of three buckets:
 
-| Item                                                | Crate                  | Notes                                                                                                                |
-| --------------------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `SyntaxKind::is_keyword`                            | `compactp_syntax`      | No caller anywhere in the workspace. Demote, delete, or doctest.                                                     |
-| `SyntaxKind::is_trivia`                             | `compactp_syntax`      | Used by `compactp_parser` internally; not by CLI. Keep `pub` (parser is a consumer), but no CLI codepath exercises it. |
-| `type SyntaxElement`                                | `compactp_syntax`      | Type alias with no callers. Demote or doctest.                                                                       |
-| `compactp_parser::grammar` module                   | `compactp_parser`      | `pub mod` but every consumer uses `crate::grammar`. Demote to `pub(crate)`.                                          |
-| `parse_file(&Path) -> Result<ParseResult, io::Error>` | `compactp_parser`    | CLI uses `resolve_inputs` + `parse_with`. No callers in the workspace.                                               |
-| `ImportSpecifier` + accessors                       | `compactp_ast`         | Exposed but never destructured. `Import` is opaque in `ast` output.                                                  |
-| `PrefixDecl` + accessors                            | `compactp_ast`         | Exposed via `Import::prefix()`; CLI does not inspect.                                                                |
-| Entire `enum Stmt` family                           | `compactp_ast`         | CLI does not walk circuit bodies. ~9 newtypes + 1 enum + their accessors.                                            |
-| Entire `enum Pat` family                            | `compactp_ast`         | CLI does not walk patterns. ~4 newtypes + 1 enum.                                                                    |
-| Entire `enum Type` family                           | `compactp_ast`         | CLI calls `Type` accessors that *return* `Type` but never matches on the variants. ~10 newtypes + 1 enum + `TypeSize`. |
-| Entire `compactp_ast::expr` module                  | `compactp_ast`         | 22 expression newtypes + the `Expr` enum. CLI never walks expressions.                                               |
-| `Param`, `ParamList`                                | `compactp_ast`         | Exposed on every circuit-like accessor but CLI never calls `params()`.                                               |
-| `Block`                                             | `compactp_ast`         | Returned by `.body()`; CLI only checks `.is_some()`.                                                                 |
-| `support::child_node`, `child_token`, `children_nodes` | `compactp_ast`      | Internal helpers; no external consumer. Demote to `pub(crate)` or doctest.                                           |
+| Bucket                          | Items                                                                                                                                                       |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Demoted to `pub(crate)` (or removed) | `SyntaxKind::is_keyword` (removed), `type SyntaxElement` (removed), `compactp_parser::grammar` (demoted), `parse_file` (removed), `compactp_ast::support` (demoted) |
+| Exposed via `ast --include-bodies` | `enum Stmt` + 9 newtypes, `enum Pat` + 5 newtypes, `enum Type` + 11 newtypes + `TypeSize`, `enum Expr` + 22 expression newtypes (incl. `StructFieldInit`, `StructUpdate`), `Block`, `Param`, `ParamList` |
+| Added doctest as consumer       | `SyntaxKind::is_trivia`, `ImportSpecifier`, `PrefixDecl`                                                                                                    |
 
-### Orphan-count summary
+### Per-crate resolution
 
-| Crate                  | CLI-orphan items (approx.)                                                                                |
-| ---------------------- | --------------------------------------------------------------------------------------------------------- |
-| `compactp_lexer`       | 0                                                                                                         |
-| `compactp_syntax`      | 3 (`is_keyword`, `is_trivia` from CLI’s POV, `SyntaxElement`)                                             |
-| `compactp_diagnostics` | 0 (constructors used by parser, not by CLI — kept)                                                        |
-| `compactp_parser`      | 2 (`grammar` mod, `parse_file`)                                                                            |
-| `compactp_ast`         | ~50 nodes across `Stmt`, `Pat`, `Type`, `expr`, plus `Block`, `Param`, `ParamList`, `ImportSpecifier`, `PrefixDecl`, and the 3 `support` helpers |
+| Crate                  | Orphans before T4 | Orphans after T4 |
+| ---------------------- | ----------------- | ---------------- |
+| `compactp_lexer`       | 0                 | 0                |
+| `compactp_syntax`      | 3                 | 0                |
+| `compactp_diagnostics` | 0                 | 0                |
+| `compactp_parser`      | 2                 | 0                |
+| `compactp_ast`         | ~50               | 0                |
 
-Task 4 will decide, for each orphan, whether to:
-1. demote to `pub(crate)`,
-2. add a doctest that exercises it from the public API,
-3. extend the CLI (most likely for the AST orphans — e.g. an `--depth full` flag on `ast`), or
-4. delete outright.
+The contract is preserved: every public item is either (a) exercised by
+a CLI subcommand (the `ast` subcommand alone, with `--include-bodies`,
+covers the entire AST surface), or (b) carries a runnable doctest in
+the source of the item itself.

@@ -18,7 +18,6 @@ impl rowan::Language for CompactLanguage {
 
 pub type SyntaxNode = rowan::SyntaxNode<CompactLanguage>;
 pub type SyntaxToken = rowan::SyntaxToken<CompactLanguage>;
-pub type SyntaxElement = rowan::SyntaxElement<CompactLanguage>;
 
 #[cfg(test)]
 mod tests {
@@ -44,15 +43,6 @@ mod tests {
         assert!(SyntaxKind::BLOCK_COMMENT.is_trivia());
         assert!(!SyntaxKind::IDENT.is_trivia());
         assert!(!SyntaxKind::CIRCUIT_KW.is_trivia());
-    }
-
-    #[test]
-    fn syntax_kind_is_keyword() {
-        assert!(SyntaxKind::CIRCUIT_KW.is_keyword());
-        assert!(SyntaxKind::BOOLEAN_KW.is_keyword());
-        assert!(SyntaxKind::TRUE_KW.is_keyword());
-        assert!(!SyntaxKind::IDENT.is_keyword());
-        assert!(!SyntaxKind::PLUS.is_keyword());
     }
 
     #[test]

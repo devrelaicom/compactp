@@ -54,7 +54,12 @@ pub enum Commands {
     /// Dump concrete syntax tree
     Cst { paths: Vec<PathBuf> },
     /// Dump typed abstract syntax tree
-    Ast { paths: Vec<PathBuf> },
+    Ast {
+        paths: Vec<PathBuf>,
+        /// Walk circuit/constructor bodies, including Block, Stmt, Pat, Expr, and Type nodes.
+        #[arg(long)]
+        include_bodies: bool,
+    },
     /// Emit diagnostics only
     Diag { paths: Vec<PathBuf> },
     /// Report token/node counts and parse time
@@ -89,7 +94,12 @@ pub enum WatchableCommand {
     /// Dump concrete syntax tree on change
     Cst { paths: Vec<PathBuf> },
     /// Dump typed abstract syntax tree on change
-    Ast { paths: Vec<PathBuf> },
+    Ast {
+        paths: Vec<PathBuf>,
+        /// Walk circuit/constructor bodies, including Block, Stmt, Pat, Expr, and Type nodes.
+        #[arg(long)]
+        include_bodies: bool,
+    },
     /// Emit diagnostics only on change
     Diag { paths: Vec<PathBuf> },
     /// Report stats on change
@@ -102,9 +112,9 @@ impl WatchableCommand {
             WatchableCommand::Lex { paths }
             | WatchableCommand::Parse { paths }
             | WatchableCommand::Cst { paths }
-            | WatchableCommand::Ast { paths }
             | WatchableCommand::Diag { paths }
             | WatchableCommand::Stats { paths } => paths,
+            WatchableCommand::Ast { paths, .. } => paths,
         }
     }
 }

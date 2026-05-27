@@ -145,11 +145,36 @@ impl Import {
 
 ast_node! {
     /// An import specifier within a braced import list.
+    ///
+    /// Appears inside `import { foo, bar as baz } from "...";` declarations.
+    /// Currently the only typed accessor is [`ImportSpecifier::name`]; the
+    /// optional `as` alias is preserved in the green tree but not yet exposed
+    /// as a dedicated accessor.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use compactp_ast::{AstNode, ImportSpecifier, SourceFile};
+    /// use compactp_syntax::SyntaxNode;
+    ///
+    /// let result = compactp_parser::parse(r#"import { foo, bar } from "./x";"#);
+    /// let root = SyntaxNode::new_root(result.green);
+    /// let file = SourceFile::cast(root).expect("root is SOURCE_FILE");
+    ///
+    /// let names: Vec<String> = file
+    ///     .syntax()
+    ///     .descendants()
+    ///     .filter_map(ImportSpecifier::cast)
+    ///     .filter_map(|s| s.name())
+    ///     .map(|t| t.text().to_string())
+    ///     .collect();
+    /// assert_eq!(names, vec!["foo".to_string(), "bar".to_string()]);
+    /// ```
     ImportSpecifier => IMPORT_SPECIFIER
 }
 
 impl ImportSpecifier {
-    /// The imported name.
+    /// The imported name (the identifier before any `as` alias).
     pub fn name(&self) -> Option<SyntaxToken> {
         support::child_token(&self.0, SyntaxKind::IDENT)
     }
@@ -518,6 +543,23 @@ impl EnumVariant {
 
 ast_node! {
     /// `prefix id` declaration within an import.
+    ///
+    /// Reached via [`Import::prefix`]. Holds the identifier that qualifies all
+    /// imported names from this module.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use compactp_ast::{AstNode, SourceFile};
+    /// use compactp_syntax::SyntaxNode;
+    ///
+    /// let result = compactp_parser::parse("import Foo prefix bar;");
+    /// let root = SyntaxNode::new_root(result.green);
+    /// let file = SourceFile::cast(root).expect("root is SOURCE_FILE");
+    /// let import = file.imports().next().expect("Import node");
+    /// let prefix = import.prefix().expect("prefix decl");
+    /// assert_eq!(prefix.name().unwrap().text(), "bar");
+    /// ```
     PrefixDecl => PREFIX_DECL
 }
 

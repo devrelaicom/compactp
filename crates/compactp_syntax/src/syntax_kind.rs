@@ -205,7 +205,25 @@ pub enum SyntaxKind {
 }
 
 impl SyntaxKind {
-    /// Returns true for whitespace and comment tokens.
+    /// Returns `true` for whitespace and comment tokens.
+    ///
+    /// The lexer and parser preserve trivia in the green tree (so source can be
+    /// round-tripped losslessly), but most downstream consumers — formatters,
+    /// linters, code navigators — want to ignore it. Use this to filter trivia
+    /// out of a token stream or descendants iterator.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use compactp_syntax::SyntaxKind;
+    ///
+    /// assert!(SyntaxKind::WHITESPACE.is_trivia());
+    /// assert!(SyntaxKind::LINE_COMMENT.is_trivia());
+    /// assert!(SyntaxKind::BLOCK_COMMENT.is_trivia());
+    ///
+    /// assert!(!SyntaxKind::IDENT.is_trivia());
+    /// assert!(!SyntaxKind::CIRCUIT_KW.is_trivia());
+    /// ```
     pub fn is_trivia(self) -> bool {
         matches!(
             self,
@@ -213,54 +231,6 @@ impl SyntaxKind {
         )
     }
 
-    /// Returns true for all keyword variants (including builtin type keywords and boolean literals).
-    pub fn is_keyword(self) -> bool {
-        matches!(
-            self,
-            Self::TRUE_KW
-                | Self::FALSE_KW
-                | Self::PRAGMA_KW
-                | Self::INCLUDE_KW
-                | Self::IMPORT_KW
-                | Self::FROM_KW
-                | Self::PREFIX_KW
-                | Self::EXPORT_KW
-                | Self::MODULE_KW
-                | Self::LEDGER_KW
-                | Self::CONSTRUCTOR_KW
-                | Self::CIRCUIT_KW
-                | Self::WITNESS_KW
-                | Self::CONTRACT_KW
-                | Self::STRUCT_KW
-                | Self::ENUM_KW
-                | Self::TYPE_KW
-                | Self::CONST_KW
-                | Self::RETURN_KW
-                | Self::IF_KW
-                | Self::ELSE_KW
-                | Self::FOR_KW
-                | Self::OF_KW
-                | Self::ASSERT_KW
-                | Self::AS_KW
-                | Self::PURE_KW
-                | Self::SEALED_KW
-                | Self::NEW_KW
-                | Self::MAP_KW
-                | Self::FOLD_KW
-                | Self::DEFAULT_KW
-                | Self::DISCLOSE_KW
-                | Self::PAD_KW
-                | Self::SLICE_KW
-                | Self::BOOLEAN_KW
-                | Self::FIELD_KW
-                | Self::UINT_KW
-                | Self::BYTES_KW
-                | Self::OPAQUE_KW
-                | Self::VECTOR_KW
-                | Self::UNSIGNED_KW
-                | Self::INTEGER_KW
-        )
-    }
 }
 
 impl From<SyntaxKind> for u16 {

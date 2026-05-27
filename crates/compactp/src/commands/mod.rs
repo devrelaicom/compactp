@@ -14,7 +14,10 @@ pub fn run(cli: Cli) -> Result<i32, CliError> {
         crate::Commands::Lex { paths } => lex::run(&cli, paths),
         crate::Commands::Parse { paths } => parse::run(&cli, paths),
         crate::Commands::Cst { paths } => cst::run(&cli, paths),
-        crate::Commands::Ast { paths } => ast::run(&cli, paths),
+        crate::Commands::Ast {
+            paths,
+            include_bodies,
+        } => ast::run(&cli, paths, *include_bodies),
         crate::Commands::Diag { paths } => diag::run(&cli, paths),
         crate::Commands::Stats { paths } => stats::run(&cli, paths),
         crate::Commands::Watch { command } => watch::run(&cli, command),
@@ -26,7 +29,10 @@ pub(crate) fn run_watchable(cli: &Cli, command: &crate::WatchableCommand) -> Res
         crate::WatchableCommand::Lex { paths } => lex::run(cli, paths),
         crate::WatchableCommand::Parse { paths } => parse::run(cli, paths),
         crate::WatchableCommand::Cst { paths } => cst::run(cli, paths),
-        crate::WatchableCommand::Ast { paths } => ast::run(cli, paths),
+        crate::WatchableCommand::Ast {
+            paths,
+            include_bodies,
+        } => ast::run(cli, paths, *include_bodies),
         crate::WatchableCommand::Diag { paths } => diag::run(cli, paths),
         crate::WatchableCommand::Stats { paths } => stats::run(cli, paths),
     }

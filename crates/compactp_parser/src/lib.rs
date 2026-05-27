@@ -1,5 +1,5 @@
 mod event;
-pub mod grammar;
+pub(crate) mod grammar;
 mod marker;
 mod parser;
 mod sink;
@@ -46,12 +46,6 @@ pub fn parse_with(source: &str, opts: ParseOptions) -> ParseResult {
     let (green, errors) = sink::Sink::new(events, tokens).finish();
 
     ParseResult { green, errors }
-}
-
-/// Parse a file from disk.
-pub fn parse_file(path: &std::path::Path) -> Result<ParseResult, std::io::Error> {
-    let source = std::fs::read_to_string(path)?;
-    Ok(parse(&source))
 }
 
 #[cfg(test)]

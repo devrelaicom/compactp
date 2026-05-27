@@ -197,7 +197,6 @@ pub compactp_syntax::SyntaxKind::WHITESPACE = 0
 pub compactp_syntax::SyntaxKind::WITNESS_DECL
 pub compactp_syntax::SyntaxKind::WITNESS_KW
 impl compactp_syntax::SyntaxKind
-pub fn compactp_syntax::SyntaxKind::is_keyword(self) -> bool
 pub fn compactp_syntax::SyntaxKind::is_trivia(self) -> bool
 impl core::clone::Clone for compactp_syntax::SyntaxKind
 pub fn compactp_syntax::SyntaxKind::clone(&self) -> compactp_syntax::SyntaxKind
@@ -227,6 +226,5 @@ impl core::marker::Unpin for compactp_syntax::SyntaxKind
 impl core::marker::UnsafeUnpin for compactp_syntax::SyntaxKind
 impl core::panic::unwind_safe::RefUnwindSafe for compactp_syntax::SyntaxKind
 impl core::panic::unwind_safe::UnwindSafe for compactp_syntax::SyntaxKind
-pub type compactp_syntax::SyntaxElement = rowan::api::SyntaxElement<compactp_syntax::CompactLanguage>
 pub type compactp_syntax::SyntaxNode = rowan::api::SyntaxNode<compactp_syntax::CompactLanguage>
 pub type compactp_syntax::SyntaxToken = rowan::api::SyntaxToken<compactp_syntax::CompactLanguage>
