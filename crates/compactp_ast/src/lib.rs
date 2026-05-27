@@ -1055,4 +1055,31 @@ enum Color { Red, Green }
             assert_eq!(recast.syntax().text().to_string(), text);
         }
     }
+
+    // -----------------------------------------------------------------------
+    // Type::cast — WS2 gap fix coverage for RECORD_TYPE and
+    // UNSIGNED_INTEGER_TYPE introduced in WS1 Phase 2.
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn type_cast_accepts_unsigned_integer_and_record() {
+        use compactp_syntax::SyntaxKind;
+
+        // UNSIGNED_INTEGER_TYPE via a circuit parameter.
+        let root = parse("circuit f(x: Unsigned Integer[64]): Field { return 1 as Field; }");
+        let has_unsigned = root
+            .descendants()
+            .any(|n| n.kind() == SyntaxKind::UNSIGNED_INTEGER_TYPE && Type::cast(n).is_some());
+        assert!(
+            has_unsigned,
+            "Type::cast should accept UNSIGNED_INTEGER_TYPE"
+        );
+
+        // RECORD_TYPE via a type alias.
+        let root = parse("type Foo = { x: Field };");
+        let has_record = root
+            .descendants()
+            .any(|n| n.kind() == SyntaxKind::RECORD_TYPE && Type::cast(n).is_some());
+        assert!(has_record, "Type::cast should accept RECORD_TYPE");
+    }
 }

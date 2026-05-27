@@ -707,6 +707,11 @@ pub enum Type {
     Vector(VectorType),
     /// `[type, ..., type]`
     Tuple(TupleType),
+    /// `Unsigned Integer[N]` — the two-word legacy numeric type form.
+    UnsignedInteger(UnsignedIntegerType),
+    /// `{ field: type, ... }` — record-shaped type body, primarily used in
+    /// type alias declarations like `type Ledger = { a: Field, b: Uint<32> }`.
+    Record(RecordType),
 }
 
 impl AstNode for Type {
@@ -721,6 +726,8 @@ impl AstNode for Type {
                 | SyntaxKind::OPAQUE_TYPE
                 | SyntaxKind::VECTOR_TYPE
                 | SyntaxKind::TUPLE_TYPE
+                | SyntaxKind::UNSIGNED_INTEGER_TYPE
+                | SyntaxKind::RECORD_TYPE
         )
     }
 
@@ -734,6 +741,10 @@ impl AstNode for Type {
             SyntaxKind::OPAQUE_TYPE => Some(Self::Opaque(OpaqueType(node))),
             SyntaxKind::VECTOR_TYPE => Some(Self::Vector(VectorType(node))),
             SyntaxKind::TUPLE_TYPE => Some(Self::Tuple(TupleType(node))),
+            SyntaxKind::UNSIGNED_INTEGER_TYPE => {
+                Some(Self::UnsignedInteger(UnsignedIntegerType(node)))
+            }
+            SyntaxKind::RECORD_TYPE => Some(Self::Record(RecordType(node))),
             _ => None,
         }
     }
@@ -748,6 +759,8 @@ impl AstNode for Type {
             Self::Opaque(n) => &n.0,
             Self::Vector(n) => &n.0,
             Self::Tuple(n) => &n.0,
+            Self::UnsignedInteger(n) => &n.0,
+            Self::Record(n) => &n.0,
         }
     }
 }
@@ -842,6 +855,17 @@ impl TupleType {
     pub fn element_types(&self) -> impl Iterator<Item = Type> {
         support::children_nodes(&self.0)
     }
+}
+
+ast_node! {
+    /// `Unsigned Integer[N]` — the two-word legacy numeric type form.
+    UnsignedIntegerType => UNSIGNED_INTEGER_TYPE
+}
+
+ast_node! {
+    /// `{ field: type, ... }` — record-shaped type body, primarily used
+    /// in type alias declarations like `type Ledger = { a: Field, b: Uint<32> }`.
+    RecordType => RECORD_TYPE
 }
 
 ast_node! {
