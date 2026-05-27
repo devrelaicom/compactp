@@ -40,6 +40,45 @@ cargo test -p compactp_parser --test corpus_test
 cargo bench -p compactp_parser --bench parse_bench
 ```
 
+## Fuzzing
+
+The project ships two cargo-fuzz harnesses: `lex` (lexer) and `parse`
+(parser). Both run against arbitrary UTF-8 input and assert lossless
+behavior (no panic; for parser, valid input round-trips through the
+CST byte-for-byte).
+
+### Quick smoke run
+
+```bash
+scripts/fuzz.sh --target lex --duration 1
+scripts/fuzz.sh --target parse --duration 1
+```
+
+### Long-running sessions
+
+```bash
+# 30 minutes
+scripts/fuzz.sh --target parse --duration 30
+
+# 8-hour overnight session with 4 parallel workers
+scripts/fuzz.sh --target parse --duration 480 -- -jobs=4 -workers=4
+```
+
+### Requirements
+
+- `cargo-fuzz` installed: `cargo install cargo-fuzz --locked`
+- Nightly Rust toolchain available via rustup (libFuzzer linkage)
+- The script invokes `cargo +nightly fuzz run` and prepends
+  `$HOME/.cargo/bin` to `PATH` so the rustup proxy is used (matters on
+  macOS where Homebrew's cargo may shadow it).
+
+### Crash artifacts
+
+If a crash is found, libFuzzer writes the offending input to
+`fuzz/artifacts/<target>/`. The artifacts directory is gitignored —
+inspect locally, then either fix the bug or save the input as a
+reduced test case in `crates/compactp_parser/src/` test modules.
+
 ## Code style and local hooks
 
 - Formatting is enforced with `cargo fmt --all -- --check`.
