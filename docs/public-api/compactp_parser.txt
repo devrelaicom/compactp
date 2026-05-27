@@ -1,5 +1,3 @@
- Documenting compactp_parser v0.1.0 (/Users/aaronbassett/Projects/midnight/compactp/crates/compactp_parser)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.65s
 pub mod compactp_parser
 pub struct compactp_parser::ParseOptions
 pub compactp_parser::ParseOptions::max_depth: u32
