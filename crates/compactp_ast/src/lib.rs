@@ -32,6 +32,8 @@
 //! # }
 //! ```
 
+#![deny(missing_docs)]
+
 pub mod expr;
 pub mod nodes;
 pub(crate) mod support;

@@ -624,19 +624,33 @@ impl TypeDecl {
 /// [`SourceFile`] remain available.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Item {
+    /// A `pragma` directive.
     Pragma(Pragma),
+    /// An `include` directive.
     Include(Include),
+    /// An `import` declaration.
     Import(Import),
+    /// An `export { ... }` list.
     ExportList(ExportList),
+    /// A `ledger` field declaration.
     LedgerDecl(LedgerDecl),
+    /// A `constructor` definition.
     ConstructorDef(ConstructorDef),
+    /// A `circuit` definition with a body.
     CircuitDef(CircuitDef),
+    /// A `circuit` declaration without a body (signature only).
     CircuitDecl(CircuitDecl),
+    /// A `witness` declaration.
     WitnessDecl(WitnessDecl),
+    /// A `contract` declaration.
     ContractDecl(ContractDecl),
+    /// A `struct` definition.
     StructDef(StructDef),
+    /// An `enum` definition.
     EnumDef(EnumDef),
+    /// A `module` definition.
     ModuleDef(ModuleDef),
+    /// A `type` alias or `new type` declaration.
     TypeDecl(TypeDecl),
 }
 
