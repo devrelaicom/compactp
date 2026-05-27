@@ -99,9 +99,9 @@ fn expr_bp(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
             }
             let m = lhs.precede(p);
             p.bump(QUESTION);
-            expr_bp(p, 0); // then branch (any precedence)
+            expr_bp_or_error(p, 0); // then branch (any precedence)
             p.expect(COLON);
-            expr_bp(p, r_bp); // else branch (right-assoc)
+            expr_bp_or_error(p, r_bp); // else branch (right-assoc)
             lhs = m.complete(p, TERNARY_EXPR);
             continue;
         }
@@ -176,7 +176,7 @@ fn expr_bp(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
             }
             let m = lhs.precede(p);
             p.bump_any(); // consume the operator token
-            expr_bp(p, r_bp);
+            expr_bp_or_error(p, r_bp);
             lhs = m.complete(p, BINARY_EXPR);
             continue;
         }
@@ -186,6 +186,29 @@ fn expr_bp(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
     }
 
     Some(lhs)
+}
+
+/// Like `expr_bp` but emits an ERROR placeholder at the current position
+/// if no LHS could be produced.
+///
+/// Use this in grammatical contexts that *require* an expression on the
+/// right-hand side (binary operators, ternary branches, unary prefix). The
+/// bare `expr_bp` returns `Option<CompletedMarker>`; if callers ignored that
+/// `None`, the outer marker would be completed with a zero-width hole, and
+/// the Pratt loop could spin without consuming a token (latent infinite
+/// loop / empty-marker bug, FU1).
+///
+/// The ERROR placeholder preserves the lossless round-trip (parent marker
+/// has a real child where the missing RHS would have been) and lets outer
+/// recovery resume on the next token.
+fn expr_bp_or_error(p: &mut Parser, min_bp: u8) {
+    if expr_bp(p, min_bp).is_none() {
+        // `lhs()` already emitted a diagnostic when it returned None
+        // (see the wildcard arm in `lhs`), so we only need the placeholder
+        // node here — no duplicate `p.error(...)` call.
+        let m = p.start();
+        m.complete(p, ERROR);
+    }
 }
 
 /// Return (left_bp, right_bp) for infix binary operators.
@@ -212,7 +235,7 @@ fn lhs(p: &mut Parser) -> Option<CompletedMarker> {
             let m = p.start();
             p.bump(BANG);
             // Unary prefix BP = 18 (level 9)
-            expr_bp(p, 18);
+            expr_bp_or_error(p, 18);
             Some(m.complete(p, UNARY_EXPR))
         }
 
@@ -1820,6 +1843,99 @@ mod tests {
                         SEMICOLON@62..63 ";"
                       WHITESPACE@63..64 " "
                       R_BRACE@64..65 "}"
+            "#]],
+        );
+    }
+
+    // --- FU1 regression tests --------------------------------------------
+    //
+    // These exercise the `expr_bp_or_error` helper added in FU1.
+    // Previously, when an inner `expr_bp` call returned `None` (no LHS),
+    // the surrounding Pratt context would complete its marker with a
+    // zero-width hole — a latent infinite-loop / empty-marker bug that
+    // would have been the first thing the WS3 fuzzer hit. The fix inserts
+    // an ERROR placeholder so the CST round-trips and the parser advances.
+
+    #[test]
+    fn expr_binary_missing_rhs_emits_error_no_infinite_loop() {
+        check(
+            "circuit f() : Field { return a + ; }",
+            expect![[r#"
+                SOURCE_FILE@0..36
+                  CIRCUIT_DEF@0..36
+                    CIRCUIT_KW@0..7 "circuit"
+                    WHITESPACE@7..8 " "
+                    IDENT@8..9 "f"
+                    L_PAREN@9..10 "("
+                    R_PAREN@10..11 ")"
+                    WHITESPACE@11..12 " "
+                    COLON@12..13 ":"
+                    FIELD_TYPE@13..19
+                      WHITESPACE@13..14 " "
+                      FIELD_KW@14..19 "Field"
+                    BLOCK@19..36
+                      WHITESPACE@19..20 " "
+                      L_BRACE@20..21 "{"
+                      RETURN_STMT@21..34
+                        WHITESPACE@21..22 " "
+                        RETURN_KW@22..28 "return"
+                        BINARY_EXPR@28..32
+                          NAME_EXPR@28..30
+                            WHITESPACE@28..29 " "
+                            IDENT@29..30 "a"
+                          WHITESPACE@30..31 " "
+                          PLUS@31..32 "+"
+                          ERROR@32..32
+                        WHITESPACE@32..33 " "
+                        SEMICOLON@33..34 ";"
+                      WHITESPACE@34..35 " "
+                      R_BRACE@35..36 "}"
+                errors:
+                  expected expression
+            "#]],
+        );
+    }
+
+    #[test]
+    fn expr_ternary_missing_then_emits_error() {
+        check(
+            "circuit f() : Field { return a ? : b; }",
+            expect![[r#"
+                SOURCE_FILE@0..39
+                  CIRCUIT_DEF@0..39
+                    CIRCUIT_KW@0..7 "circuit"
+                    WHITESPACE@7..8 " "
+                    IDENT@8..9 "f"
+                    L_PAREN@9..10 "("
+                    R_PAREN@10..11 ")"
+                    WHITESPACE@11..12 " "
+                    COLON@12..13 ":"
+                    FIELD_TYPE@13..19
+                      WHITESPACE@13..14 " "
+                      FIELD_KW@14..19 "Field"
+                    BLOCK@19..39
+                      WHITESPACE@19..20 " "
+                      L_BRACE@20..21 "{"
+                      RETURN_STMT@21..37
+                        WHITESPACE@21..22 " "
+                        RETURN_KW@22..28 "return"
+                        TERNARY_EXPR@28..36
+                          NAME_EXPR@28..30
+                            WHITESPACE@28..29 " "
+                            IDENT@29..30 "a"
+                          WHITESPACE@30..31 " "
+                          QUESTION@31..32 "?"
+                          ERROR@32..32
+                          WHITESPACE@32..33 " "
+                          COLON@33..34 ":"
+                          NAME_EXPR@34..36
+                            WHITESPACE@34..35 " "
+                            IDENT@35..36 "b"
+                        SEMICOLON@36..37 ";"
+                      WHITESPACE@37..38 " "
+                      R_BRACE@38..39 "}"
+                errors:
+                  expected expression
             "#]],
         );
     }
