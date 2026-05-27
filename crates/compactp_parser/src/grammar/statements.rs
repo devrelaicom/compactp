@@ -18,6 +18,22 @@ use compactp_syntax::SyntaxKind::*;
 
 /// Parse a statement.
 pub(crate) fn stmt(p: &mut Parser) {
+    if !p.enter_depth() {
+        // Recursion limit exceeded — emit a recovery diagnostic and an
+        // ERROR placeholder rather than risk a stack overflow.
+        let m = p.start();
+        p.error("statement recursion limit exceeded");
+        if !p.at_end() {
+            p.bump_any();
+        }
+        m.complete(p, ERROR);
+        return;
+    }
+    stmt_inner(p);
+    p.exit_depth();
+}
+
+fn stmt_inner(p: &mut Parser) {
     match p.current() {
         L_BRACE => block(p),
         RETURN_KW => return_stmt(p),
@@ -36,6 +52,22 @@ pub(crate) fn stmt(p: &mut Parser) {
 
 /// `{ stmt ... stmt }`
 pub(crate) fn block(p: &mut Parser) {
+    if !p.enter_depth() {
+        // Recursion limit exceeded — emit a recovery diagnostic and an
+        // ERROR placeholder rather than risk a stack overflow.
+        let m = p.start();
+        p.error("block recursion limit exceeded");
+        if !p.at_end() {
+            p.bump_any();
+        }
+        m.complete(p, ERROR);
+        return;
+    }
+    block_inner(p);
+    p.exit_depth();
+}
+
+fn block_inner(p: &mut Parser) {
     let m = p.start();
     p.expect(L_BRACE);
     while !p.at(R_BRACE) && !p.at_end() {

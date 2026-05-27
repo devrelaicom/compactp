@@ -18,6 +18,22 @@ use compactp_syntax::SyntaxKind::*;
 
 /// Parse a type.
 pub(crate) fn ty(p: &mut Parser) {
+    if !p.enter_depth() {
+        // Recursion limit exceeded — emit a recovery diagnostic and an
+        // ERROR placeholder rather than risk a stack overflow.
+        let m = p.start();
+        p.error("type recursion limit exceeded");
+        if !p.at_end() {
+            p.bump_any();
+        }
+        m.complete(p, ERROR);
+        return;
+    }
+    ty_inner(p);
+    p.exit_depth();
+}
+
+fn ty_inner(p: &mut Parser) {
     match p.current() {
         BOOLEAN_KW => {
             let m = p.start();

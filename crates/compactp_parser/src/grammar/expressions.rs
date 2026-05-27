@@ -119,6 +119,26 @@ fn array_element(p: &mut Parser) {
 
 /// Pratt parser core: parse an expression with minimum binding power `min_bp`.
 fn expr_bp(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
+    if !p.enter_depth() {
+        // Recursion limit exceeded — emit a recovery diagnostic and an
+        // ERROR placeholder rather than risk a stack overflow. Bump one
+        // token (if any remain) so outer loops make progress.
+        let m = p.start();
+        p.error("expression recursion limit exceeded");
+        if !p.at_end() {
+            p.bump_any();
+        }
+        return Some(m.complete(p, ERROR));
+    }
+    let result = expr_bp_inner(p, min_bp);
+    p.exit_depth();
+    result
+}
+
+/// Pratt parser body — only ever invoked from [`expr_bp`], which owns
+/// the depth-counter enter/exit. Splitting the body out keeps the early
+/// `?`-returns from leaking past the depth bookkeeping.
+fn expr_bp_inner(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
     let mut lhs = lhs(p)?;
 
     loop {
@@ -2334,6 +2354,58 @@ mod tests {
                       WHITESPACE@44..45 " "
                       R_BRACE@45..46 "}"
             "#]],
+        );
+    }
+
+    #[test]
+    fn expr_depth_limit_emits_error_no_stack_overflow() {
+        // Build an expression nested past the default 256 limit.
+        // `(((...1...)))` with `depth` open/close paren pairs.
+        let depth = 300;
+        let source = format!(
+            "circuit f() : Field {{ return {}1{}; }}",
+            "(".repeat(depth),
+            ")".repeat(depth),
+        );
+        let result = crate::parse(&source);
+        // Should produce diagnostics, not stack-overflow.
+        assert!(
+            !result.errors.is_empty(),
+            "expected recovery diagnostics at depth {}",
+            depth
+        );
+        // And the diagnostic list should mention recursion / limit.
+        let any_recursion = result.errors.iter().any(|d| {
+            d.message.to_lowercase().contains("recursion")
+                || d.message.to_lowercase().contains("limit")
+        });
+        assert!(
+            any_recursion,
+            "expected at least one diagnostic mentioning recursion/limit; got: {:?}",
+            result.errors.iter().map(|d| &d.message).collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn expr_just_below_depth_limit_parses_cleanly() {
+        // Each `(expr)` pair consumes two recursion frames in this Pratt
+        // parser: one for the outer `expr_bp` call, and one for the
+        // inner `expr_bp` that re-enters to parse the parenthesized
+        // body. To stay well below the 256 default while still
+        // exercising deep nesting, we use 100 paren pairs (≈ 200
+        // frames + a handful for `circuit`/`return`/`stmt`/`block`).
+        let depth = 100;
+        let source = format!(
+            "circuit f() : Field {{ return {}1{}; }}",
+            "(".repeat(depth),
+            ")".repeat(depth),
+        );
+        let result = crate::parse(&source);
+        assert!(
+            result.errors.is_empty(),
+            "depth {} should parse cleanly; errors: {:?}",
+            depth,
+            result.errors.iter().map(|d| &d.message).collect::<Vec<_>>()
         );
     }
 }

@@ -26,6 +26,7 @@ pub fn run(cli: &Cli, paths: &[PathBuf]) -> Result<i32, CliError> {
             ParseOptions {
                 recover: !cli.no_recover,
                 max_errors: cli.max_errors.unwrap_or(256),
+                ..ParseOptions::default()
             },
         );
 

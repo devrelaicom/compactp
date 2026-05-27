@@ -9,6 +9,8 @@ pub(crate) struct Parser<'src> {
     pub(crate) recover: bool,
     pub(crate) max_errors: usize,
     pub(crate) error_count: usize,
+    pub(crate) current_depth: u32,
+    pub(crate) max_depth: u32,
 }
 
 impl<'src> Parser<'src> {
@@ -20,12 +22,31 @@ impl<'src> Parser<'src> {
             recover: true,
             max_errors: 256,
             error_count: 0,
+            current_depth: 0,
+            max_depth: 256,
         }
     }
 
     pub(crate) fn set_options(&mut self, opts: &crate::ParseOptions) {
         self.recover = opts.recover;
         self.max_errors = opts.max_errors;
+        self.max_depth = opts.max_depth;
+    }
+
+    /// Enter a recursive grammar function. Returns `true` if depth is
+    /// within limit (caller proceeds); `false` if overflow (caller
+    /// emits a diagnostic + ERROR node and returns).
+    pub(crate) fn enter_depth(&mut self) -> bool {
+        if self.current_depth >= self.max_depth {
+            return false;
+        }
+        self.current_depth += 1;
+        true
+    }
+
+    /// Pair with `enter_depth`; decrement on function exit.
+    pub(crate) fn exit_depth(&mut self) {
+        self.current_depth = self.current_depth.saturating_sub(1);
     }
 
     /// Peek at the current non-trivia token kind.

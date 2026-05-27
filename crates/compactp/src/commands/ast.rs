@@ -21,6 +21,7 @@ pub fn run(cli: &Cli, paths: &[PathBuf], include_bodies: bool) -> Result<i32, Cl
             ParseOptions {
                 recover: !cli.no_recover,
                 max_errors: cli.max_errors.unwrap_or(256),
+                ..ParseOptions::default()
             },
         );
         let root = root_from_green(result.green);

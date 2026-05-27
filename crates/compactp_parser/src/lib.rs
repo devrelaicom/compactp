@@ -43,6 +43,13 @@ pub struct ParseOptions {
     /// Maximum number of errors before the parser stops recovery
     /// (default: `256`).
     pub max_errors: usize,
+    /// Maximum recursion depth for the grammar (default: `256`).
+    ///
+    /// On overflow the parser emits a recovery diagnostic and
+    /// produces an `ERROR` node instead of overflowing the stack.
+    /// Increase for input intentionally deeper than 256 nested
+    /// expressions/types/blocks; decrease for stricter limits.
+    pub max_depth: u32,
 }
 
 impl Default for ParseOptions {
@@ -50,6 +57,7 @@ impl Default for ParseOptions {
         Self {
             recover: true,
             max_errors: 256,
+            max_depth: 256,
         }
     }
 }
