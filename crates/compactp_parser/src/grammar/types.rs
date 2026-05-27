@@ -118,11 +118,9 @@ fn record_type(p: &mut Parser) {
             break;
         }
         super::patterns::arg(p); // `id : type` → STRUCT_FIELD
-        if !p.eat(SEMICOLON) && !p.eat(COMMA) {
-            if !p.at(R_BRACE) {
-                p.error("expected `;`, `,`, or `}`");
-                break;
-            }
+        if !p.eat(SEMICOLON) && !p.eat(COMMA) && !p.at(R_BRACE) {
+            p.error("expected `;`, `,`, or `}`");
+            break;
         }
     }
     p.expect(R_BRACE);
