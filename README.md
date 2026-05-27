@@ -24,7 +24,7 @@ workflows.
 
 | compactp version | Compact language | Tested compiler | JSON schema | MSRV |
 | ---------------- | ---------------- | --------------- | ----------- | ---- |
-| `0.1.0-pre.2`    | `0.23.101`       | `0.31.0`        | `1`         | not pinned (Rust edition `2024`) |
+| `0.1.0-pre.3`    | `0.23.101`       | `0.31.0`        | `1`         | not pinned (Rust edition `2024`) |
 
 The exact upstream commit hashes the parser is validated against are
 recorded in `SOURCE_VERSIONS.md`. Known deviations from upstream
