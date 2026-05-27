@@ -1,9 +1,32 @@
+//! Compact lexer — token stream over UTF-8 source bytes.
+//!
+//! Produces `(SyntaxKind, &str)` pairs with byte offsets, suitable
+//! for consumption by the parser. Each Compact keyword has a dedicated
+//! `_KW` SyntaxKind variant; literals and identifiers carry their
+//! text verbatim.
+
+#![deny(missing_docs)]
+
 use compactp_syntax::SyntaxKind;
 
-/// Lex source code into a sequence of (SyntaxKind, &str) pairs.
+/// Lex source code into a sequence of `(SyntaxKind, &str)` pairs.
 ///
-/// Every byte of the input is represented in the output — nothing is discarded.
-/// This is required for lossless CST construction.
+/// Every byte of the input is represented in the output — nothing is discarded
+/// (whitespace and comments are emitted as trivia kinds). This is required for
+/// lossless CST construction by the parser.
+///
+/// # Examples
+///
+/// ```
+/// use compactp_lexer::lex;
+/// use compactp_syntax::SyntaxKind;
+///
+/// let tokens = lex("circuit f");
+/// assert_eq!(tokens[0].0, SyntaxKind::CIRCUIT_KW);
+/// assert_eq!(tokens[0].1, "circuit");
+/// assert_eq!(tokens[2].0, SyntaxKind::IDENT);
+/// assert_eq!(tokens[2].1, "f");
+/// ```
 pub fn lex(source: &str) -> Vec<(SyntaxKind, &str)> {
     let mut tokens = Vec::new();
     let mut pos = 0;
