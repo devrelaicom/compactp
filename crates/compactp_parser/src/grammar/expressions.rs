@@ -277,60 +277,23 @@ fn lhs(p: &mut Parser) -> Option<CompletedMarker> {
             Some(m.complete(p, MAP_EXPR))
         }
 
-        // `fold(fun, init, expr, ...)` — modern form per upstream compiler.
-        //
-        // The fixture `errors/noimport.compact` uses a legacy whitespace-
-        // separated form `fold <fun> <init> over <iter>` which predates
-        // even the current upstream tree-sitter grammar; we recover from
-        // that case by swallowing tokens up to the statement terminator
-        // without emitting diagnostics, so the corpus test passes.
         FOLD_KW => {
             let m = p.start();
             p.bump(FOLD_KW);
-            if p.at(L_PAREN) {
-                p.bump(L_PAREN);
-                // First: function
-                expr(p);
-                p.expect(COMMA);
-                // Second: init value
-                expr(p);
-                p.expect(COMMA);
-                // Rest: expressions
-                comma_sep1(p, R_PAREN, expr);
-                p.expect(R_PAREN);
-            } else {
-                // Legacy `fold f init over xs` — recover silently. Wrap the
-                // tokens up to the next statement boundary in an ERROR node
-                // so the bytes round-trip but no diagnostic is emitted.
-                // Track brace/paren/bracket depth so we don't stop on the
-                // closing delimiter of a nested block or argument list inside
-                // the legacy form (e.g. an inline `circuit(...) : T { ... }`).
-                let err = p.start();
-                let mut brace = 0i32;
-                let mut paren = 0i32;
-                let mut bracket = 0i32;
-                while !p.at_end() {
-                    let k = p.current();
-                    if brace == 0
-                        && paren == 0
-                        && bracket == 0
-                        && (k == SEMICOLON || k == R_BRACE || k == R_PAREN)
-                    {
-                        break;
-                    }
-                    match k {
-                        L_BRACE => brace += 1,
-                        R_BRACE => brace -= 1,
-                        L_PAREN => paren += 1,
-                        R_PAREN => paren -= 1,
-                        L_BRACKET => bracket += 1,
-                        R_BRACKET => bracket -= 1,
-                        _ => {}
-                    }
-                    p.bump_any();
-                }
-                err.complete(p, ERROR);
-            }
+            // `fold(fn, init, ...args)` — strictly require the `(`.
+            // Legacy `fold f init over xs` is not accepted by any current
+            // Compact compiler; corpus fixtures using the legacy form live
+            // under `tests/corpus/errors/negative/`.
+            p.expect(L_PAREN);
+            // First: function
+            expr(p);
+            p.expect(COMMA);
+            // Second: init value
+            expr(p);
+            p.expect(COMMA);
+            // Rest: expressions
+            comma_sep1(p, R_PAREN, expr);
+            p.expect(R_PAREN);
             Some(m.complete(p, FOLD_EXPR))
         }
 
