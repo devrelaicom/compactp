@@ -16,7 +16,7 @@ body.
 | ----------------------------------------- | ----------------------------------------------- |
 | `demo/valid.compact`                      | Happy path for every subcommand                 |
 | `demo/invalid.compact`                    | Recovery behaviour; diag human/JSON             |
-| `demo/outdated.compact`                   | Pre-0.22 pragma sample (future version warning) |
+| `demo/outdated.compact`                   | Old pragma sample (`>= 0.19.0`, below current language floor) |
 | `declarations/all_declarations.compact`   | Top-level declarations in AST dump              |
 | `imports/all_import_forms.compact`        | Import variants in lex/cst/stats snapshots      |
 | `recovery/missing_semicolons.compact`     | parse exit 1 + --max-diagnostics test           |
