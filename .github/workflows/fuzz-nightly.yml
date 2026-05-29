@@ -44,7 +44,11 @@ jobs:
         id: fuzz
         run: |
           set -euo pipefail
-          cargo +nightly fuzz run ${{ matrix.target }} -- -max_total_time=600
+          # Pin the gnu target explicitly: cargo-fuzz would otherwise default to
+          # the musl host triple (static libc), which AddressSanitizer rejects
+          # ("sanitizer is incompatible with statically linked libc").
+          cargo +nightly fuzz run ${{ matrix.target }} \
+            --target x86_64-unknown-linux-gnu -- -max_total_time=600
       - name: Upload crash artifacts (if any)
         # Only on an actual fuzz-run failure — not on setup/install failures.
         if: failure() && steps.fuzz.outcome == 'failure'
