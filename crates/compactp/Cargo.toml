@@ -3,9 +3,15 @@ name = "compactp"
 edition.workspace = true
 license.workspace = true
 version.workspace = true
-repository = "https://github.com/devrelaicom/compactp"
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
 description = "A production-grade parser frontend for the Compact language (Midnight Network)"
-homepage = "https://github.com/devrelaicom/compactp"
+documentation = "https://docs.rs/compactp"
+readme = "README.md"
+keywords = ["compact", "midnight", "parser", "cli", "compiler"]
+categories = ["command-line-utilities", "parser-implementations", "development-tools"]
+default-run = "compactp"
 
 [dependencies]
 compactp_syntax.workspace = true

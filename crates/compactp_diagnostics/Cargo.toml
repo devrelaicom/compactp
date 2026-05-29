@@ -3,6 +3,14 @@ name = "compactp_diagnostics"
 edition.workspace = true
 license.workspace = true
 version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+description = "Structured diagnostics (severities, codes, labeled spans) for the compactp Compact parser frontend."
+documentation = "https://docs.rs/compactp_diagnostics"
+readme = "README.md"
+keywords = ["compact", "midnight", "diagnostics", "errors", "parser"]
+categories = ["parser-implementations", "development-tools"]
 
 [dependencies]
 compactp_syntax.workspace = true
