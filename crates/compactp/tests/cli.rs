@@ -75,18 +75,26 @@ fn parse_json(output: &std::process::Output) -> Value {
     serde_json::from_slice(&output.stdout).expect("stdout is JSON")
 }
 
-/// Normalise Windows backslashes to forward slashes inside both JSON-encoded
-/// and raw-text path values so snapshots match across platforms. Two passes:
-///
-///  1. `\\` (JSON-escape for a single backslash) → `/` — handles paths that
-///     appear in JSON string literals.
-///  2. Remaining literal `\` → `/` — handles human-mode output where paths
-///     are not escaped.
-fn normalise_path_separators(text: &str) -> String {
+/// Normalise Windows path separators inside JSON output so snapshots match
+/// across platforms. serde escapes a path backslash as `\\` (two characters),
+/// so only doubled backslashes are path separators. Single backslashes are
+/// JSON escape sequences (e.g. `\n` in a whitespace token's `text`) and MUST be
+/// left intact — a blanket `\` → `/` would corrupt `\n` into `/n`.
+fn normalise_json_path_separators(text: &str) -> String {
     if MAIN_SEPARATOR == '/' {
         return text.to_string();
     }
-    text.replace("\\\\", "/").replace('\\', "/")
+    text.replace("\\\\", "/")
+}
+
+/// Normalise Windows path separators in human-mode output, where paths are
+/// printed with literal, unescaped backslashes and no JSON escape sequences are
+/// present.
+fn normalise_human_path_separators(text: &str) -> String {
+    if MAIN_SEPARATOR == '/' {
+        return text.to_string();
+    }
+    text.replace('\\', "/")
 }
 
 fn assert_envelope(value: &Value, expected_input: &str) {
@@ -196,7 +204,7 @@ fn ast_include_bodies_json_walks_typed_ast() {
 fn diag_human_output() {
     let path = fixture("recovery/broken_expressions.compact");
     let out = stdout(run_expect_code(&["diag", "--color", "never", &path], 1));
-    assert_snapshot!("diag_human_output", normalise_path_separators(&out));
+    assert_snapshot!("diag_human_output", normalise_human_path_separators(&out));
 }
 
 #[test]
@@ -250,7 +258,7 @@ fn redact_parse_time_ms(text: &str) -> String {
 
 fn snapshot_raw(name: &str, output: &std::process::Output) {
     let raw = String::from_utf8(output.stdout.clone()).expect("stdout utf8");
-    assert_snapshot!(name, normalise_path_separators(&raw));
+    assert_snapshot!(name, normalise_json_path_separators(&raw));
 }
 
 #[test]
@@ -378,7 +386,7 @@ fn stats_json_output() {
     let output = run_ok(&["--format", "json", "--pretty", "stats", &path]);
     assert_envelope(&parse_json(&output), &path);
     let raw = String::from_utf8(output.stdout.clone()).expect("utf8");
-    let redacted = redact_parse_time_ms(&normalise_path_separators(&raw));
+    let redacted = redact_parse_time_ms(&normalise_json_path_separators(&raw));
     assert_snapshot!("stats_json_output", redacted);
 }
 
