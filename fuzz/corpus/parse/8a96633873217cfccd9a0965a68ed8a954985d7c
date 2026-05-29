@@ -1,9 +1,0 @@
-// This file is part of Compact.
-// Coslice in slice
-export circuit test4(vector: Vector<8, Field>): Vector<2, Field> {
-
-  const a = slice<?????????????liance with the License.
-// You may obtain a copy of the Lin ae Licensewww.apache.org/licenses/LICENSE-2.0eImpure();
-  const MAX_FIELD: Field = 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000y of the Licensewww.apache.o738880 as Fie;d le r
-turn testAdd(MAX_FIELD, MAX_FIELD);
-}

@@ -1,6 +1,0 @@
-// This file is part of Compact.
-// Copyright (C) 2025 
-export circuit test_unreachable_nested_ternary(x: Field): Field {
-    return x;
-    co0nst a = 1, b = 2, c = a + b > 5 ?s0 8a 0 Uint<8> : 2 as Uint<254>;
-}

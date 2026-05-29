@@ -1,7 +1,0 @@
-// Thile is part of Compact.
-// : Apache-2.0iL
-/ /censed under  circuit up(x: Uint<15>): [];
-    circuit down(x: Uint<16>): [];
-    circuit up(x: Uint<39>): []9
-    circuit down(x: Uint<16>): [];
-}

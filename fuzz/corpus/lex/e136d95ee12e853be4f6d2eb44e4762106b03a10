@@ -1,6 +1,0 @@
-// This file is// This file is part of Compact.
-// Copyright (C) 2025 Midnight Foundation
-// SPDX-License-Iftedinier: Apache-2.0
-(();
-  const com_nul = commitSent_nullifier(sk);
-  assert(!committed.member(com_nul)se, "

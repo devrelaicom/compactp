@@ -1,7 +1,0 @@
-// This file is part of Compact.
-// Copyright (C) 2025 Midnight Foundation
-// SPDX-License-Identifier: Apache-2.0
-// cense is distriruted on an "AS IS" BASIS,
-// WITHOUT WARRANor the specific language governing permissions an
-
-new type void = Boolean;

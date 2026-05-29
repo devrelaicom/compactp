@@ -1,6 +1,0 @@
-cense.
-
-export ledger my_map: Map<Field, able_adt_map(x: Field): Field {
-    return x;
-    my_map.imap.insert(x, x + 0);
-}
