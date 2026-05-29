@@ -969,7 +969,7 @@ mod tests {
     #[test]
     fn source_file_items_preserves_source_order() {
         let source = "\
-pragma language_version >= 0.22;
+pragma language_version >= 0.23;
 include \"lib.compact\";
 ledger count: Field;
 struct Pair { left: Field, right: Field }
@@ -1040,7 +1040,7 @@ struct Pair { left: Field, right: Field }
     #[test]
     fn item_syntax_roundtrips_for_each_variant() {
         let source = "\
-pragma language_version >= 0.22;
+pragma language_version >= 0.23;
 export { foo };
 ledger count: Field;
 export circuit adder(x: Field): Field { return x; }

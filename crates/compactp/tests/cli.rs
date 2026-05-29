@@ -98,7 +98,7 @@ fn assert_envelope(value: &Value, expected_input: &str) {
     assert_eq!(value.get("schema_version").and_then(Value::as_u64), Some(1));
     assert_eq!(
         value.get("language_version").and_then(Value::as_str),
-        Some("0.22.0")
+        Some("0.23.0")
     );
     let actual = value
         .get("input")

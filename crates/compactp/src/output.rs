@@ -17,7 +17,7 @@ pub struct OutputEnvelope<T: Serialize> {
 
 pub const TOOL_VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const SCHEMA_VERSION: u32 = 1;
-pub const LANGUAGE_VERSION: &str = "0.22.0";
+pub const LANGUAGE_VERSION: &str = "0.23.0";
 
 impl<T: Serialize> OutputEnvelope<T> {
     pub fn new(input: String, data: T, timing_ms: Option<f64>) -> Self {

@@ -114,7 +114,7 @@ Every JSON payload is wrapped in an envelope:
 {
   "tool_version":     "0.1.0-beta.1",
   "schema_version":   1,
-  "language_version": "0.22.0",
+  "language_version": "0.23.0",
   "input":            "path/to/file.compact",
   "timing_ms":        0.42,
   "data":             { ... }
