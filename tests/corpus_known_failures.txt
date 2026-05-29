@@ -22,7 +22,7 @@
 # Categories:
 #   grammar-gap            -- parser missing a real production; WS1 Phase 2 work
 #   upstream-bug-repro     -- reduced compiler bug; not user code
-#   intentional-strictness -- deliberate parser rejection; see LS.md
+#   intentional-strictness -- deliberate parser rejection (rationale in entry note)
 #
 # An uncategorized entry is treated as `unclassified` and MUST be
 # resolved before WS1 Phase 1 is complete.

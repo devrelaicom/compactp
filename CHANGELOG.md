@@ -39,7 +39,7 @@ First public beta of `compactp` and its five companion library crates
 - No semantic checking, name resolution, constant evaluation, code generation, or
   runtime execution — `compactp` is a syntactic frontend only.
 - Intentional strictness and upstream-bug-reproduction deviations from `compactc`
-  acceptance are enumerated in `tests/corpus_known_failures.txt` and `LS.md`.
+  acceptance are enumerated in `tests/corpus_known_failures.txt`.
 
 [Unreleased]: https://github.com/devrelaicom/compactp/compare/compactp-v0.1.0-beta.1...HEAD
 [0.1.0-beta.1]: https://github.com/devrelaicom/compactp/releases/tag/compactp-v0.1.0-beta.1

@@ -29,7 +29,7 @@ workflows.
 The exact upstream commit hashes the parser is validated against are
 recorded in `SOURCE_VERSIONS.md`. Known deviations from upstream
 acceptance are enumerated in `tests/corpus_known_failures.txt` (each
-entry annotated with category + reason) and explained in `LS.md`. The
+entry annotated with category + reason). The
 JSON envelope compatibility policy is documented in
 [`docs/json-schema.md`](docs/json-schema.md). Release history is in
 [`CHANGELOG.md`](CHANGELOG.md).

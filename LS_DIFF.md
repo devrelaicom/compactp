@@ -18,7 +18,8 @@ baseline is captured by:
   upstream `examples/`.
 - `tests/corpus_known_failures.txt` — 71 manifest entries categorized
   as: 21 grammar-gap, 28 upstream-bug-repro, 22 intentional-strictness.
-- `LS.md` §18 — three intentional-strictness deviations documented.
+- Intentional-strictness deviations are annotated inline in
+  `tests/corpus_known_failures.txt`.
 
 ### Grammar-gap themes — WS1 Phase 2 outcome
 
