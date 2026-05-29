@@ -410,7 +410,6 @@ impl SyntaxKind {
             Self::WHITESPACE | Self::LINE_COMMENT | Self::BLOCK_COMMENT
         )
     }
-
 }
 
 impl From<SyntaxKind> for u16 {

@@ -484,7 +484,9 @@ fn block_json(block: &Block) -> serde_json::Value {
 
 fn stmt_json(stmt: Stmt) -> serde_json::Value {
     match stmt {
-        Stmt::Block(b) => json!({ "kind": "Block", "stmts": b.stmts().map(stmt_json).collect::<Vec<_>>() }),
+        Stmt::Block(b) => {
+            json!({ "kind": "Block", "stmts": b.stmts().map(stmt_json).collect::<Vec<_>>() })
+        }
         Stmt::Assign(a) => json!({
             "kind": "Assign",
             "op": text(a.op()),
@@ -588,4 +590,3 @@ fn expr_json(expr: &Expr) -> serde_json::Value {
         Expr::Paren(_) => json!({ "kind": "Paren" }),
     }
 }
-

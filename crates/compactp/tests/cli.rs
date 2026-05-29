@@ -184,9 +184,7 @@ fn ast_include_bodies_json_walks_typed_ast() {
         .expect("items should be array");
     // Find at least one CircuitDef and verify body/stmts are present.
     let has_walked_body = items.iter().any(|item| {
-        item["kind"] == "CircuitDef"
-            && item["body"].is_object()
-            && item["body"]["stmts"].is_array()
+        item["kind"] == "CircuitDef" && item["body"].is_object() && item["body"]["stmts"].is_array()
     });
     assert!(
         has_walked_body,
@@ -682,8 +680,7 @@ fn cli_json_envelope_has_all_documented_fields() {
         String::from_utf8_lossy(&output.stderr)
     );
     let stdout = String::from_utf8(output.stdout).expect("stdout is utf8");
-    let parsed: Value =
-        serde_json::from_str(&stdout).expect("envelope must be valid JSON");
+    let parsed: Value = serde_json::from_str(&stdout).expect("envelope must be valid JSON");
 
     for field in [
         "tool_version",

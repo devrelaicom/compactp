@@ -2014,7 +2014,9 @@ mod tests {
 
     #[test]
     fn expr_assign_in_paren() {
-        check("circuit f() : [] { return (x = 42); }", expect![[r#"
+        check(
+            "circuit f() : [] { return (x = 42); }",
+            expect![[r#"
             SOURCE_FILE@0..37
               CIRCUIT_DEF@0..37
                 CIRCUIT_KW@0..7 "circuit"
@@ -2049,7 +2051,8 @@ mod tests {
                     SEMICOLON@34..35 ";"
                   WHITESPACE@35..36 " "
                   R_BRACE@36..37 "}"
-        "#]]);
+        "#]],
+        );
     }
 
     #[test]
@@ -2163,7 +2166,9 @@ mod tests {
 
     #[test]
     fn expr_assign_in_return() {
-        check("circuit f() : [] { return field = x; }", expect![[r#"
+        check(
+            "circuit f() : [] { return field = x; }",
+            expect![[r#"
             SOURCE_FILE@0..38
               CIRCUIT_DEF@0..38
                 CIRCUIT_KW@0..7 "circuit"
@@ -2195,7 +2200,8 @@ mod tests {
                     SEMICOLON@35..36 ";"
                   WHITESPACE@36..37 " "
                   R_BRACE@37..38 "}"
-        "#]]);
+        "#]],
+        );
     }
 
     #[test]
