@@ -74,17 +74,14 @@ override needed).
    read `0.1.0-beta.1`; if release-plz ever proposes a different version,
    correct it with `release-plz set-version 0.1.0-beta.1` before merging.
 2. **Merge triggers `release-plz release`**, which publishes the six crates in
-   dependency order and pushes the git tag(s).
-   - ⚠️ **Tag behavior to verify on the first release:** release-plz tags each
-     published package by default (`compactp-v0.1.0-beta.1`,
-     `compactp_syntax-v0.1.0-beta.1`, …). GitHub caps tag-push events at 3 tags
-     per commit. The cargo-dist `release.yml` tag glob
-     (`**[0-9]+.[0-9]+.[0-9]+*`) matches ALL of them, so a library tag could
-     trigger a dist run that errors (libraries are not dist-able). **Mitigation
-     (do before the first real tag):** restrict `release.yml`'s tag trigger to
-     the CLI tag only — change the glob to `compactp-v[0-9]+.[0-9]+.[0-9]+*` —
-     so only the `compactp` tag triggers binary builds. (Re-confirm after any
-     `dist init`, which regenerates `release.yml`.)
+   dependency order and pushes a single git tag `compactp-v<version>`.
+   - **Tagging is configured so only `compactp` is tagged.** The five library
+     crates set `git_tag_enable = false` in `release-plz.toml`; they publish to
+     crates.io but are not tagged. This avoids release-plz's default of one tag
+     per crate, which would make cargo-dist's `release.yml` spin up a failing
+     run for each non-dist-able library tag. Do NOT instead try to narrow the
+     `release.yml` tag glob — cargo-dist verifies the committed `release.yml`
+     matches `dist generate` output and the `plan` job fails on any manual edit.
 3. **The `compactp` tag triggers `release.yml`** (cargo dist), which builds the
    four target binaries + checksums and creates the GitHub Release with the
    CHANGELOG excerpt.

@@ -10,6 +10,11 @@ semver_check = true
 # Single workspace changelog: the CLI crate owns the root CHANGELOG.md and
 # aggregates the five library crates' entries; the libraries do not get their
 # own per-crate changelog files.
+#
+# Tagging: only `compactp` is tagged (compactp-v<version>). The five libraries
+# publish to crates.io but are NOT tagged — release-plz otherwise pushes a tag
+# per crate, and cargo-dist's release.yml would spin up a (failing) run for each
+# non-dist-able library tag. One CLI tag triggers exactly one dist run.
 [[package]]
 name = "compactp"
 publish = true
@@ -26,23 +31,28 @@ changelog_include = [
 name = "compactp_syntax"
 publish = true
 changelog_update = false
+git_tag_enable = false
 
 [[package]]
 name = "compactp_lexer"
 publish = true
 changelog_update = false
+git_tag_enable = false
 
 [[package]]
 name = "compactp_parser"
 publish = true
 changelog_update = false
+git_tag_enable = false
 
 [[package]]
 name = "compactp_ast"
 publish = true
 changelog_update = false
+git_tag_enable = false
 
 [[package]]
 name = "compactp_diagnostics"
 publish = true
 changelog_update = false
+git_tag_enable = false
