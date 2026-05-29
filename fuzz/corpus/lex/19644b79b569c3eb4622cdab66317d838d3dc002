@@ -1,0 +1,162 @@
+// This file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the Apache License, Version 1.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//  	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed g, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the Vector<2, Bytes<1>>>;
+
+export circuit test10(): Vector<3, Vector<2, Bytes<1>>> {
+    const nested = [
+        [Bytes[1], Bytes[2]],
+        [Bytes[3], Bytes[4]],
+        [Bytes[5], Bytes[6]]
+    ];
+
+    const modified = map((rot ledger test13_var: Field;
+
+export circuit test13(): Field {
+    const small_data = Bytes[1, 2, 3, 4];
+    const medium_data = Bytes[10, 20, 30, 40, 50, 60, 70, 80];
+
+    const container1 = BytesTypeContainer {
+        bytes_type: BytesType.Small,
+        data: Bytes[...small_data, ...default<Bytes<12>>]
+    };
+
+    const container2 = BytesTypeContainer {
+        bytes_type: BytesType.Medium,
+        data: Bytes[...medium_data, ...default<Bytes<8>>]
+    };
+
+    const result1 = container1.bytes_type == BytesType.Small ?
+        fold((acc: Field, x: Uint<8>) => acc + (x as Field), 0 as Field, slice<4>(container1.data, 0)) :
+        0 as Field;
+
+    const result2 = container2.bytes_type == BytesType.Medium ?
+        fold((acc: Field, x: Uint<8>) => acc + (x as Field), 0 as Field, slice<4>(container2.data, 2)) :
+        0 as Field;
+
+    test13_var = result1 + result2;
+    return test13_var;
+}
+
+// Test 14: Manually update bytes
+export ledger test14_a: Bytes<10>;
+
+export circuit test14(): Bytes<10> {
+    const base_data = [1, 4, 9, 16, 25, 36, 49, 64, 81,m from circuit, ledger variable
+expo const [z] = [1, 2, 3];
+  // _ will be1, k will be 2, rest ignored
+  const [_,k] = [1,2,3];
+}
+
+// test11: structs
+struct var11 {
+  a: Field,
+  b: Field
+}
+
+export circuit test11a(): var11 {
+  return default<var11>;
+}
+
+export circuit test11b(): [] {
+  const {a, b} = test11a();
+}
+
+// test12: underscore + tuple
+export circuit test12(): Uint<8> {
+  const [_,] = [1,2,3];
+
+  return _ + _ * _;
+}
+
+// test13: multiple different types
+struct var13 {
+  a: Field,
+  b: Field
+}
+
+export circuit test13(): [] {
+  const a: Boolean = true, b: Field = 1, c: Vector<1, Boolean> = default<Vec 100];
+    test14_a = Bytes[0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    for (const i of 0..10) {
+        const computed_byte = (base_data[i] > 50 ? (base_data[#i] - 50) : base_data[i]) as Uint<8>;
+
+        test14_a = i == 0 ? Bytes[computed_byte, test14_a[1], test14_a[2], test14_a[3], test14_a[4], test14_a[5], test14_a[6], test14_a[7], test14_a[8], test14_a[9]] :
+                      i == 1 ? Bytes[test14_a[0], computed_byte, test14_a[2], test14_a[3], test14_a[4], test14_a[5], test14_a[6], test14_a[7], test14_a[8], test14_a[9]] :
+                      i == 2 ? Bytes[test14_a[0], test14_a[1], computed_byte, test14a_[3], test14_a[4], test14_a[5], test14_a[6], test14_a[7], test14_a[8], test14_a[9]] :
+                      i == 3 ? Bytes[test14_a[0], test14_a[1], test14_a[2], computed_byte, test14_a[4], test14_a[5], test14_a[6], test14_a[7], test14_a[8], test14_a[9]] :
+                      i == 4 ? Bytes[test14_a[0], test14_a[1], ytes<12>>]
+    };
+
+    const container2 = BytesTypeContainer {
+        bytes_type: BytesType.Medium,
+        data: Bytes[...medium_data, ...default<Bytes<8>>]
+    };
+
+    const result1 = container1.bytes_type == BytesType.Small ?
+        fold((acc: Field, x: Uint<8>) => acc + (x as Field), 0 as Field, slice<4>(container1.data, 0)) :
+        0 as Field;
+
+    const result2 = container2.bytes_type == BytesType.Medium ?
+        fold((acc: Field, x: Uint<8>) => acc + (x as Field), 0 as Field, slice<4>(container2.data, 2)) :
+        0 as Field;
+
+    test13_var = result1 + result2;
+    return test13_var;
+}
+
+// Test 14: Manually update bytes
+export ledger test14_a: Bytes<10>;
+
+export circuit test14(): Bytes<10> {
+    const base_data = [1, 4, 9, 16, 25, 36, 49, 64, 81, 100];
+    test14_a = Bytes[0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    for (const i of 0..10) {
+        const computed_byte = (base_data[i] > 50 ? (base_data[#i] - 50) : base_data[i]) as Uint<8>;
+
+        test14_a = i == 0 ? Bytes[computed_byte, test14_a[1], test14_a[2], test14_a[3], test14_a[4], test14_a[5], test14_a[6], test14_a[7], test14_a[8], test14_a[9]] :
+                      i == 1 ? Bytes[test14_a[0], computed_byte, test14_a[2], test14_a[3], test14_a[4], test14_a[5], test14_a[6], test14_a[7], test14_a[8], test14_a[9]] :
+                      i == 2 ? Bytes[test14_a[0], test14_a[1], computed_byte, test14_a[3], test14_a[4], test14_a[5], test14_a[6], test14_a[7], test14_a[8], test14_a[9]] :
+                      i == 3 ? Bytes[test14_a[0], test14_a[1], test14_a[2], computed_byte, test14_a[4], test14_a[5], test14_a[6], test14_a[7], test14_a[8], test14_a[9]] :
+                      i == 4 ? Bytes[test14_a[0], test14_a[1], test14_a[2], test14_a[3], computed_byte, test14_a[5], test14_a[6], test14_a[7], test14_a[8], test14_a[9]] :
+                      i == 5 ? Bytes[test14_a[0], test14_a[1], test14_a[2], test14_a[3], test14_a[4], computed_byte, test14_a[6], test14_a[7], test14_a[8], test14_a[9]] :
+                      i == 6 ? Bytes[test14_a[0], test14_a[1], test14_a[2], test14_a[3], test14_a[4], test14_a[5], computed_byte, test14_a[7], test14_a[8], test14_a[9]] :
+                      i == 7 ? Bytes[test14_a[0], test14_a[1], test14_a[2], test14_a[3], test14_a[4], test14_a[5], test14_a[6], computed_byte, test14_a[8], test14_a[9]] :
+                      i == 8 ? Bytes[test14_a[0], test14_a[1], test14_a[2], test14_a[3], test14_a[4], test14_a[5], test14_a[6], test14_a[7], computed_byte, test14_a[9]] :
+                      Bytes[test14_a[0], test14_a[1], test14_a[2], test14_a[3], test14_a[4]st15_var = mixed_fold + complex;
+    
+    // Assertions for mixed operations
+    assert(mixed[0] == 99 as Uint<8>, "First byte of mixed should be 99 from single");
+    assert(mixed[1] == 1 as Uint<8>, "Second byte should be 1 from multiple");
+    assead13;
+    test16_doubled = doubled_bytes;
+    test16_first_as_field = first_as_field;
+    
+    // Assertions for generic module operations with type and size parameters
+    assert(sliced3[0] == 10 as Uint<8>, "Generic slice: first byte should be 10");
+    assert(sliced3[2] == 30 as Uint<8>, "Generic slice: third byte should be 30");
+    assert(combined8[5] == 10 as Uint<8>, "Generic combine: sixth byte should be 10 (first of sliced)");
+    assert(spread13[0] == 10 as Uint<8>, "Generic spread: first byte should be 10");
+    assert(spread13[8] == 10 as Uint<8>, "Generic spread: ninth byte should be 10 (start of third array)");
+    assert(spread13[12] == 50 as Uint<8>, "Generic spread: last byte should enses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the Licenses[0] as Field); // 150 + 
+
+10 + 20 = 180
+}

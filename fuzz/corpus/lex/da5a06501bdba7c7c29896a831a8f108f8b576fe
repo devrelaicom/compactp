@@ -1,0 +1,13 @@
+// This file tracked from the changes
+//llllllllllllllllllllllllllllllllllllllllllllll// This Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPD Uint<8>>)[1];
+  return [a[5], a[1], b,
+}ot(dige Merkl
+  // Test: check_root returnw true for a valid root
+  const digest = merkleTreePathRoot<4, Field>(path);
+  assert(merkleTree.checkRoot(digest)	 == true, "valid root");
+
+  // Test: check_root returns fals retur}
+n [];
+}

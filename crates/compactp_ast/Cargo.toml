@@ -1,0 +1,21 @@
+[package]
+name = "compactp_ast"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+description = "Typed AST wrappers over the lossless Compact CST produced by compactp_parser."
+documentation = "https://docs.rs/compactp_ast"
+readme = "README.md"
+keywords = ["compact", "midnight", "ast", "syntax", "parser"]
+categories = ["parser-implementations", "development-tools"]
+
+[dependencies]
+compactp_syntax.workspace = true
+rowan.workspace = true
+
+[dev-dependencies]
+compactp_parser.workspace = true
+expect-test.workspace = true

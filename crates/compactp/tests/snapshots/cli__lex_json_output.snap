@@ -1,0 +1,366 @@
+---
+source: crates/compactp/tests/cli.rs
+expression: normalise_path_separators(&raw)
+---
+{
+  "tool_version": "0.1.0-beta.1",
+  "schema_version": 1,
+  "language_version": "0.23.0",
+  "input": "tests/fixtures/imports/all_import_forms.compact",
+  "data": [
+    {
+      "kind": "IMPORT_KW",
+      "text": "import",
+      "offset": 0,
+      "len": 6
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 6,
+      "len": 1
+    },
+    {
+      "kind": "L_BRACE",
+      "text": "{",
+      "offset": 7,
+      "len": 1
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 8,
+      "len": 1
+    },
+    {
+      "kind": "IDENT",
+      "text": "foo",
+      "offset": 9,
+      "len": 3
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 12,
+      "len": 1
+    },
+    {
+      "kind": "AS_KW",
+      "text": "as",
+      "offset": 13,
+      "len": 2
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 15,
+      "len": 1
+    },
+    {
+      "kind": "IDENT",
+      "text": "f",
+      "offset": 16,
+      "len": 1
+    },
+    {
+      "kind": "COMMA",
+      "text": ",",
+      "offset": 17,
+      "len": 1
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 18,
+      "len": 1
+    },
+    {
+      "kind": "IDENT",
+      "text": "bar",
+      "offset": 19,
+      "len": 3
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 22,
+      "len": 1
+    },
+    {
+      "kind": "R_BRACE",
+      "text": "}",
+      "offset": 23,
+      "len": 1
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 24,
+      "len": 1
+    },
+    {
+      "kind": "FROM_KW",
+      "text": "from",
+      "offset": 25,
+      "len": 4
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 29,
+      "len": 1
+    },
+    {
+      "kind": "IDENT",
+      "text": "Math",
+      "offset": 30,
+      "len": 4
+    },
+    {
+      "kind": "LT",
+      "text": "<",
+      "offset": 34,
+      "len": 1
+    },
+    {
+      "kind": "FIELD_KW",
+      "text": "Field",
+      "offset": 35,
+      "len": 5
+    },
+    {
+      "kind": "GT",
+      "text": ">",
+      "offset": 40,
+      "len": 1
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 41,
+      "len": 1
+    },
+    {
+      "kind": "PREFIX_KW",
+      "text": "prefix",
+      "offset": 42,
+      "len": 6
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 48,
+      "len": 1
+    },
+    {
+      "kind": "IDENT",
+      "text": "M$",
+      "offset": 49,
+      "len": 2
+    },
+    {
+      "kind": "SEMICOLON",
+      "text": ";",
+      "offset": 51,
+      "len": 1
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": "\n",
+      "offset": 52,
+      "len": 1
+    },
+    {
+      "kind": "EXPORT_KW",
+      "text": "export",
+      "offset": 53,
+      "len": 6
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 59,
+      "len": 1
+    },
+    {
+      "kind": "L_BRACE",
+      "text": "{",
+      "offset": 60,
+      "len": 1
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 61,
+      "len": 1
+    },
+    {
+      "kind": "IDENT",
+      "text": "f",
+      "offset": 62,
+      "len": 1
+    },
+    {
+      "kind": "COMMA",
+      "text": ",",
+      "offset": 63,
+      "len": 1
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 64,
+      "len": 1
+    },
+    {
+      "kind": "IDENT",
+      "text": "M$",
+      "offset": 65,
+      "len": 2
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 67,
+      "len": 1
+    },
+    {
+      "kind": "R_BRACE",
+      "text": "}",
+      "offset": 68,
+      "len": 1
+    },
+    {
+      "kind": "SEMICOLON",
+      "text": ";",
+      "offset": 69,
+      "len": 1
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": "\n",
+      "offset": 70,
+      "len": 1
+    },
+    {
+      "kind": "MODULE_KW",
+      "text": "module",
+      "offset": 71,
+      "len": 6
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 77,
+      "len": 1
+    },
+    {
+      "kind": "IDENT",
+      "text": "Wrapped",
+      "offset": 78,
+      "len": 7
+    },
+    {
+      "kind": "LT",
+      "text": "<",
+      "offset": 85,
+      "len": 1
+    },
+    {
+      "kind": "HASH",
+      "text": "#",
+      "offset": 86,
+      "len": 1
+    },
+    {
+      "kind": "IDENT",
+      "text": "n",
+      "offset": 87,
+      "len": 1
+    },
+    {
+      "kind": "GT",
+      "text": ">",
+      "offset": 88,
+      "len": 1
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 89,
+      "len": 1
+    },
+    {
+      "kind": "L_BRACE",
+      "text": "{",
+      "offset": 90,
+      "len": 1
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": "\n  ",
+      "offset": 91,
+      "len": 3
+    },
+    {
+      "kind": "LEDGER_KW",
+      "text": "ledger",
+      "offset": 94,
+      "len": 6
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 100,
+      "len": 1
+    },
+    {
+      "kind": "IDENT",
+      "text": "value",
+      "offset": 101,
+      "len": 5
+    },
+    {
+      "kind": "COLON",
+      "text": ":",
+      "offset": 106,
+      "len": 1
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": " ",
+      "offset": 107,
+      "len": 1
+    },
+    {
+      "kind": "FIELD_KW",
+      "text": "Field",
+      "offset": 108,
+      "len": 5
+    },
+    {
+      "kind": "SEMICOLON",
+      "text": ";",
+      "offset": 113,
+      "len": 1
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": "\n",
+      "offset": 114,
+      "len": 1
+    },
+    {
+      "kind": "R_BRACE",
+      "text": "}",
+      "offset": 115,
+      "len": 1
+    },
+    {
+      "kind": "WHITESPACE",
+      "text": "\n",
+      "offset": 116,
+      "len": 1
+    }
+  ]
+}

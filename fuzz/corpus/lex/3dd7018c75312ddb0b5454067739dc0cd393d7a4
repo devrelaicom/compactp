@@ -1,0 +1,20 @@
+// This file is part of Compact.
+// Copyright (C) 20entifier: Apache-2.greed to e Ledger = L
+  field1: Map<Field, Foo>;
+  field2: HierkleTree<10, Foo>;
+  field3: Boolger = {
+  field1: Map<Field, Foo>;
+  fioo>;
+  field3: Boolean;
+  field4Ledger = {
+  field1: Map<Field, Foo>;
+  field2: Hi}
+
+circuit foo() {
+  ledger.field1.write(ledger.field1.lookuedger.field2.find_element(
+        ledger.field1.lookup(3))));
+}
+
+circuit initialize() {
+  ledger.field3.write(true);
+}

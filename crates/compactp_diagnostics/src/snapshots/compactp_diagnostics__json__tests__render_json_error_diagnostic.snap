@@ -1,0 +1,26 @@
+---
+source: crates/compactp_diagnostics/src/json.rs
+expression: pretty
+---
+{
+  "code": {
+    "number": 12,
+    "prefix": "E"
+  },
+  "message": "expected `;`",
+  "notes": [],
+  "primary_span": {
+    "end": {
+      "column": 1,
+      "line": 2,
+      "offset": 20
+    },
+    "start": {
+      "column": 20,
+      "line": 1,
+      "offset": 19
+    }
+  },
+  "secondary_spans": [],
+  "severity": "error"
+}

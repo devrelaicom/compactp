@@ -1,0 +1,32 @@
+[package]
+name = "compactp_diagnostics"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+description = "Structured diagnostics (severities, codes, labeled spans) for the compactp Compact parser frontend."
+documentation = "https://docs.rs/compactp_diagnostics"
+readme = "README.md"
+keywords = ["compact", "midnight", "diagnostics", "errors", "parser"]
+categories = ["parser-implementations", "development-tools"]
+
+[dependencies]
+compactp_syntax.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+rowan.workspace = true
+
+[dev-dependencies]
+insta.workspace = true
+
+# No panic paths on user input (CONSTITUTION §III). Tests are exempt via
+# the standard `#[cfg(test)]` allow-list that clippy applies to lints
+# enabled at crate level — library production code must not panic.
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"

@@ -1,0 +1,10 @@
+/target
+FUNC_SPEC.md
+LS.md
+docs/superpowers/
+.superpowers/
+
+# cargo-fuzz artifacts and build outputs
+fuzz/target/
+fuzz/coverage/
+fuzz/artifacts/

@@ -1,0 +1,2 @@
+pub mod compactp_lexer
+pub fn compactp_lexer::lex(&str) -> alloc::vec::Vec<(compactp_syntax::syntax_kind::SyntaxKind, &str)>

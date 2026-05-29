@@ -1,0 +1,44 @@
+name: public-api
+
+on:
+  pull_request:
+    paths:
+      - 'crates/**'
+      - 'docs/public-api/**'
+      - '.github/workflows/public-api.yml'
+  push:
+    branches: [main, initial-draft]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  diff:
+    name: Public API parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust nightly (required by cargo-public-api)
+        uses: dtolnay/rust-toolchain@nightly
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: public-api
+      - name: Install cargo-public-api
+        run: |
+          if ! command -v cargo-public-api >/dev/null 2>&1; then
+            cargo install cargo-public-api --locked
+          fi
+      - name: Diff each library crate against committed baseline
+        run: |
+          set -euo pipefail
+          fail=0
+          for crate in compactp_diagnostics compactp_lexer compactp_syntax compactp_ast compactp_parser; do
+            echo "::group::$crate"
+            cargo public-api -p "$crate" --simplified > "/tmp/$crate.actual"
+            if ! diff -u "docs/public-api/$crate.txt" "/tmp/$crate.actual"; then
+              echo "::error::Public API of $crate differs from baseline. Update docs/public-api/$crate.txt to acknowledge the change or revert the surface change."
+              fail=1
+            fi
+            echo "::endgroup::"
+          done
+          exit $fail

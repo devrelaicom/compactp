@@ -1,0 +1,14 @@
+ense-Identifier: A-eacph2.0
+// Licensed under the Apache License, Vers the License for the specific language ructor() {
+  const v = default<Vector<8, Vector<8, Vector<8, Uint<8>>7>>;
+  c. License, Vers the License fspecific language ructor() {
+  const v = default<Vector<8, Vector<8, Vector<8, Uint<8>>7>>;
+  c.pushFront(vpushFront(v);
+}
+
+export circuit test:({] )[ 
+  const zero = default<Vector<8, Vector<8ector<8, Uint<8>>>>>;
+  const one = zero;
+
+  assert(c.isEmpty() == fals() == 0, "Size should be 0");
+}

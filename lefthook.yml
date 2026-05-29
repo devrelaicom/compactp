@@ -1,0 +1,47 @@
+commit-msg:
+  commands:
+    conventional-commit:
+      run: |
+        MSG=$(cat {1})
+        FIRST_LINE=$(head -1 {1})
+        # Check conventional commit format
+        if ! echo "$FIRST_LINE" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .+'; then
+          echo "ERROR: Commit message must follow Conventional Commits format"
+          echo "  Format: type(scope): description"
+          echo "  Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+          exit 1
+        fi
+        # Check commit body is under 500 characters
+        BODY=$(tail -n +3 {1})
+        BODY_LEN=${#BODY}
+        if [ "$BODY_LEN" -gt 500 ]; then
+          echo "ERROR: Commit body must be under 500 characters (currently $BODY_LEN)"
+          exit 1
+        fi
+        # Check commit body is under 10 lines
+        BODY_LINES=$(tail -n +3 {1} | wc -l | tr -d ' ')
+        if [ "$BODY_LINES" -gt 10 ]; then
+          echo "ERROR: Commit body must be under 10 lines (currently $BODY_LINES)"
+          exit 1
+        fi
+
+pre-commit:
+  parallel: true
+  commands:
+    clippy-staged:
+      glob: "*.rs"
+      run: cargo clippy --workspace -- -D warnings
+    format-check:
+      glob: "*.rs"
+      run: cargo fmt --all -- --check
+
+pre-push:
+  commands:
+    lint:
+      run: cargo clippy --workspace -- -D warnings
+    format:
+      run: cargo fmt --all -- --check
+    build:
+      run: cargo build --workspace
+    test:
+      run: cargo test --workspace

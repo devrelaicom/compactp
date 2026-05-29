@@ -1,0 +1,10 @@
+---
+source: crates/compactp_diagnostics/src/render.rs
+expression: rendered
+---
+error[E0001]: unexpected token
+   --> big.compact:11:6
+   |
+11 | abcdefghijklmnopqrstuvwxyz
+   |      ^ unexpected token
+   |

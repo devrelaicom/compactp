@@ -1,0 +1,51 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or motivation
+      description: What problem does this solve, or what workflow does it improve?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe the feature you'd like to see. If it affects CLI output or library APIs, sketch the shape.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any other approaches you've thought about, including doing nothing.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Lexer
+        - Parser / Grammar
+        - AST
+        - Diagnostics
+        - CLI
+        - Library API
+        - Documentation
+        - Tooling / Release
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Public surface impact
+      options:
+        - No user-visible change
+        - Additive (new flag, new field, new command)
+        - Breaking (changes existing output or API)
+        - Unsure
+    validations:
+      required: true

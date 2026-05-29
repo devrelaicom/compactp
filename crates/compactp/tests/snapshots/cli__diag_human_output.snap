@@ -1,0 +1,34 @@
+---
+source: crates/compactp/tests/cli.rs
+expression: out
+---
+error[E0001]: expected type
+  --> tests/fixtures/recovery/broken_expressions.compact:2:20
+  |
+2 |   const cast = a as ;
+  |                    ^ expected type
+  |
+error[E0001]: expected expression
+  --> tests/fixtures/recovery/broken_expressions.compact:3:22
+  |
+3 |   const ternary = a ? : b;
+  |                      ^ expected expression
+  |
+error[E0001]: expected expression
+  --> tests/fixtures/recovery/broken_expressions.compact:4:25
+  |
+4 |   const call = disclose(;
+  |                         ^ expected expression
+  |
+error[E0001]: expected R_PAREN
+  --> tests/fixtures/recovery/broken_expressions.compact:4:25
+  |
+4 |   const call = disclose(;
+  |                         ^ expected R_PAREN
+  |
+error[E0001]: expected expression
+  --> tests/fixtures/recovery/broken_expressions.compact:5:13
+  |
+5 |   return a + ;
+  |             ^ expected expression
+  |

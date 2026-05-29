@@ -1,0 +1,26 @@
+pub mod compactp_parser
+pub struct compactp_parser::ParseOptions
+pub compactp_parser::ParseOptions::max_depth: u32
+pub compactp_parser::ParseOptions::max_errors: usize
+pub compactp_parser::ParseOptions::recover: bool
+impl core::default::Default for compactp_parser::ParseOptions
+pub fn compactp_parser::ParseOptions::default() -> Self
+impl core::marker::Freeze for compactp_parser::ParseOptions
+impl core::marker::Send for compactp_parser::ParseOptions
+impl core::marker::Sync for compactp_parser::ParseOptions
+impl core::marker::Unpin for compactp_parser::ParseOptions
+impl core::marker::UnsafeUnpin for compactp_parser::ParseOptions
+impl core::panic::unwind_safe::RefUnwindSafe for compactp_parser::ParseOptions
+impl core::panic::unwind_safe::UnwindSafe for compactp_parser::ParseOptions
+pub struct compactp_parser::ParseResult
+pub compactp_parser::ParseResult::errors: alloc::vec::Vec<compactp_diagnostics::Diagnostic>
+pub compactp_parser::ParseResult::green: rowan::green::node::GreenNode
+impl core::marker::Freeze for compactp_parser::ParseResult
+impl core::marker::Send for compactp_parser::ParseResult
+impl core::marker::Sync for compactp_parser::ParseResult
+impl core::marker::Unpin for compactp_parser::ParseResult
+impl core::marker::UnsafeUnpin for compactp_parser::ParseResult
+impl core::panic::unwind_safe::RefUnwindSafe for compactp_parser::ParseResult
+impl core::panic::unwind_safe::UnwindSafe for compactp_parser::ParseResult
+pub fn compactp_parser::parse(&str) -> compactp_parser::ParseResult
+pub fn compactp_parser::parse_with(&str, compactp_parser::ParseOptions) -> compactp_parser::ParseResult

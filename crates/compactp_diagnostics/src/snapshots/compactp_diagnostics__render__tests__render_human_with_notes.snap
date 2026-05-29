@@ -1,0 +1,12 @@
+---
+source: crates/compactp_diagnostics/src/render.rs
+expression: rendered
+---
+error[E0100]: unknown type `Strng`
+  --> types.compact:1:16
+  |
+1 | ledger name : Strng;
+  |                ^^^^^ unknown type `Strng`
+  |
+  = note: did you mean `String`?
+  = note: defined types: String, Int, Bool

@@ -1,0 +1,30 @@
+[package]
+name = "compactp_parser"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+description = "Recursive-descent parser for the Compact language producing a lossless CST and structured diagnostics."
+documentation = "https://docs.rs/compactp_parser"
+readme = "README.md"
+keywords = ["compact", "midnight", "parser", "cst", "compiler"]
+categories = ["parser-implementations", "development-tools"]
+
+[dependencies]
+compactp_syntax.workspace = true
+compactp_lexer.workspace = true
+compactp_diagnostics.workspace = true
+rowan.workspace = true
+drop_bomb.workspace = true
+
+[dev-dependencies]
+expect-test.workspace = true
+insta.workspace = true
+walkdir.workspace = true
+criterion.workspace = true
+
+[[bench]]
+name = "parse_bench"
+harness = false

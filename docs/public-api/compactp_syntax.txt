@@ -1,0 +1,232 @@
+pub mod compactp_syntax
+pub enum compactp_syntax::CompactLanguage
+impl core::clone::Clone for compactp_syntax::CompactLanguage
+pub fn compactp_syntax::CompactLanguage::clone(&self) -> compactp_syntax::CompactLanguage
+impl core::cmp::Eq for compactp_syntax::CompactLanguage
+impl core::cmp::Ord for compactp_syntax::CompactLanguage
+pub fn compactp_syntax::CompactLanguage::cmp(&self, &compactp_syntax::CompactLanguage) -> core::cmp::Ordering
+impl core::cmp::PartialEq for compactp_syntax::CompactLanguage
+pub fn compactp_syntax::CompactLanguage::eq(&self, &compactp_syntax::CompactLanguage) -> bool
+impl core::cmp::PartialOrd for compactp_syntax::CompactLanguage
+pub fn compactp_syntax::CompactLanguage::partial_cmp(&self, &compactp_syntax::CompactLanguage) -> core::option::Option<core::cmp::Ordering>
+impl core::fmt::Debug for compactp_syntax::CompactLanguage
+pub fn compactp_syntax::CompactLanguage::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for compactp_syntax::CompactLanguage
+pub fn compactp_syntax::CompactLanguage::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::Copy for compactp_syntax::CompactLanguage
+impl core::marker::StructuralPartialEq for compactp_syntax::CompactLanguage
+impl rowan::api::Language for compactp_syntax::CompactLanguage
+pub type compactp_syntax::CompactLanguage::Kind = compactp_syntax::SyntaxKind
+pub fn compactp_syntax::CompactLanguage::kind_from_raw(rowan::green::SyntaxKind) -> compactp_syntax::SyntaxKind
+pub fn compactp_syntax::CompactLanguage::kind_to_raw(compactp_syntax::SyntaxKind) -> rowan::green::SyntaxKind
+impl core::marker::Freeze for compactp_syntax::CompactLanguage
+impl core::marker::Send for compactp_syntax::CompactLanguage
+impl core::marker::Sync for compactp_syntax::CompactLanguage
+impl core::marker::Unpin for compactp_syntax::CompactLanguage
+impl core::marker::UnsafeUnpin for compactp_syntax::CompactLanguage
+impl core::panic::unwind_safe::RefUnwindSafe for compactp_syntax::CompactLanguage
+impl core::panic::unwind_safe::UnwindSafe for compactp_syntax::CompactLanguage
+#[repr(u16)] pub enum compactp_syntax::SyntaxKind
+pub compactp_syntax::SyntaxKind::AMP_AMP
+pub compactp_syntax::SyntaxKind::ARRAY_EXPR
+pub compactp_syntax::SyntaxKind::ASSERT_KW
+pub compactp_syntax::SyntaxKind::ASSERT_STMT
+pub compactp_syntax::SyntaxKind::ASSIGN_EXPR
+pub compactp_syntax::SyntaxKind::ASSIGN_STMT
+pub compactp_syntax::SyntaxKind::AS_KW
+pub compactp_syntax::SyntaxKind::BANG
+pub compactp_syntax::SyntaxKind::BANG_EQ
+pub compactp_syntax::SyntaxKind::BINARY_EXPR
+pub compactp_syntax::SyntaxKind::BIN_LIT
+pub compactp_syntax::SyntaxKind::BLOCK
+pub compactp_syntax::SyntaxKind::BLOCK_COMMENT
+pub compactp_syntax::SyntaxKind::BOOLEAN_KW
+pub compactp_syntax::SyntaxKind::BOOLEAN_TYPE
+pub compactp_syntax::SyntaxKind::BYTES_EXPR
+pub compactp_syntax::SyntaxKind::BYTES_KW
+pub compactp_syntax::SyntaxKind::BYTES_TYPE
+pub compactp_syntax::SyntaxKind::CALL_EXPR
+pub compactp_syntax::SyntaxKind::CAST_EXPR
+pub compactp_syntax::SyntaxKind::CIRCUIT_DECL
+pub compactp_syntax::SyntaxKind::CIRCUIT_DEF
+pub compactp_syntax::SyntaxKind::CIRCUIT_KW
+pub compactp_syntax::SyntaxKind::COLON
+pub compactp_syntax::SyntaxKind::COMMA
+pub compactp_syntax::SyntaxKind::COMPOUND_ASSIGN_EXPR
+pub compactp_syntax::SyntaxKind::CONSTRUCTOR_DEF
+pub compactp_syntax::SyntaxKind::CONSTRUCTOR_KW
+pub compactp_syntax::SyntaxKind::CONST_KW
+pub compactp_syntax::SyntaxKind::CONST_STMT
+pub compactp_syntax::SyntaxKind::CONTRACT_CIRCUIT
+pub compactp_syntax::SyntaxKind::CONTRACT_DECL
+pub compactp_syntax::SyntaxKind::CONTRACT_KW
+pub compactp_syntax::SyntaxKind::DEFAULT_EXPR
+pub compactp_syntax::SyntaxKind::DEFAULT_KW
+pub compactp_syntax::SyntaxKind::DISCLOSE_EXPR
+pub compactp_syntax::SyntaxKind::DISCLOSE_KW
+pub compactp_syntax::SyntaxKind::DOT
+pub compactp_syntax::SyntaxKind::DOT_DOT
+pub compactp_syntax::SyntaxKind::DOT_DOT_DOT
+pub compactp_syntax::SyntaxKind::ELSE_KW
+pub compactp_syntax::SyntaxKind::ENUM_DEF
+pub compactp_syntax::SyntaxKind::ENUM_KW
+pub compactp_syntax::SyntaxKind::ENUM_VARIANT
+pub compactp_syntax::SyntaxKind::EOF
+pub compactp_syntax::SyntaxKind::EQ
+pub compactp_syntax::SyntaxKind::EQ_EQ
+pub compactp_syntax::SyntaxKind::ERROR
+pub compactp_syntax::SyntaxKind::EXPORT_KW
+pub compactp_syntax::SyntaxKind::EXPORT_LIST
+pub compactp_syntax::SyntaxKind::EXPR_SEQ
+pub compactp_syntax::SyntaxKind::EXPR_STMT
+pub compactp_syntax::SyntaxKind::FALSE_KW
+pub compactp_syntax::SyntaxKind::FAT_ARROW
+pub compactp_syntax::SyntaxKind::FIELD_KW
+pub compactp_syntax::SyntaxKind::FIELD_TYPE
+pub compactp_syntax::SyntaxKind::FOLD_EXPR
+pub compactp_syntax::SyntaxKind::FOLD_KW
+pub compactp_syntax::SyntaxKind::FOR_KW
+pub compactp_syntax::SyntaxKind::FOR_STMT
+pub compactp_syntax::SyntaxKind::FROM_KW
+pub compactp_syntax::SyntaxKind::GENERIC_ARG
+pub compactp_syntax::SyntaxKind::GENERIC_ARG_LIST
+pub compactp_syntax::SyntaxKind::GENERIC_PARAM
+pub compactp_syntax::SyntaxKind::GENERIC_PARAM_LIST
+pub compactp_syntax::SyntaxKind::GT
+pub compactp_syntax::SyntaxKind::GT_EQ
+pub compactp_syntax::SyntaxKind::HASH
+pub compactp_syntax::SyntaxKind::HEX_LIT
+pub compactp_syntax::SyntaxKind::IDENT
+pub compactp_syntax::SyntaxKind::IDENT_PAT
+pub compactp_syntax::SyntaxKind::IF_KW
+pub compactp_syntax::SyntaxKind::IF_STMT
+pub compactp_syntax::SyntaxKind::IMPORT
+pub compactp_syntax::SyntaxKind::IMPORT_KW
+pub compactp_syntax::SyntaxKind::IMPORT_SPECIFIER
+pub compactp_syntax::SyntaxKind::IMPORT_SPECIFIER_LIST
+pub compactp_syntax::SyntaxKind::INCLUDE
+pub compactp_syntax::SyntaxKind::INCLUDE_KW
+pub compactp_syntax::SyntaxKind::INDEX_EXPR
+pub compactp_syntax::SyntaxKind::INTEGER_KW
+pub compactp_syntax::SyntaxKind::INT_LIT
+pub compactp_syntax::SyntaxKind::LAMBDA_EXPR
+pub compactp_syntax::SyntaxKind::LEDGER_DECL
+pub compactp_syntax::SyntaxKind::LEDGER_KW
+pub compactp_syntax::SyntaxKind::LINE_COMMENT
+pub compactp_syntax::SyntaxKind::LITERAL_EXPR
+pub compactp_syntax::SyntaxKind::LT
+pub compactp_syntax::SyntaxKind::LT_EQ
+pub compactp_syntax::SyntaxKind::L_BRACE
+pub compactp_syntax::SyntaxKind::L_BRACKET
+pub compactp_syntax::SyntaxKind::L_PAREN
+pub compactp_syntax::SyntaxKind::MAP_EXPR
+pub compactp_syntax::SyntaxKind::MAP_KW
+pub compactp_syntax::SyntaxKind::MEMBER_EXPR
+pub compactp_syntax::SyntaxKind::MINUS
+pub compactp_syntax::SyntaxKind::MINUS_EQ
+pub compactp_syntax::SyntaxKind::MODULE_DEF
+pub compactp_syntax::SyntaxKind::MODULE_KW
+pub compactp_syntax::SyntaxKind::MULTI_CONST_STMT
+pub compactp_syntax::SyntaxKind::NAMED_ARG
+pub compactp_syntax::SyntaxKind::NAME_EXPR
+pub compactp_syntax::SyntaxKind::NEW_KW
+pub compactp_syntax::SyntaxKind::OCT_LIT
+pub compactp_syntax::SyntaxKind::OF_KW
+pub compactp_syntax::SyntaxKind::OPAQUE_KW
+pub compactp_syntax::SyntaxKind::OPAQUE_TYPE
+pub compactp_syntax::SyntaxKind::PAD_EXPR
+pub compactp_syntax::SyntaxKind::PAD_KW
+pub compactp_syntax::SyntaxKind::PARAM
+pub compactp_syntax::SyntaxKind::PARAM_LIST
+pub compactp_syntax::SyntaxKind::PAREN_EXPR
+pub compactp_syntax::SyntaxKind::PIPE_PIPE
+pub compactp_syntax::SyntaxKind::PLUS
+pub compactp_syntax::SyntaxKind::PLUS_EQ
+pub compactp_syntax::SyntaxKind::PRAGMA
+pub compactp_syntax::SyntaxKind::PRAGMA_KW
+pub compactp_syntax::SyntaxKind::PREFIX_DECL
+pub compactp_syntax::SyntaxKind::PREFIX_KW
+pub compactp_syntax::SyntaxKind::PURE_KW
+pub compactp_syntax::SyntaxKind::QUESTION
+pub compactp_syntax::SyntaxKind::RANGE_EXPR
+pub compactp_syntax::SyntaxKind::RECORD_TYPE
+pub compactp_syntax::SyntaxKind::RETURN_KW
+pub compactp_syntax::SyntaxKind::RETURN_STMT
+pub compactp_syntax::SyntaxKind::R_BRACE
+pub compactp_syntax::SyntaxKind::R_BRACKET
+pub compactp_syntax::SyntaxKind::R_PAREN
+pub compactp_syntax::SyntaxKind::SEALED_KW
+pub compactp_syntax::SyntaxKind::SEMICOLON
+pub compactp_syntax::SyntaxKind::SLASH
+pub compactp_syntax::SyntaxKind::SLICE_EXPR
+pub compactp_syntax::SyntaxKind::SLICE_KW
+pub compactp_syntax::SyntaxKind::SOURCE_FILE
+pub compactp_syntax::SyntaxKind::SPREAD_EXPR
+pub compactp_syntax::SyntaxKind::STAR
+pub compactp_syntax::SyntaxKind::STRING_LIT
+pub compactp_syntax::SyntaxKind::STRUCT_DEF
+pub compactp_syntax::SyntaxKind::STRUCT_EXPR
+pub compactp_syntax::SyntaxKind::STRUCT_FIELD
+pub compactp_syntax::SyntaxKind::STRUCT_FIELD_INIT
+pub compactp_syntax::SyntaxKind::STRUCT_KW
+pub compactp_syntax::SyntaxKind::STRUCT_PAT
+pub compactp_syntax::SyntaxKind::STRUCT_PAT_FIELD
+pub compactp_syntax::SyntaxKind::STRUCT_UPDATE
+pub compactp_syntax::SyntaxKind::TERNARY_EXPR
+pub compactp_syntax::SyntaxKind::TRUE_KW
+pub compactp_syntax::SyntaxKind::TUPLE_PAT
+pub compactp_syntax::SyntaxKind::TUPLE_PAT_ELT
+pub compactp_syntax::SyntaxKind::TUPLE_TYPE
+pub compactp_syntax::SyntaxKind::TYPED_PAT
+pub compactp_syntax::SyntaxKind::TYPE_DECL
+pub compactp_syntax::SyntaxKind::TYPE_KW
+pub compactp_syntax::SyntaxKind::TYPE_REF
+pub compactp_syntax::SyntaxKind::TYPE_SIZE
+pub compactp_syntax::SyntaxKind::UINT_KW
+pub compactp_syntax::SyntaxKind::UINT_TYPE
+pub compactp_syntax::SyntaxKind::UNARY_EXPR
+pub compactp_syntax::SyntaxKind::UNSIGNED_INTEGER_TYPE
+pub compactp_syntax::SyntaxKind::UNSIGNED_KW
+pub compactp_syntax::SyntaxKind::VECTOR_KW
+pub compactp_syntax::SyntaxKind::VECTOR_TYPE
+pub compactp_syntax::SyntaxKind::VERSION_AND_EXPR
+pub compactp_syntax::SyntaxKind::VERSION_EXPR
+pub compactp_syntax::SyntaxKind::VERSION_LIT
+pub compactp_syntax::SyntaxKind::VERSION_OR_EXPR
+pub compactp_syntax::SyntaxKind::VERSION_PAREN_EXPR
+pub compactp_syntax::SyntaxKind::VERSION_UNARY_EXPR
+pub compactp_syntax::SyntaxKind::WHITESPACE = 0
+pub compactp_syntax::SyntaxKind::WITNESS_DECL
+pub compactp_syntax::SyntaxKind::WITNESS_KW
+impl compactp_syntax::SyntaxKind
+pub fn compactp_syntax::SyntaxKind::is_trivia(self) -> bool
+impl core::clone::Clone for compactp_syntax::SyntaxKind
+pub fn compactp_syntax::SyntaxKind::clone(&self) -> compactp_syntax::SyntaxKind
+impl core::cmp::Eq for compactp_syntax::SyntaxKind
+impl core::cmp::Ord for compactp_syntax::SyntaxKind
+pub fn compactp_syntax::SyntaxKind::cmp(&self, &compactp_syntax::SyntaxKind) -> core::cmp::Ordering
+impl core::cmp::PartialEq for compactp_syntax::SyntaxKind
+pub fn compactp_syntax::SyntaxKind::eq(&self, &compactp_syntax::SyntaxKind) -> bool
+impl core::cmp::PartialOrd for compactp_syntax::SyntaxKind
+pub fn compactp_syntax::SyntaxKind::partial_cmp(&self, &compactp_syntax::SyntaxKind) -> core::option::Option<core::cmp::Ordering>
+impl core::convert::From<compactp_syntax::SyntaxKind> for rowan::green::SyntaxKind
+pub fn rowan::green::SyntaxKind::from(compactp_syntax::SyntaxKind) -> rowan::green::SyntaxKind
+impl core::convert::From<compactp_syntax::SyntaxKind> for u16
+pub fn u16::from(compactp_syntax::SyntaxKind) -> u16
+impl core::convert::From<u16> for compactp_syntax::SyntaxKind
+pub fn compactp_syntax::SyntaxKind::from(u16) -> compactp_syntax::SyntaxKind
+impl core::fmt::Debug for compactp_syntax::SyntaxKind
+pub fn compactp_syntax::SyntaxKind::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for compactp_syntax::SyntaxKind
+pub fn compactp_syntax::SyntaxKind::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::Copy for compactp_syntax::SyntaxKind
+impl core::marker::StructuralPartialEq for compactp_syntax::SyntaxKind
+impl core::marker::Freeze for compactp_syntax::SyntaxKind
+impl core::marker::Send for compactp_syntax::SyntaxKind
+impl core::marker::Sync for compactp_syntax::SyntaxKind
+impl core::marker::Unpin for compactp_syntax::SyntaxKind
+impl core::marker::UnsafeUnpin for compactp_syntax::SyntaxKind
+impl core::panic::unwind_safe::RefUnwindSafe for compactp_syntax::SyntaxKind
+impl core::panic::unwind_safe::UnwindSafe for compactp_syntax::SyntaxKind
+pub type compactp_syntax::SyntaxNode = rowan::api::SyntaxNode<compactp_syntax::CompactLanguage>
+pub type compactp_syntax::SyntaxToken = rowan::api::SyntaxToken<compactp_syntax::CompactLanguage>

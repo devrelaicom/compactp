@@ -1,0 +1,10 @@
+h /T/is file is part of Compact.
+// Copyright (C) 2025 Midnight Foundation
+// SPDX-License-Identifier: Apache-2.0
+// Licensed under the AIS,
+// WITHOUT WARRANTIES Ocific language governing :permissions and
+// limitations under the License.
+
+export circuit test(): [] {
+    const c = (slice<0o0>([], 0) as Bytes<0> as Field) + (slice<0o0>([], 0) as Bytes<0> as Field);
+}

@@ -1,0 +1,76 @@
+name: fuzz-nightly
+
+on:
+  schedule:
+    # 04:00 UTC every night.
+    - cron: '0 4 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  fuzz:
+    name: Fuzz ${{ matrix.target }} for 10 minutes
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [lex, parse]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust nightly (required by cargo-fuzz)
+        uses: dtolnay/rust-toolchain@nightly
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: fuzz-${{ matrix.target }}
+          workspaces: |
+            .
+            fuzz
+      - name: Install cargo-fuzz
+        run: |
+          if ! command -v cargo-fuzz >/dev/null 2>&1; then
+            cargo install cargo-fuzz --locked
+          fi
+      - name: Run fuzz target for 10 minutes
+        id: fuzz
+        run: |
+          set -euo pipefail
+          cargo +nightly fuzz run ${{ matrix.target }} -- -max_total_time=600
+      - name: Upload crash artifacts (if any)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-crashes-${{ matrix.target }}-${{ github.run_id }}
+          path: fuzz/artifacts/${{ matrix.target }}/
+          if-no-files-found: ignore
+          retention-days: 30
+      - name: Open issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const target = "${{ matrix.target }}";
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `fuzz-nightly: ${target} target crashed`,
+              body: [
+                `Nightly fuzz of the \`${target}\` target failed.`,
+                ``,
+                `Run: ${runUrl}`,
+                `Artifacts: crash inputs were uploaded as workflow artifacts (look for \`fuzz-crashes-${target}-${{ github.run_id }}\`).`,
+                ``,
+                `Next steps:`,
+                `1. Download the crash artifact from the workflow run.`,
+                `2. Reproduce locally with \`scripts/fuzz.sh --target ${target} --duration 1\` or directly via \`cat fuzz/artifacts/${target}/<input> | cargo +nightly fuzz run ${target}\`.`,
+                `3. Fix and add a reduced reproducer as a unit test in the relevant grammar module.`,
+              ].join('\n'),
+              labels: ['fuzz', 'bug', 'priority:high'],
+            });

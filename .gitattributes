@@ -1,0 +1,12 @@
+# compactp is a *lossless* parser: snapshots record exact byte offsets and
+# whitespace token text. If git checks fixtures out with CRLF on Windows, every
+# offset after the first newline shifts and the byte-exact snapshots fail.
+# Force LF on all byte-significant text so checkouts are identical on every OS.
+
+*.compact text eol=lf
+*.snap    text eol=lf
+*.txt     text eol=lf
+
+# Fuzz corpus entries are arbitrary input bytes (content-hash filenames) and
+# must never be EOL-normalized — treat them as binary.
+fuzz/corpus/** -text

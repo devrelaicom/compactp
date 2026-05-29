@@ -1,0 +1,26 @@
+[package]
+name = "compactp_syntax"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+description = "Shared syntax-tree types (SyntaxKind, rowan aliases) for the compactp Compact parser frontend."
+documentation = "https://docs.rs/compactp_syntax"
+readme = "README.md"
+keywords = ["compact", "midnight", "syntax", "cst", "parser"]
+categories = ["parser-implementations", "development-tools"]
+
+[dependencies]
+rowan.workspace = true
+
+# No panic paths on user input (CONSTITUTION §III). Tests are exempt via
+# the standard `#[cfg(test)]` allow-list that clippy applies to lints
+# enabled at crate level — library production code must not panic.
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"

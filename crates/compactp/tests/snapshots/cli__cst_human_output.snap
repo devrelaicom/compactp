@@ -1,0 +1,78 @@
+---
+source: crates/compactp/tests/cli.rs
+expression: "stdout(run_ok(&[\"cst\", &path]))"
+---
+SOURCE_FILE@0..117
+  IMPORT@0..52
+    IMPORT_KW@0..6 "import"
+    IMPORT_SPECIFIER_LIST@6..24
+      WHITESPACE@6..7 " "
+      L_BRACE@7..8 "{"
+      IMPORT_SPECIFIER@8..17
+        WHITESPACE@8..9 " "
+        IDENT@9..12 "foo"
+        WHITESPACE@12..13 " "
+        AS_KW@13..15 "as"
+        WHITESPACE@15..16 " "
+        IDENT@16..17 "f"
+      COMMA@17..18 ","
+      IMPORT_SPECIFIER@18..22
+        WHITESPACE@18..19 " "
+        IDENT@19..22 "bar"
+      WHITESPACE@22..23 " "
+      R_BRACE@23..24 "}"
+    WHITESPACE@24..25 " "
+    FROM_KW@25..29 "from"
+    WHITESPACE@29..30 " "
+    IDENT@30..34 "Math"
+    GENERIC_ARG_LIST@34..41
+      LT@34..35 "<"
+      GENERIC_ARG@35..40
+        FIELD_TYPE@35..40
+          FIELD_KW@35..40 "Field"
+      GT@40..41 ">"
+    PREFIX_DECL@41..51
+      WHITESPACE@41..42 " "
+      PREFIX_KW@42..48 "prefix"
+      WHITESPACE@48..49 " "
+      IDENT@49..51 "M$"
+    SEMICOLON@51..52 ";"
+  EXPORT_LIST@52..70
+    WHITESPACE@52..53 "\n"
+    EXPORT_KW@53..59 "export"
+    WHITESPACE@59..60 " "
+    L_BRACE@60..61 "{"
+    WHITESPACE@61..62 " "
+    IDENT@62..63 "f"
+    COMMA@63..64 ","
+    WHITESPACE@64..65 " "
+    IDENT@65..67 "M$"
+    WHITESPACE@67..68 " "
+    R_BRACE@68..69 "}"
+    SEMICOLON@69..70 ";"
+  MODULE_DEF@70..116
+    WHITESPACE@70..71 "\n"
+    MODULE_KW@71..77 "module"
+    WHITESPACE@77..78 " "
+    IDENT@78..85 "Wrapped"
+    GENERIC_PARAM_LIST@85..89
+      LT@85..86 "<"
+      GENERIC_PARAM@86..88
+        HASH@86..87 "#"
+        IDENT@87..88 "n"
+      GT@88..89 ">"
+    WHITESPACE@89..90 " "
+    L_BRACE@90..91 "{"
+    LEDGER_DECL@91..114
+      WHITESPACE@91..94 "\n  "
+      LEDGER_KW@94..100 "ledger"
+      WHITESPACE@100..101 " "
+      IDENT@101..106 "value"
+      COLON@106..107 ":"
+      FIELD_TYPE@107..113
+        WHITESPACE@107..108 " "
+        FIELD_KW@108..113 "Field"
+      SEMICOLON@113..114 ";"
+    WHITESPACE@114..115 "\n"
+    R_BRACE@115..116 "}"
+  WHITESPACE@116..117 "\n"

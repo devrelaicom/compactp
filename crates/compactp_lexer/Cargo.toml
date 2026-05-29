@@ -1,0 +1,29 @@
+[package]
+name = "compactp_lexer"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+description = "Lexer for the Compact language (Midnight Network) — tokenizes UTF-8 source into a SyntaxKind stream."
+documentation = "https://docs.rs/compactp_lexer"
+readme = "README.md"
+keywords = ["compact", "midnight", "lexer", "tokenizer", "parser"]
+categories = ["parser-implementations", "development-tools"]
+
+[dependencies]
+compactp_syntax.workspace = true
+
+[dev-dependencies]
+expect-test.workspace = true
+
+# No panic paths on user input (CONSTITUTION §III). Tests are exempt via
+# the standard `#[cfg(test)]` allow-list that clippy applies to lints
+# enabled at crate level — library production code must not panic.
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"

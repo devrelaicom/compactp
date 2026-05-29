@@ -1,0 +1,44 @@
+[package]
+name = "compactp"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+description = "A production-grade parser frontend for the Compact language (Midnight Network)"
+documentation = "https://docs.rs/compactp"
+readme = "README.md"
+keywords = ["compact", "midnight", "parser", "cli", "compiler"]
+categories = ["command-line-utilities", "parser-implementations", "development-tools"]
+default-run = "compactp"
+
+[dependencies]
+compactp_syntax.workspace = true
+compactp_lexer.workspace = true
+compactp_parser.workspace = true
+compactp_ast.workspace = true
+compactp_diagnostics.workspace = true
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+rowan.workspace = true
+notify-debouncer-full.workspace = true
+notify.workspace = true
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[dev-dependencies]
+assert_cmd.workspace = true
+insta.workspace = true
+tempfile.workspace = true
+
+# No-panic contract for the binary crate (CONSTITUTION §III).
+# Tests are exempt via Rust's default `cfg(test)` scoping of these lints.
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"

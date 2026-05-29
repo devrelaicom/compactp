@@ -1,0 +1,91 @@
+pub mod compactp_diagnostics
+pub mod compactp_diagnostics::json
+pub fn compactp_diagnostics::json::render_json(&compactp_diagnostics::Diagnostic, &str) -> serde_json::value::Value
+pub mod compactp_diagnostics::render
+pub fn compactp_diagnostics::render::render_human(&compactp_diagnostics::Diagnostic, &str, &str, bool) -> alloc::string::String
+pub enum compactp_diagnostics::Severity
+pub compactp_diagnostics::Severity::Error
+pub compactp_diagnostics::Severity::Note
+pub compactp_diagnostics::Severity::Warning
+impl core::clone::Clone for compactp_diagnostics::Severity
+pub fn compactp_diagnostics::Severity::clone(&self) -> compactp_diagnostics::Severity
+impl core::cmp::Eq for compactp_diagnostics::Severity
+impl core::cmp::PartialEq for compactp_diagnostics::Severity
+pub fn compactp_diagnostics::Severity::eq(&self, &compactp_diagnostics::Severity) -> bool
+impl core::fmt::Debug for compactp_diagnostics::Severity
+pub fn compactp_diagnostics::Severity::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::Copy for compactp_diagnostics::Severity
+impl core::marker::StructuralPartialEq for compactp_diagnostics::Severity
+impl serde_core::ser::Serialize for compactp_diagnostics::Severity
+pub fn compactp_diagnostics::Severity::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl core::marker::Freeze for compactp_diagnostics::Severity
+impl core::marker::Send for compactp_diagnostics::Severity
+impl core::marker::Sync for compactp_diagnostics::Severity
+impl core::marker::Unpin for compactp_diagnostics::Severity
+impl core::marker::UnsafeUnpin for compactp_diagnostics::Severity
+impl core::panic::unwind_safe::RefUnwindSafe for compactp_diagnostics::Severity
+impl core::panic::unwind_safe::UnwindSafe for compactp_diagnostics::Severity
+pub struct compactp_diagnostics::Diagnostic
+pub compactp_diagnostics::Diagnostic::code: compactp_diagnostics::DiagnosticCode
+pub compactp_diagnostics::Diagnostic::message: alloc::string::String
+pub compactp_diagnostics::Diagnostic::notes: alloc::vec::Vec<alloc::string::String>
+pub compactp_diagnostics::Diagnostic::primary_span: text_size::range::TextRange
+pub compactp_diagnostics::Diagnostic::secondary_spans: alloc::vec::Vec<compactp_diagnostics::LabeledSpan>
+pub compactp_diagnostics::Diagnostic::severity: compactp_diagnostics::Severity
+impl compactp_diagnostics::Diagnostic
+pub fn compactp_diagnostics::Diagnostic::error(compactp_diagnostics::DiagnosticCode, alloc::string::String, text_size::range::TextRange) -> Self
+pub fn compactp_diagnostics::Diagnostic::note(compactp_diagnostics::DiagnosticCode, alloc::string::String, text_size::range::TextRange) -> Self
+pub fn compactp_diagnostics::Diagnostic::warning(compactp_diagnostics::DiagnosticCode, alloc::string::String, text_size::range::TextRange) -> Self
+pub fn compactp_diagnostics::Diagnostic::with_note(self, alloc::string::String) -> Self
+pub fn compactp_diagnostics::Diagnostic::with_secondary(self, text_size::range::TextRange, core::option::Option<alloc::string::String>) -> Self
+impl core::clone::Clone for compactp_diagnostics::Diagnostic
+pub fn compactp_diagnostics::Diagnostic::clone(&self) -> compactp_diagnostics::Diagnostic
+impl core::fmt::Debug for compactp_diagnostics::Diagnostic
+pub fn compactp_diagnostics::Diagnostic::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl serde_core::ser::Serialize for compactp_diagnostics::Diagnostic
+pub fn compactp_diagnostics::Diagnostic::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl core::marker::Freeze for compactp_diagnostics::Diagnostic
+impl core::marker::Send for compactp_diagnostics::Diagnostic
+impl core::marker::Sync for compactp_diagnostics::Diagnostic
+impl core::marker::Unpin for compactp_diagnostics::Diagnostic
+impl core::marker::UnsafeUnpin for compactp_diagnostics::Diagnostic
+impl core::panic::unwind_safe::RefUnwindSafe for compactp_diagnostics::Diagnostic
+impl core::panic::unwind_safe::UnwindSafe for compactp_diagnostics::Diagnostic
+pub struct compactp_diagnostics::DiagnosticCode
+pub compactp_diagnostics::DiagnosticCode::number: u16
+pub compactp_diagnostics::DiagnosticCode::prefix: &'static str
+impl compactp_diagnostics::DiagnosticCode
+pub fn compactp_diagnostics::DiagnosticCode::new(&'static str, u16) -> Self
+impl core::clone::Clone for compactp_diagnostics::DiagnosticCode
+pub fn compactp_diagnostics::DiagnosticCode::clone(&self) -> compactp_diagnostics::DiagnosticCode
+impl core::fmt::Debug for compactp_diagnostics::DiagnosticCode
+pub fn compactp_diagnostics::DiagnosticCode::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for compactp_diagnostics::DiagnosticCode
+pub fn compactp_diagnostics::DiagnosticCode::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl serde_core::ser::Serialize for compactp_diagnostics::DiagnosticCode
+pub fn compactp_diagnostics::DiagnosticCode::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl core::marker::Freeze for compactp_diagnostics::DiagnosticCode
+impl core::marker::Send for compactp_diagnostics::DiagnosticCode
+impl core::marker::Sync for compactp_diagnostics::DiagnosticCode
+impl core::marker::Unpin for compactp_diagnostics::DiagnosticCode
+impl core::marker::UnsafeUnpin for compactp_diagnostics::DiagnosticCode
+impl core::panic::unwind_safe::RefUnwindSafe for compactp_diagnostics::DiagnosticCode
+impl core::panic::unwind_safe::UnwindSafe for compactp_diagnostics::DiagnosticCode
+pub struct compactp_diagnostics::LabeledSpan
+pub compactp_diagnostics::LabeledSpan::label: core::option::Option<alloc::string::String>
+pub compactp_diagnostics::LabeledSpan::span: text_size::range::TextRange
+impl core::clone::Clone for compactp_diagnostics::LabeledSpan
+pub fn compactp_diagnostics::LabeledSpan::clone(&self) -> compactp_diagnostics::LabeledSpan
+impl core::fmt::Debug for compactp_diagnostics::LabeledSpan
+pub fn compactp_diagnostics::LabeledSpan::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl serde_core::ser::Serialize for compactp_diagnostics::LabeledSpan
+pub fn compactp_diagnostics::LabeledSpan::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl core::marker::Freeze for compactp_diagnostics::LabeledSpan
+impl core::marker::Send for compactp_diagnostics::LabeledSpan
+impl core::marker::Sync for compactp_diagnostics::LabeledSpan
+impl core::marker::Unpin for compactp_diagnostics::LabeledSpan
+impl core::marker::UnsafeUnpin for compactp_diagnostics::LabeledSpan
+impl core::panic::unwind_safe::RefUnwindSafe for compactp_diagnostics::LabeledSpan
+impl core::panic::unwind_safe::UnwindSafe for compactp_diagnostics::LabeledSpan
+pub fn compactp_diagnostics::render_human(&compactp_diagnostics::Diagnostic, &str, &str, bool) -> alloc::string::String
+pub fn compactp_diagnostics::render_json(&compactp_diagnostics::Diagnostic, &str) -> serde_json::value::Value
