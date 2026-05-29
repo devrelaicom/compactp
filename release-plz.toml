@@ -1,29 +1,48 @@
 [workspace]
 changelog_update = true
 git_tag_enable = true
-git_release_enable = true
+# cargo-dist (release.yml) creates the GitHub Release with binaries on tag
+# push. Let release-plz publish crates + push the tag, but NOT create the
+# GitHub release, otherwise it collides with dist's `gh release create`.
+git_release_enable = false
 semver_check = true
 
+# Single workspace changelog: the CLI crate owns the root CHANGELOG.md and
+# aggregates the five library crates' entries; the libraries do not get their
+# own per-crate changelog files.
 [[package]]
 name = "compactp"
 publish = true
+changelog_path = "CHANGELOG.md"
+changelog_include = [
+    "compactp_syntax",
+    "compactp_lexer",
+    "compactp_parser",
+    "compactp_ast",
+    "compactp_diagnostics",
+]
 
 [[package]]
 name = "compactp_syntax"
 publish = true
+changelog_update = false
 
 [[package]]
 name = "compactp_lexer"
 publish = true
+changelog_update = false
 
 [[package]]
 name = "compactp_parser"
 publish = true
+changelog_update = false
 
 [[package]]
 name = "compactp_ast"
 publish = true
+changelog_update = false
 
 [[package]]
 name = "compactp_diagnostics"
 publish = true
+changelog_update = false
