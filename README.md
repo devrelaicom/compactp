@@ -22,18 +22,17 @@ workflows.
 
 ## Compact compatibility
 
-| compactp version | Compact language | Tested compiler | JSON schema | MSRV |
-| ---------------- | ---------------- | --------------- | ----------- | ---- |
-| `0.1.0-pre.4`    | `0.23.101`       | `0.31.0`        | `1`         | not pinned (Rust edition `2024`) |
+| compactp version | Compact language | Tested compiler | JSON schema | MSRV   |
+| ---------------- | ---------------- | --------------- | ----------- | ------ |
+| `0.1.0-beta.1`   | `>= 0.23`        | `0.31.0`        | `1`         | `1.90` |
 
 The exact upstream commit hashes the parser is validated against are
 recorded in `SOURCE_VERSIONS.md`. Known deviations from upstream
 acceptance are enumerated in `tests/corpus_known_failures.txt` (each
-entry annotated with category + reason) and explained in `LS.md`.
-
-> **Note:** This table reflects the *current development target*.
-> Until `0.1.0-beta.1` is tagged, the compatibility contract is
-> provisional and may shift between commits.
+entry annotated with category + reason) and explained in `LS.md`. The
+JSON envelope compatibility policy is documented in
+[`docs/json-schema.md`](docs/json-schema.md). Release history is in
+[`CHANGELOG.md`](CHANGELOG.md).
 
 ## Installation
 
@@ -113,7 +112,7 @@ Every JSON payload is wrapped in an envelope:
 
 ```json
 {
-  "tool_version":     "0.1.0",
+  "tool_version":     "0.1.0-beta.1",
   "schema_version":   1,
   "language_version": "0.22.0",
   "input":            "path/to/file.compact",
