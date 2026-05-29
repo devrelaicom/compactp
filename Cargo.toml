@@ -20,11 +20,11 @@ rust-version = "1.90"
 
 [workspace.dependencies]
 # Internal crates
-compactp_syntax = { path = "crates/compactp_syntax" }
-compactp_lexer = { path = "crates/compactp_lexer" }
-compactp_parser = { path = "crates/compactp_parser" }
-compactp_ast = { path = "crates/compactp_ast" }
-compactp_diagnostics = { path = "crates/compactp_diagnostics" }
+compactp_syntax = { path = "crates/compactp_syntax", version = "=0.1.0-beta.1" }
+compactp_lexer = { path = "crates/compactp_lexer", version = "=0.1.0-beta.1" }
+compactp_parser = { path = "crates/compactp_parser", version = "=0.1.0-beta.1" }
+compactp_ast = { path = "crates/compactp_ast", version = "=0.1.0-beta.1" }
+compactp_diagnostics = { path = "crates/compactp_diagnostics", version = "=0.1.0-beta.1" }
 
 # External dependencies — verify versions with `cargo search` before changing
 rowan = "0.16"
