@@ -33,17 +33,25 @@ jobs:
             .
             fuzz
       - name: Install cargo-fuzz
-        run: |
-          if ! command -v cargo-fuzz >/dev/null 2>&1; then
-            cargo install cargo-fuzz --locked
-          fi
+        # Use a prebuilt binary rather than `cargo install cargo-fuzz --locked`:
+        # the locked dependency set fails to compile on recent nightly toolchains
+        # (a transitive dep uses reserved `rustc_attrs`). A prebuilt binary is
+        # toolchain-independent and far faster.
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-fuzz
       - name: Run fuzz target for 10 minutes
         id: fuzz
         run: |
           set -euo pipefail
-          cargo +nightly fuzz run ${{ matrix.target }} -- -max_total_time=600
+          # Pin the gnu target explicitly: cargo-fuzz would otherwise default to
+          # the musl host triple (static libc), which AddressSanitizer rejects
+          # ("sanitizer is incompatible with statically linked libc").
+          cargo +nightly fuzz run ${{ matrix.target }} \
+            --target x86_64-unknown-linux-gnu -- -max_total_time=600
       - name: Upload crash artifacts (if any)
-        if: failure()
+        # Only on an actual fuzz-run failure — not on setup/install failures.
+        if: failure() && steps.fuzz.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: fuzz-crashes-${{ matrix.target }}-${{ github.run_id }}
@@ -51,7 +59,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
       - name: Open issue on failure
-        if: failure()
+        # Only when the fuzz run itself crashed — setup/install failures should
+        # not masquerade as "target crashed".
+        if: failure() && steps.fuzz.outcome == 'failure'
         uses: actions/github-script@v7
         with:
           script: |
