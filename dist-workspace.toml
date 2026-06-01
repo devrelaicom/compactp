@@ -4,11 +4,15 @@ members = ["cargo:."]
 # Config for 'dist'
 [dist]
 # The preferred dist version to use in CI (Cargo.toml SemVer syntax)
-cargo-dist-version = "0.31.0"
+cargo-dist-version = "0.32.0"
 # CI backends to support
 ci = "github"
 # The installers to generate for each app
 installers = ["shell", "powershell", "homebrew"]
+# Emit the CI job that pushes the generated formula to the tap repo
+# (uses the HOMEBREW_TAP_TOKEN secret).
+publish-jobs = ["homebrew"]
+tap = "aaronbassett/homebrew-tap"
 # Target platforms to build apps for (Rust target-triple syntax)
 targets = [
     "aarch64-apple-darwin",
@@ -20,7 +24,3 @@ install-updater = false
 
 [dist.github-custom-runners]
 aarch64-apple-darwin = "macos-14"
-
-[dist.homebrew-tap]
-owner = "aaronbassett"
-name = "homebrew-tap"
