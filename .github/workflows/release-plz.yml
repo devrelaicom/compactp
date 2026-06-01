@@ -10,9 +10,31 @@ on:
       - main
 
 jobs:
-  release-plz-release:
-    name: Release-plz release
+  # Manual publish loop with rate-limit-safe delays.
+  #
+  # release-plz 0.3.x has no inter-publish delay option, and crates.io's
+  # "new crate" rate limit (~1 publish per 10 minutes) easily trips a
+  # first-release of a multi-crate workspace. We replace release-plz's
+  # `release` command with a script that:
+  #
+  #   1. Iterates crates in dependency order.
+  #   2. Skips any crate@version already on crates.io (idempotent retry).
+  #   3. Publishes the rest with PUBLISH_DELAY_SECONDS between actual
+  #      publishes (not before the first, not after skips).
+  #   4. Pushes the compactp release tag once publishes succeed.
+  #
+  # For releases where every crate already exists on crates.io, the delay is
+  # overkill but harmless — the limit for updates is much higher. Override via
+  # the PUBLISH_DELAY_SECONDS env if you want faster update-only releases.
+  release:
+    name: Publish to crates.io (rate-limit-safe)
     runs-on: ubuntu-latest
+    concurrency:
+      group: publish-${{ github.ref }}
+      cancel-in-progress: false
+    env:
+      # 600s == the new-crate rate-limit window; pad to 660 for safety.
+      PUBLISH_DELAY_SECONDS: '660'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,13 +42,59 @@ jobs:
           fetch-depth: 0
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-      - name: Run release-plz
-        uses: release-plz/action@v0.5
-        with:
-          command: release
+      - name: Cargo login
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: printf '%s\n' "$CARGO_REGISTRY_TOKEN" | cargo login
+      - name: Publish crates in dependency order
+        run: |
+          set -euo pipefail
+          ORDER=(compactp_syntax compactp_diagnostics compactp_lexer compactp_ast compactp_parser compactp)
+          published_count=0
+          for crate in "${ORDER[@]}"; do
+            version=$(cargo metadata --no-deps --format-version 1 \
+              | jq -r --arg c "$crate" '.packages[] | select(.name==$c) | .version')
+            if [ -z "$version" ] || [ "$version" = "null" ]; then
+              echo "::error::Could not determine version for ${crate} from cargo metadata"
+              exit 1
+            fi
+            status=$(curl -fsS -o /dev/null -w '%{http_code}' \
+              -H 'User-Agent: compactp-release (aaronbassett@gmail.com)' \
+              "https://crates.io/api/v1/crates/${crate}/${version}" \
+              || true)
+            if [ "$status" = "200" ]; then
+              echo "::notice::${crate} v${version} already on crates.io; skipping"
+              continue
+            fi
+            if [ "$published_count" -gt 0 ]; then
+              echo "::group::Sleeping ${PUBLISH_DELAY_SECONDS}s before publishing ${crate} (crates.io rate-limit buffer)"
+              sleep "${PUBLISH_DELAY_SECONDS}"
+              echo "::endgroup::"
+            fi
+            echo "::group::cargo publish -p ${crate}"
+            cargo publish -p "${crate}"
+            echo "::endgroup::"
+            published_count=$((published_count + 1))
+          done
+          echo "Published ${published_count} crate(s) this run."
+      - name: Push compactp release tag
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION=$(cargo metadata --no-deps --format-version 1 \
+            | jq -r '.packages[] | select(.name=="compactp") | .version')
+          TAG="compactp-v${VERSION}"
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "::notice::Tag ${TAG} already exists on origin; not re-tagging"
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git tag "${TAG}"
+            git push origin "${TAG}"
+            echo "::notice::Pushed tag ${TAG}"
+          fi
 
   release-plz-pr:
     name: Release-plz PR
