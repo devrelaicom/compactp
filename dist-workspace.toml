@@ -13,6 +13,11 @@ installers = ["shell", "powershell", "homebrew"]
 # (uses the HOMEBREW_TAP_TOKEN secret).
 publish-jobs = ["homebrew"]
 tap = "aaronbassett/homebrew-tap"
+# Push the formula to the tap on PRERELEASE tags too (0.1.0-beta.1, etc.).
+# Without this, dist's publish-homebrew-formula job is gated on
+# `!announcement_is_prerelease || publish_prereleases` and skips for every
+# -beta / -rc tag.
+publish-prereleases = true
 # Target platforms to build apps for (Rust target-triple syntax)
 targets = [
     "aarch64-apple-darwin",
