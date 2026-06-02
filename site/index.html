@@ -2,37 +2,113 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>compactp</title>
+  <title>compactp — a parser frontend for the Compact language</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="A parser frontend for the Compact language (Midnight). Coming soon.">
+  <meta name="description" content="compactp is a production-grade parser frontend for the Compact language (Midnight) written in Rust. Lossless CST, typed AST, structured JSON, watch mode.">
   <meta name="robots" content="index,follow">
-  <style>
-    html, body {
-      margin: 0;
-      height: 100%;
-      background: #000;
-      color: #f0ede0;
-      font: 14px/1.5 ui-monospace, "SF Mono", Menlo, monospace;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .word { font-size: 32px; letter-spacing: -0.02em; }
-    .tag { color: #aaa; margin-top: 6px; }
-    .c {
-      color: #ffb454;
-      animation: blink 1s steps(1) infinite;
-    }
-    @keyframes blink { 50% { opacity: 0; } }
-    @media (prefers-reduced-motion: reduce) {
-      .c { animation: none; }
-    }
-  </style>
+  <meta name="theme-color" content="#000000">
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="compactp">
+  <meta property="og:description" content="a parser frontend for the compact language">
+  <meta property="og:url" content="https://compactp.midnightntwrk.expert/">
+  <meta name="twitter:card" content="summary">
 </head>
 <body>
+
+  <header class="topbar" role="banner">
+    <span class="brand">COMPACTP</span>
+    <span class="bar-tags">PARSE · CST · AST · JSON</span>
+    <span class="bar-ver">v0.1.0-β1</span>
+    <span class="bar-lic">MIT</span>
+    <a class="bar-link" href="https://github.com/devrelaicom/compactp">GITHUB&nbsp;↗</a>
+  </header>
+
   <main>
-    <div class="word">compactp<span class="c">_</span></div>
-    <div class="tag">a parser frontend for the compact language · soon</div>
+
+  <section class="hero" aria-labelledby="wordmark-label">
+    <h1 id="wordmark-label" class="visually-hidden">compactp</h1>
+    <div class="wordmark" role="img" aria-label="compactp ASCII wordmark">
+      <pre id="wordmark" aria-hidden="true">                                                      __
+   _________  ____ ___  ____  ____ ______/ /_____  / /
+  / ___/ __ \/ __ `__ \/ __ \/ __ `/ ___/ __/ __ \/ /
+ / /__/ /_/ / / / / / / /_/ / /_/ / /__/ /_/ /_/ / /
+ \___/\____/_/ /_/ /_/ ____/\__,_/\___/\__/ ____/_/
+                       /_/                  /_/</pre>
+    </div>
+    <p class="tagline">a parser frontend for the compact language<span class="cursor" aria-hidden="true">_</span></p>
+  </section>
+
+  <section class="facts" aria-label="Project facts">
+    <div class="fact"><span class="label">FACTS</span><span class="value version">v0.1.0-β1</span></div>
+    <div class="fact"><span class="label">COMPACT</span><span class="value">≥ 0.23</span></div>
+    <div class="fact"><span class="label">TESTED</span><span class="value">0.31.0</span></div>
+    <div class="fact"><span class="label">MSRV</span><span class="value">1.90</span></div>
+  </section>
+
+  <section class="features" aria-label="Features">
+    <ol class="feature-list">
+      <li><span class="num">001</span><span class="name">LOSSLESS CONCRETE SYNTAX TREE</span><span class="tag">ROWAN</span></li>
+      <li><span class="num">002</span><span class="name">TYPED ABSTRACT SYNTAX TREE</span><span class="tag">ZERO-ALLOC</span></li>
+      <li><span class="num">003</span><span class="name">RESILIENT PARSING + RECOVERY</span><span class="tag">ERROR NODES</span></li>
+      <li><span class="num">004</span><span class="name">RUSTC-STYLE HUMAN DIAGNOSTICS</span><span class="tag">ANSI</span></li>
+      <li><span class="num">005</span><span class="name">STRUCTURED JSON ENVELOPE</span><span class="tag">SCHEMA&nbsp;v1</span></li>
+      <li><span class="num">006</span><span class="name">LIBRARY API FOR RUST EMBEDDING</span><span class="tag">LIB</span></li>
+      <li><span class="num">007</span><span class="name">WATCH MODE</span><span class="tag">FSNOTIFY</span></li>
+    </ol>
+  </section>
+
+  <section class="install" aria-label="Install and usage">
+    <h2 class="section-label">INSTALL</h2>
+    <pre class="code"><span class="prompt">$</span> cargo install <span class="cmd">compactp</span></pre>
+    <h2 class="section-label">USAGE</h2>
+    <pre class="code"><span class="prompt">$</span> <span class="cmd">compactp</span> parse program.compact
+<span class="prompt">$</span> <span class="cmd">compactp</span> --format json --pretty diag program.compact
+<span class="prompt">$</span> <span class="cmd">compactp</span> watch parse src/</pre>
+    <p class="reference">read full reference → <a href="https://github.com/devrelaicom/compactp">GITHUB&nbsp;↗</a></p>
+  </section>
+
+  <section class="cli" aria-label="CLI commands">
+    <h2 class="section-label">COMMANDS</h2>
+    <table class="cli-table">
+      <thead><tr><th>COMMAND</th><th>DESCRIPTION</th></tr></thead>
+      <tbody>
+        <tr><td><code>lex</code></td><td>Tokenize Compact source and print tokens with byte offsets</td></tr>
+        <tr><td><code>parse</code></td><td>Parse input and report diagnostics</td></tr>
+        <tr><td><code>cst</code></td><td>Dump the full lossless concrete syntax tree</td></tr>
+        <tr><td><code>ast</code></td><td>Dump the typed abstract syntax tree</td></tr>
+        <tr><td><code>diag</code></td><td>Emit diagnostics only</td></tr>
+        <tr><td><code>stats</code></td><td>Report file size, token / node / error counts, parse time</td></tr>
+        <tr><td><code>watch</code></td><td>Re-run any of the above when files change</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track" aria-hidden="true">+&nbsp;?&nbsp;9&nbsp;N&nbsp;+&nbsp;.&nbsp;?&nbsp;+&nbsp;?&nbsp;9&nbsp;N&nbsp;+&nbsp;.&nbsp;?&nbsp;+&nbsp;?&nbsp;9&nbsp;N&nbsp;+&nbsp;.&nbsp;?&nbsp;+&nbsp;?&nbsp;9&nbsp;N&nbsp;+&nbsp;.&nbsp;?&nbsp;+&nbsp;?&nbsp;9&nbsp;N&nbsp;+&nbsp;.&nbsp;?&nbsp;+&nbsp;?&nbsp;9&nbsp;N&nbsp;+&nbsp;.&nbsp;?&nbsp;+&nbsp;?&nbsp;9&nbsp;N&nbsp;+&nbsp;.&nbsp;?&nbsp;+&nbsp;?&nbsp;9&nbsp;N&nbsp;+&nbsp;.&nbsp;?&nbsp;+&nbsp;?&nbsp;9&nbsp;N&nbsp;+&nbsp;.&nbsp;?&nbsp;+&nbsp;?&nbsp;9&nbsp;N&nbsp;+&nbsp;.&nbsp;?</div>
+  </div>
+
   </main>
+
+  <footer class="footer" role="contentinfo">
+    <div class="cluster cluster-left">
+      <div class="locale">GCM</div>
+      <div class="clock" id="clock">LIVE</div>
+    </div>
+    <div class="cluster cluster-mid">
+      <a href="https://github.com/devrelaicom/compactp">GITHUB&nbsp;↗</a>
+      <a href="https://crates.io/crates/compactp">CRATES.IO&nbsp;↗</a>
+      <a href="https://github.com/devrelaicom/compactp#readme">DOCS&nbsp;↗</a>
+    </div>
+    <div class="cluster cluster-right">
+      <div class="license">MIT</div>
+      <a class="attribution" href="https://aino.agency">INSPIRED&nbsp;BY&nbsp;AINO&nbsp;↗</a>
+    </div>
+  </footer>
+
+  <script src="main.js" defer></script>
 </body>
 </html>
