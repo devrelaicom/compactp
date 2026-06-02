@@ -107,3 +107,100 @@ pre, code { font-family: var(--font-mono); margin: 0; }
   .facts { grid-template-columns: repeat(2, 1fr); }
   .facts .fact:nth-child(3) { border-left: 0; }
 }
+
+/* 4 · Numbered features */
+.features {
+  padding: clamp(32px, 6vh, 64px) var(--page-pad);
+}
+.feature-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.feature-list li {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  gap: 24px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+.feature-list li:last-child { border-bottom: 0; }
+.feature-list .num   { color: var(--dim); }
+.feature-list .name  { color: var(--fg); }
+.feature-list .tag   { color: var(--accent); }
+
+@media (max-width: 720px) {
+  .feature-list li {
+    grid-template-columns: 48px 1fr;
+    gap: 12px;
+  }
+  .feature-list .tag {
+    grid-column: 2;
+    font-size: 11px;
+    margin-top: 4px;
+  }
+}
+
+/* 5 · Install + usage */
+.install {
+  padding: clamp(32px, 6vh, 64px) var(--page-pad);
+  border-top: 1px solid var(--rule);
+}
+.section-label {
+  margin: 0 0 14px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--dim);
+  font-weight: normal;
+}
+.install .code { margin-bottom: 24px; }
+.code {
+  background: transparent;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre;
+  overflow-x: auto;
+}
+.code .prompt { color: var(--dim); }
+.code .cmd    { color: var(--accent); }
+.reference {
+  margin: 0;
+  color: var(--dim);
+  font-size: 12px;
+}
+.reference a { color: var(--dim); }
+.reference a:hover { color: var(--fg); }
+
+/* 6 · CLI command table */
+.cli {
+  padding: clamp(32px, 6vh, 64px) var(--page-pad);
+  border-top: 1px solid var(--rule);
+}
+.cli-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.cli-table th,
+.cli-table td {
+  text-align: left;
+  padding: 10px 16px 10px 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+.cli-table th {
+  font-weight: normal;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--dim);
+}
+.cli-table td:first-child { width: 120px; }
+.cli-table td code {
+  color: var(--accent);
+  font-size: 13px;
+}
+.cli-table td:last-child {
+  color: var(--secondary);
+}
