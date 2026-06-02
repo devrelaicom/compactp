@@ -96,3 +96,55 @@
   // handler can reuse the same DOM split rather than re-parsing.
   wordmark._cells = cells;
 })();
+
+(() => {
+  const wordmark = document.getElementById('wordmark');
+  if (!wordmark) return;
+
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) return;
+
+  // T7 attached the cells array. If it didn't run (e.g. reduced motion was on
+  // when T7 evaluated, or the wordmark element is missing), bail.
+  const cells = wordmark._cells;
+  if (!cells || cells.length === 0) return;
+
+  const ALPHABET = '!#$%&*+-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ\\^_`abcdefghijklmnopqrstuvwxyz{|}~';
+  const SCRAMBLE_RATIO = 0.4;
+  const TICK_MS = 80;
+
+  const randomGlyph = (avoid) => {
+    let g;
+    do { g = ALPHABET[Math.floor(Math.random() * ALPHABET.length)]; }
+    while (g === avoid);
+    return g;
+  };
+
+  let timer = null;
+
+  const tick = () => {
+    cells.forEach((cell) => {
+      if (Math.random() < SCRAMBLE_RATIO) {
+        cell.span.textContent = randomGlyph(cell.final);
+      } else {
+        cell.span.textContent = cell.final;
+      }
+    });
+  };
+
+  const start = () => {
+    if (timer !== null) return;
+    tick();
+    timer = setInterval(tick, TICK_MS);
+  };
+
+  const stop = () => {
+    if (timer === null) return;
+    clearInterval(timer);
+    timer = null;
+    cells.forEach((cell) => { cell.span.textContent = cell.final; });
+  };
+
+  wordmark.addEventListener('mouseenter', start);
+  wordmark.addEventListener('mouseleave', stop);
+})();
