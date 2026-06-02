@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>compactp</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="A parser frontend for the Compact language (Midnight). Coming soon.">
+  <meta name="robots" content="index,follow">
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #000;
+      color: #f0ede0;
+      font: 14px/1.5 ui-monospace, "SF Mono", Menlo, monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .word { font-size: 32px; letter-spacing: -0.02em; }
+    .tag { color: #aaa; margin-top: 6px; }
+    .c {
+      color: #ffb454;
+      animation: blink 1s steps(1) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      .c { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="word">compactp<span class="c">_</span></div>
+    <div class="tag">a parser frontend for the compact language · soon</div>
+  </main>
+</body>
+</html>
