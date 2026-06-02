@@ -204,3 +204,74 @@ pre, code { font-family: var(--font-mono); margin: 0; }
 .cli-table td:last-child {
   color: var(--secondary);
 }
+
+/* 7 · ASCII marquee band */
+.marquee {
+  overflow: hidden;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: 12px 0;
+  white-space: nowrap;
+}
+.marquee-track {
+  display: inline-block;
+  color: var(--dim);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  padding-left: 100%;
+  animation: marquee-scroll 30s linear infinite;
+}
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+
+/* 8 · Footer */
+.footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+  padding: 24px var(--page-pad) 32px;
+  font-size: 12px;
+  color: var(--secondary);
+}
+.footer .cluster { display: flex; flex-direction: column; gap: 4px; }
+.footer .cluster-mid    { align-items: center; }
+.footer .cluster-right  { align-items: flex-end; }
+.footer .locale,
+.footer .license { color: var(--dim); letter-spacing: 0.14em; }
+.footer .clock { color: var(--secondary); letter-spacing: 0.06em; }
+.footer .attribution { color: var(--dim); font-size: 11px; }
+.footer .attribution:hover { color: var(--fg); }
+.footer a { display: block; }
+
+/* Topbar mobile fix — at sub-720px viewports, drop the middle PARSE·CST·AST·JSON
+   tags label which is decorative; the rest of the bar wraps as flex items. */
+@media (max-width: 720px) {
+  .topbar .bar-tags { display: none; }
+  .topbar {
+    flex-wrap: wrap;
+    gap: 4px 14px;
+  }
+  .footer {
+    grid-template-columns: 1fr;
+  }
+  .footer .cluster-mid,
+  .footer .cluster-right { align-items: flex-start; }
+}
+
+/* Reduced motion — CSS animations only.
+   JS-driven animations are skipped in main.js when the user prefers
+   reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .cursor { animation: none; }
+  .marquee { display: none; }
+}
+
+/* Print */
+@media print {
+  html, body { background: #fff; color: #000; }
+  .cursor, .marquee { display: none; }
+  .topbar, .footer { border-color: #ccc; }
+  a { color: #000; border-bottom: 1px solid #000; }
+}
