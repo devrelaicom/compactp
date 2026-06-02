@@ -39,7 +39,7 @@ uploading `/site/` as a GitHub Pages artifact.
 | Scope | One-page docs-lite |
 | Aesthetic | ASCII-rich (lean into aino reference) |
 | Motion | Hero animation + ambience, with `prefers-reduced-motion` fallback |
-| Palette | Pure terminal — `#000` background, `#f0ede0` text, `#ffb454` accent, `#aaa` secondary text, `#555` dim, `#151515` rule |
+| Palette | Pure terminal — `#000` background, `#f0ede0` text, `#ffb454` accent, `#aaa` secondary text, `#777` dim, `#151515` rule (originally `#555` — raised to `#777` during implementation to satisfy WCAG AA 4.5:1 contrast on small dim text) |
 | Stack | Vanilla HTML/CSS/JS — no build tool |
 | Hosting | GitHub Pages with GH Actions deploy |
 | Domain | `compactp.midnightntwrk.expert` |
@@ -91,7 +91,7 @@ scroll.
 
 ### 1 · Top bar
 
-Single thin row, `#555` dim. Five spans space-between:
+Single thin row, `#777` dim. Five spans space-between:
 
 ```
 COMPACTP    PARSE · CST · AST · JSON    v0.1.0-β1    MIT    GITHUB ↗
@@ -125,7 +125,7 @@ the persistent amber `_` cursor immediately after.
 ### 3 · Facts strip
 
 Four equal columns, separated by 1px `#151515` rules. Top label is
-`#555`, value is `#f0ede0`. The version value is amber — it's the one
+`#777`, value is `#f0ede0`. The version value is amber — it's the one
 piece of "data that changes."
 
 ```
@@ -138,7 +138,7 @@ them by hand.
 
 ### 4 · Numbered features
 
-Three-column grid: `[NUM] [NAME] [TAG]`. NUM is `#555`, NAME is
+Three-column grid: `[NUM] [NAME] [TAG]`. NUM is `#777`, NAME is
 `#f0ede0`, TAG is `#ffb454`. Seven rows:
 
 ```
@@ -156,7 +156,7 @@ No expand / collapse. The rows are the whole content.
 ### 5 · Install + usage
 
 Two stacked `<pre>` blocks, no syntax highlighting. The `$` prompt is
-`#555`, the `compactp` token is amber, the rest of each line is
+`#777`, the `compactp` token is amber, the rest of each line is
 `#f0ede0`.
 
 ```
