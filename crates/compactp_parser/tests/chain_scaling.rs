@@ -26,8 +26,10 @@
 //! `precede` calls and produce a tree of the same depth. They differ in
 //! one respect: `x+x+…+x` gives every `BINARY_EXPR` exactly three
 //! children, which is narrow enough to intern, while `x + x + … + x`
-//! puts whitespace either side of the operator and so gives it five,
-//! which is not. Only the first shape ever reached the quadratic path.
+//! gives it four — `[lhs, WHITESPACE, PLUS, NAME_EXPR]`, the trailing
+//! space landing inside the following `NAME_EXPR` rather than beside it
+//! — which is not. Only the first shape ever reached the quadratic
+//! path.
 //!
 //! So the ratio between them is the measurement, and it cancels out
 //! machine speed, build profile and background load — the two parses run
@@ -263,15 +265,21 @@ fn nested_parens_are_not_paced_by_lookahead() {
             ));
         }
 
-        let parsed = parse_and_leak(&parens, DEEP);
-        if parsed.text != parens {
-            return Err("nested parens must round-trip byte-for-byte".to_string());
-        }
-        if !parsed.diagnostics.is_empty() {
-            return Err(format!(
-                "nested parens must parse cleanly, got {:?}",
-                parsed.diagnostics
-            ));
+        // Pin both sides. The bracket shape is the denominator of the
+        // ratio above, so a future grammar change that made it start
+        // erroring — and so returning early — would shrink it and mask
+        // a real regression in the numerator.
+        for (what, src) in [("parens", &parens), ("brackets", &brackets)] {
+            let parsed = parse_and_leak(src, DEEP);
+            if &parsed.text != src {
+                return Err(format!("nested {what} must round-trip byte-for-byte"));
+            }
+            if !parsed.diagnostics.is_empty() {
+                return Err(format!(
+                    "nested {what} must parse cleanly, got {:?}",
+                    parsed.diagnostics
+                ));
+            }
         }
         Ok(())
     };

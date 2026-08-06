@@ -168,7 +168,8 @@ the next section.
 ## Parse time
 
 Parse time is intended to be linear in the size of the input, and no
-accepted shape is currently known to break that.
+accepted shape is currently known to break that — with one caveat below
+about hash collisions.
 
 The one that did was a *left-deep spine* — a left-associative operator
 chain (`x+x+...+x`) or a postfix chain (`1()()...`, `x.a.a...`), where
@@ -180,7 +181,17 @@ table growth cost the sum of all cached subtree sizes: `O(n log n)` for
 a balanced tree, `Θ(n²)` for a spine. 40 KB of valid Compact took 1.6 s
 in a release build, quadrupling for each doubling of the input. Tree
 construction now keys its interner on child identities rather than on
-the subtree, and the same input takes 3.9 ms.
+the subtree, and the same input takes 3.7 ms — 431x.
+
+The caveat: that interner, like rowan's before it, hashes with an
+unseeded `FxHash`. It is not collision-resistant, so crafted input can
+in principle drive many token or node keys into the same bucket and push
+lookups toward `O(n)` each. Correctness is unaffected — key equality is
+exact, so a collision costs extra probing and at worst a missed
+deduplication, never a wrong tree — and this is the same exposure rowan
+carried, so it is not a regression. It is, however, the one known way to
+make parse time superlinear, and a seeded hash would trade it for
+per-run variation in a component we would rather keep deterministic.
 
 Note what hid it. At the default `max_depth` the left-spine depth charge
 truncates such a chain after a few hundred extensions, so the quadratic

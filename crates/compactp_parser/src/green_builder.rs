@@ -19,12 +19,28 @@
 //! `node_hash`, ~90% of total parse time, and the cost quadrupled each
 //! time the input doubled.
 //!
+//! Replacing the builder is the only available fix. `NodeCache` has no
+//! `clear`, no capacity bound and no way to switch interning off;
+//! `with_cache` only lets callers *share* a cache, which makes the
+//! growth worse; the builder owns the child stack, so it cannot be
+//! swapped mid-tree; and `[patch.crates.io]` does not survive
+//! `cargo publish`, so a crate that ships on crates.io cannot pin a
+//! patched rowan. Forking rowan is strictly more surface area than this
+//! module.
+//!
 //! The fix is to give every interned element a dense integer identity
 //! and key the table on `(kind, child identities)` instead of on the
 //! subtree itself. The key is fixed-size and `Copy`, so rehashing an
 //! entry is `O(1)` and no step of tree construction ever walks a
-//! subtree it has already finished. Interning is preserved, so memory
-//! behaviour is unchanged; only the asymptotics move.
+//! subtree it has already finished.
+//!
+//! This is a transliteration of rowan's relation, not a new one: rowan
+//! keys its cache on `(kind, child *pointer* identity)` — see
+//! `element_id` in its `node_cache.rs` — under the same "interned only
+//! if all children are" invariant. Dense integers stand in for the
+//! pointers, and neither can be recycled, for the same reason: the map
+//! holds a strong reference to everything it has interned and never
+//! evicts.
 //!
 //! Two identities are equal only if the elements they name are
 //! structurally identical, by induction: a token's identity is
@@ -32,6 +48,26 @@
 //! identities of its children. Reuse is therefore exact, and because
 //! identities are handed out in a deterministic order the tree built
 //! from a given event stream is always the same one.
+//!
+//! # Cost of the change
+//!
+//! Interning is preserved, with the same equality relation, so the
+//! *retained tree* shares exactly the subtrees it shared before. The
+//! *transient* tables are wider: a `NodeKey` plus its value is ~48 bytes
+//! against rowan's 8, and a token entry ~40 against 8. Peak RSS rose
+//! from 4.22 to 4.94 MiB on a 74 KB input and from 64.75 to 70.03 MiB
+//! on a 1.48 MB one. That footprint is also why `parse small` and
+//! `parse medium` are a few percent slower: a dedup-heavy steady state
+//! touches more cache per lookup. Whole-corpus throughput still
+//! improves, 88.0 to 91.4 MiB/s.
+//!
+//! # Upstream
+//!
+//! The rowan defect is real and small: `NodeCache` already stores each
+//! child's hash beside it in `children: Vec<(u64, GreenElement)>`, so
+//! the rehash closure could be `|(h, _)| *h` instead of `node_hash`.
+//! Not filed upstream as of this commit. If it is fixed there, this
+//! module can go away.
 
 use rowan::{GreenNode, GreenToken, NodeOrToken, SyntaxKind};
 use std::collections::hash_map::Entry;
@@ -264,13 +300,35 @@ impl<'src> GreenBuilder<'src> {
         self.children.push((entry.0, entry.1.into()));
     }
 
+    /// Whether the stream so far closes to exactly one `root` node.
+    ///
+    /// `rowan::GreenNodeBuilder::finish` asserted this, and that
+    /// assertion was doing real work: it passed on every input this
+    /// project has ever parsed, which is stronger evidence that the
+    /// grammar keeps its events balanced than any argument from
+    /// inspection. [`GreenBuilder::finish`] cannot assert it, because it
+    /// must stay total — so the check lives here and the sink fires it
+    /// under `debug_assert!`, keeping the detector in test builds and
+    /// the graceful degradation in release. Nothing today unbalances the
+    /// stream, but nothing prevents it either: a future
+    /// `precede(...).abandon(...)` would, and should fail loudly rather
+    /// than yield a quietly odd tree.
+    pub(crate) fn is_balanced(&self, root: SyntaxKind) -> bool {
+        self.parents.is_empty()
+            && matches!(
+                self.children.as_slice(),
+                [(_, NodeOrToken::Node(node))] if node.kind() == root
+            )
+    }
+
     /// Finish the tree, returning its root.
     ///
     /// Closes anything still open and, if what remains is not already a
     /// single `root` node, wraps it in one. Both fallbacks are
-    /// unreachable for the sink's balanced stream; they exist so that a
-    /// malformed stream degrades to an odd tree rather than a panic, and
-    /// they retain every element either way, so the result stays
+    /// unreachable for the sink's balanced stream — see
+    /// [`GreenBuilder::is_balanced`], which the sink asserts — and exist
+    /// so that a malformed stream degrades to an odd tree rather than a
+    /// panic. They retain every element either way, so the result stays
     /// lossless.
     pub(crate) fn finish(mut self, root: SyntaxKind) -> GreenNode {
         while !self.parents.is_empty() {
@@ -295,6 +353,12 @@ impl<'src> GreenBuilder<'src> {
     /// and it means one wide node makes every ancestor un-interned too.
     #[inline]
     fn node(&mut self, kind: SyntaxKind, first_child: usize) -> (Id, GreenNode) {
+        // `first_child` is recorded from `children.len()` when the node
+        // opened, and `children` only ever shrinks back to an inner
+        // node's mark, so it is always in range. Clamped once here
+        // regardless: every path below slices or drains at it, and a
+        // total function is worth one `min` on a cold branch.
+        let first_child = first_child.min(self.children.len());
         let Some(key) = self.node_key(kind, first_child) else {
             return (NOT_INTERNED, self.build(kind, first_child));
         };
@@ -322,6 +386,8 @@ impl<'src> GreenBuilder<'src> {
 
     /// Interning key for the pending node, or `None` if it is not
     /// eligible.
+    ///
+    /// `first_child` is already clamped by [`GreenBuilder::node`].
     #[inline]
     fn node_key(&self, kind: SyntaxKind, first_child: usize) -> Option<NodeKey> {
         let pending = self.children.get(first_child..)?;

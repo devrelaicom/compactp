@@ -21,16 +21,21 @@ While in `0.x`, breaking changes may land in any minor release.
   balanced tree, `Θ(n²)` for a spine. Measured release,
   `aarch64-apple-darwin`, `max_depth = 100_000`: 5,000 terms 105 ms, 10,000
   terms 405 ms, 20,000 terms 1,606 ms, with ~90% of profile samples inside
-  rowan's `node_hash`. The same chains now take 1.19 ms, 2.20 ms and 3.85 ms —
-  183x faster at 20,000 terms, and doubling the input now doubles the time.
+  rowan's `node_hash`. The same chains now take 1.15 ms, 2.08 ms and 3.73 ms —
+  **431x** faster at 20,000 terms, and doubling the input now doubles the time.
   The default `max_depth` masked this by truncating a chain after a few
   hundred extensions; it was reachable by any consumer that raised the limit,
   which the documentation invites. Tree construction moved to an in-crate
   builder that keys its interner on `(kind, child identities)` rather than on
-  the subtree itself, making a rehash `O(1)` per entry. Interning, and so
-  memory behaviour, is unchanged; the CST, AST and diagnostics are identical,
-  verified across 24,616 corpus and fuzz inputs at six `max_depth` settings.
-  Corpus throughput improved from 88.5 to 92.2 MiB/s.
+  the subtree itself, making a rehash `O(1)` per entry. The CST, AST and
+  diagnostics are identical, verified over the corpus, the fuzz corpora and
+  generated shapes at six `max_depth` settings — see
+  `crates/compactp_parser/tests/tree_equivalence.rs`. Corpus throughput
+  improved from 88.0 to 91.4 MiB/s. The *retained tree* is unchanged, since
+  the interner keeps the same equality relation and so shares the same
+  subtrees; its *transient tables* are 4-6x wider per entry than rowan's,
+  which raised peak RSS from 4.22 to 4.94 MiB on a 74 KB input and from 64.75
+  to 70.03 MiB on a 1.48 MB one.
   ([#22](https://github.com/devrelaicom/compactp/issues/22))
 - Nested parentheses no longer cost time proportional to the lambda-lookahead
   window at every level. `looks_like_lambda` decides whether a `(` opens a

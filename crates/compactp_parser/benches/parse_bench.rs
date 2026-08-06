@@ -40,6 +40,13 @@ fn bench_parse_medium(c: &mut Criterion) {
 /// truncates the spine after a few hundred extensions, so a chain
 /// benchmark run with `parse()` measures the cap and reports a flat
 /// line no matter how tree construction behaves.
+///
+/// Unlike `tests/chain_scaling.rs`, which leaks its trees, these are
+/// dropped every iteration — and rowan drops recursively, so the longer
+/// case unwinds ~4,000 levels. `ParseOptions::max_depth` puts a release
+/// frame at roughly 650 bytes, so that is ~2.6 MiB against criterion's
+/// 8 MiB main thread. Comfortable, but it is the reason these lengths
+/// are not raised further.
 fn bench_parse_chain(c: &mut Criterion) {
     const PRE: &str =
         "pragma language_version >= 0.23.0;\nexport pure circuit f(x: Field): Field { return ";
