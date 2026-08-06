@@ -8,6 +8,30 @@ While in `0.x`, breaking changes may land in any minor release.
 
 ## [Unreleased]
 
+### Fixed
+
+- `ParseOptions::max_depth` now bounds the depth of the expression tree the
+  parser returns, not only the depth of recursive-descent entry.
+  Left-associative operator chains (`x+x+...+x`) and postfix chains
+  (`f()()...`, `x[0][0]...`, `x.a.a...`, `x as T as T...`) deepen the tree from
+  inside a single stack frame and were never charged against the limit, so
+  roughly 10 KB of *valid*
+  Compact produced a 5000-deep tree with zero diagnostics. Dropping that tree
+  overflowed the stack and aborted the process with `SIGABRT` — uncatchable,
+  `catch_unwind` does not help — on any thread with a 2 MiB stack, and the
+  `compactp cst` and `compactp stats` commands aborted on their own main
+  thread. ([#21](https://github.com/devrelaicom/compactp/issues/21))
+
+### Changed
+
+- Expression chains longer than `max_depth` links now emit an
+  `expression nesting depth limit exceeded` diagnostic and an `ERROR` node
+  rather than nesting without limit. Input with more than roughly 250 chained
+  operators or postfix operations therefore reports diagnostics where it
+  previously reported none; the CST remains lossless in both cases. For scale,
+  the deepest file in the 486-file upstream Compact corpus has a CST depth of
+  20. Raise `ParseOptions::max_depth` to accept deeper input.
+
 ## [0.1.0-beta.1]
 
 First public beta of `compactp` and its five companion library crates

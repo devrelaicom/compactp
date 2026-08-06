@@ -43,12 +43,33 @@ pub struct ParseOptions {
     /// Maximum number of errors before the parser stops recovery
     /// (default: `256`).
     pub max_errors: usize,
-    /// Maximum recursion depth for the grammar (default: `256`).
+    /// Maximum nesting depth the parser will build (default: `256`).
     ///
-    /// On overflow the parser emits a recovery diagnostic and
-    /// produces an `ERROR` node instead of overflowing the stack.
-    /// Increase for input intentionally deeper than 256 nested
-    /// expressions/types/blocks; decrease for stricter limits.
+    /// The counter is charged on entry to each recursive grammar
+    /// function (expression, type, statement, block) *and* once per
+    /// left-spine extension inside the expression Pratt loop. That
+    /// second charge is what bounds the depth of the tree the parser
+    /// *returns*, rather than only the depth of its own stack:
+    /// left-associative operator chains (`x+x+...+x`) and postfix chains
+    /// (`f()()...`, `x[0][0]...`, `x.a.a...`, `x as T as T...`) deepen
+    /// the tree from inside a single stack frame, so charging entry
+    /// alone would leave them unbounded.
+    ///
+    /// On overflow the parser emits a recovery diagnostic and produces
+    /// an `ERROR` node instead of nesting further. The CST stays
+    /// lossless: every byte of the input remains recoverable.
+    ///
+    /// Across those grammars the returned tree's depth is a small
+    /// constant multiple of this value, since one charge may sit beneath
+    /// a few uncharged wrapper nodes (`PAREN_EXPR`, `EXPR_SEQ`, and
+    /// similar).
+    ///
+    /// Raising this raises the stack that *consumers* need: rowan drops
+    /// a tree recursively, and most CST walks recurse in the tree's
+    /// depth. The default keeps a dropped tree comfortably inside a
+    /// 2 MiB thread stack (the common async-runtime worker default).
+    /// For scale, the deepest file in the upstream Compact corpus has a
+    /// CST depth of 20.
     pub max_depth: u32,
 }
 

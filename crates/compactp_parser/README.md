@@ -6,8 +6,10 @@ the [`compactp`](https://github.com/devrelaicom/compactp) parser frontend.
 Produces a lossless concrete syntax tree (every byte recoverable) plus a list of
 structured diagnostics. Uses marker-based tree construction over
 [`rowan`](https://crates.io/crates/rowan), Pratt-style expression precedence, and
-explicit error recovery with `ERROR` nodes. Bounded recursion depth
-(`ParseOptions::max_depth`, default 256) guarantees no stack overflow on
+explicit error recovery with `ERROR` nodes. Bounded nesting depth
+(`ParseOptions::max_depth`, default 256) caps the parser's own recursion and
+the depth of the expression, type, statement and block nesting it builds, so
+neither the parser nor a recursive consumer of the tree overflows the stack on
 adversarial input.
 
 ## Example
