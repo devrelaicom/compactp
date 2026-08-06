@@ -706,6 +706,33 @@ impl core::marker::Unpin for compactp_ast::Type
 impl core::marker::UnsafeUnpin for compactp_ast::Type
 impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::Type
 impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::Type
+pub enum compactp_ast::nodes::VersionExpr
+pub compactp_ast::nodes::VersionExpr::And(compactp_ast::VersionAndExpr)
+pub compactp_ast::nodes::VersionExpr::Literal(compactp_ast::VersionLitExpr)
+pub compactp_ast::nodes::VersionExpr::Or(compactp_ast::VersionOrExpr)
+pub compactp_ast::nodes::VersionExpr::Paren(compactp_ast::VersionParenExpr)
+pub compactp_ast::nodes::VersionExpr::Unary(compactp_ast::VersionUnaryExpr)
+impl compactp_ast::AstNode for compactp_ast::VersionExpr
+pub fn compactp_ast::VersionExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl core::clone::Clone for compactp_ast::VersionExpr
+pub fn compactp_ast::VersionExpr::clone(&self) -> compactp_ast::VersionExpr
+impl core::cmp::Eq for compactp_ast::VersionExpr
+impl core::cmp::PartialEq for compactp_ast::VersionExpr
+pub fn compactp_ast::VersionExpr::eq(&self, &compactp_ast::VersionExpr) -> bool
+impl core::fmt::Debug for compactp_ast::VersionExpr
+pub fn compactp_ast::VersionExpr::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for compactp_ast::VersionExpr
+pub fn compactp_ast::VersionExpr::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for compactp_ast::VersionExpr
+impl core::marker::Freeze for compactp_ast::VersionExpr
+impl !core::marker::Send for compactp_ast::VersionExpr
+impl !core::marker::Sync for compactp_ast::VersionExpr
+impl core::marker::Unpin for compactp_ast::VersionExpr
+impl core::marker::UnsafeUnpin for compactp_ast::VersionExpr
+impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::VersionExpr
+impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::VersionExpr
 pub struct compactp_ast::nodes::AssertStmt(_)
 impl compactp_ast::AssertStmt
 pub fn compactp_ast::AssertStmt::message(&self) -> core::option::Option<compactp_syntax::SyntaxToken>
@@ -1507,6 +1534,7 @@ impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::ParamList
 pub struct compactp_ast::nodes::Pragma(_)
 impl compactp_ast::Pragma
 pub fn compactp_ast::Pragma::name(&self) -> core::option::Option<compactp_syntax::SyntaxToken>
+pub fn compactp_ast::Pragma::version(&self) -> core::option::Option<compactp_ast::VersionExpr>
 impl compactp_ast::AstNode for compactp_ast::Pragma
 pub fn compactp_ast::Pragma::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
 pub fn compactp_ast::Pragma::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
@@ -1950,6 +1978,129 @@ impl core::marker::Unpin for compactp_ast::VectorType
 impl core::marker::UnsafeUnpin for compactp_ast::VectorType
 impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::VectorType
 impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::VectorType
+pub struct compactp_ast::nodes::VersionAndExpr(_)
+impl compactp_ast::VersionAndExpr
+pub fn compactp_ast::VersionAndExpr::op(&self) -> core::option::Option<compactp_syntax::SyntaxToken>
+pub fn compactp_ast::VersionAndExpr::operands(&self) -> impl core::iter::traits::iterator::Iterator<Item = compactp_ast::VersionExpr>
+impl compactp_ast::AstNode for compactp_ast::VersionAndExpr
+pub fn compactp_ast::VersionAndExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionAndExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionAndExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl core::clone::Clone for compactp_ast::VersionAndExpr
+pub fn compactp_ast::VersionAndExpr::clone(&self) -> compactp_ast::VersionAndExpr
+impl core::cmp::Eq for compactp_ast::VersionAndExpr
+impl core::cmp::PartialEq for compactp_ast::VersionAndExpr
+pub fn compactp_ast::VersionAndExpr::eq(&self, &compactp_ast::VersionAndExpr) -> bool
+impl core::fmt::Debug for compactp_ast::VersionAndExpr
+pub fn compactp_ast::VersionAndExpr::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for compactp_ast::VersionAndExpr
+pub fn compactp_ast::VersionAndExpr::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for compactp_ast::VersionAndExpr
+impl core::marker::Freeze for compactp_ast::VersionAndExpr
+impl !core::marker::Send for compactp_ast::VersionAndExpr
+impl !core::marker::Sync for compactp_ast::VersionAndExpr
+impl core::marker::Unpin for compactp_ast::VersionAndExpr
+impl core::marker::UnsafeUnpin for compactp_ast::VersionAndExpr
+impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::VersionAndExpr
+impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::VersionAndExpr
+pub struct compactp_ast::nodes::VersionLitExpr(_)
+impl compactp_ast::VersionLitExpr
+pub fn compactp_ast::VersionLitExpr::literal(&self) -> core::option::Option<compactp_syntax::SyntaxToken>
+impl compactp_ast::AstNode for compactp_ast::VersionLitExpr
+pub fn compactp_ast::VersionLitExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionLitExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionLitExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl core::clone::Clone for compactp_ast::VersionLitExpr
+pub fn compactp_ast::VersionLitExpr::clone(&self) -> compactp_ast::VersionLitExpr
+impl core::cmp::Eq for compactp_ast::VersionLitExpr
+impl core::cmp::PartialEq for compactp_ast::VersionLitExpr
+pub fn compactp_ast::VersionLitExpr::eq(&self, &compactp_ast::VersionLitExpr) -> bool
+impl core::fmt::Debug for compactp_ast::VersionLitExpr
+pub fn compactp_ast::VersionLitExpr::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for compactp_ast::VersionLitExpr
+pub fn compactp_ast::VersionLitExpr::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for compactp_ast::VersionLitExpr
+impl core::marker::Freeze for compactp_ast::VersionLitExpr
+impl !core::marker::Send for compactp_ast::VersionLitExpr
+impl !core::marker::Sync for compactp_ast::VersionLitExpr
+impl core::marker::Unpin for compactp_ast::VersionLitExpr
+impl core::marker::UnsafeUnpin for compactp_ast::VersionLitExpr
+impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::VersionLitExpr
+impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::VersionLitExpr
+pub struct compactp_ast::nodes::VersionOrExpr(_)
+impl compactp_ast::VersionOrExpr
+pub fn compactp_ast::VersionOrExpr::op(&self) -> core::option::Option<compactp_syntax::SyntaxToken>
+pub fn compactp_ast::VersionOrExpr::operands(&self) -> impl core::iter::traits::iterator::Iterator<Item = compactp_ast::VersionExpr>
+impl compactp_ast::AstNode for compactp_ast::VersionOrExpr
+pub fn compactp_ast::VersionOrExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionOrExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionOrExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl core::clone::Clone for compactp_ast::VersionOrExpr
+pub fn compactp_ast::VersionOrExpr::clone(&self) -> compactp_ast::VersionOrExpr
+impl core::cmp::Eq for compactp_ast::VersionOrExpr
+impl core::cmp::PartialEq for compactp_ast::VersionOrExpr
+pub fn compactp_ast::VersionOrExpr::eq(&self, &compactp_ast::VersionOrExpr) -> bool
+impl core::fmt::Debug for compactp_ast::VersionOrExpr
+pub fn compactp_ast::VersionOrExpr::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for compactp_ast::VersionOrExpr
+pub fn compactp_ast::VersionOrExpr::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for compactp_ast::VersionOrExpr
+impl core::marker::Freeze for compactp_ast::VersionOrExpr
+impl !core::marker::Send for compactp_ast::VersionOrExpr
+impl !core::marker::Sync for compactp_ast::VersionOrExpr
+impl core::marker::Unpin for compactp_ast::VersionOrExpr
+impl core::marker::UnsafeUnpin for compactp_ast::VersionOrExpr
+impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::VersionOrExpr
+impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::VersionOrExpr
+pub struct compactp_ast::nodes::VersionParenExpr(_)
+impl compactp_ast::VersionParenExpr
+pub fn compactp_ast::VersionParenExpr::inner(&self) -> core::option::Option<compactp_ast::VersionExpr>
+impl compactp_ast::AstNode for compactp_ast::VersionParenExpr
+pub fn compactp_ast::VersionParenExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionParenExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionParenExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl core::clone::Clone for compactp_ast::VersionParenExpr
+pub fn compactp_ast::VersionParenExpr::clone(&self) -> compactp_ast::VersionParenExpr
+impl core::cmp::Eq for compactp_ast::VersionParenExpr
+impl core::cmp::PartialEq for compactp_ast::VersionParenExpr
+pub fn compactp_ast::VersionParenExpr::eq(&self, &compactp_ast::VersionParenExpr) -> bool
+impl core::fmt::Debug for compactp_ast::VersionParenExpr
+pub fn compactp_ast::VersionParenExpr::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for compactp_ast::VersionParenExpr
+pub fn compactp_ast::VersionParenExpr::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for compactp_ast::VersionParenExpr
+impl core::marker::Freeze for compactp_ast::VersionParenExpr
+impl !core::marker::Send for compactp_ast::VersionParenExpr
+impl !core::marker::Sync for compactp_ast::VersionParenExpr
+impl core::marker::Unpin for compactp_ast::VersionParenExpr
+impl core::marker::UnsafeUnpin for compactp_ast::VersionParenExpr
+impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::VersionParenExpr
+impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::VersionParenExpr
+pub struct compactp_ast::nodes::VersionUnaryExpr(_)
+impl compactp_ast::VersionUnaryExpr
+pub fn compactp_ast::VersionUnaryExpr::op(&self) -> core::option::Option<compactp_syntax::SyntaxToken>
+pub fn compactp_ast::VersionUnaryExpr::operand(&self) -> core::option::Option<compactp_ast::VersionExpr>
+impl compactp_ast::AstNode for compactp_ast::VersionUnaryExpr
+pub fn compactp_ast::VersionUnaryExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionUnaryExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionUnaryExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl core::clone::Clone for compactp_ast::VersionUnaryExpr
+pub fn compactp_ast::VersionUnaryExpr::clone(&self) -> compactp_ast::VersionUnaryExpr
+impl core::cmp::Eq for compactp_ast::VersionUnaryExpr
+impl core::cmp::PartialEq for compactp_ast::VersionUnaryExpr
+pub fn compactp_ast::VersionUnaryExpr::eq(&self, &compactp_ast::VersionUnaryExpr) -> bool
+impl core::fmt::Debug for compactp_ast::VersionUnaryExpr
+pub fn compactp_ast::VersionUnaryExpr::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for compactp_ast::VersionUnaryExpr
+pub fn compactp_ast::VersionUnaryExpr::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for compactp_ast::VersionUnaryExpr
+impl core::marker::Freeze for compactp_ast::VersionUnaryExpr
+impl !core::marker::Send for compactp_ast::VersionUnaryExpr
+impl !core::marker::Sync for compactp_ast::VersionUnaryExpr
+impl core::marker::Unpin for compactp_ast::VersionUnaryExpr
+impl core::marker::UnsafeUnpin for compactp_ast::VersionUnaryExpr
+impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::VersionUnaryExpr
+impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::VersionUnaryExpr
 pub struct compactp_ast::nodes::WitnessDecl(_)
 impl compactp_ast::WitnessDecl
 pub fn compactp_ast::WitnessDecl::export_kw(&self) -> core::option::Option<compactp_syntax::SyntaxToken>
@@ -2145,6 +2296,33 @@ impl core::marker::Unpin for compactp_ast::Type
 impl core::marker::UnsafeUnpin for compactp_ast::Type
 impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::Type
 impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::Type
+pub enum compactp_ast::VersionExpr
+pub compactp_ast::VersionExpr::And(compactp_ast::VersionAndExpr)
+pub compactp_ast::VersionExpr::Literal(compactp_ast::VersionLitExpr)
+pub compactp_ast::VersionExpr::Or(compactp_ast::VersionOrExpr)
+pub compactp_ast::VersionExpr::Paren(compactp_ast::VersionParenExpr)
+pub compactp_ast::VersionExpr::Unary(compactp_ast::VersionUnaryExpr)
+impl compactp_ast::AstNode for compactp_ast::VersionExpr
+pub fn compactp_ast::VersionExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl core::clone::Clone for compactp_ast::VersionExpr
+pub fn compactp_ast::VersionExpr::clone(&self) -> compactp_ast::VersionExpr
+impl core::cmp::Eq for compactp_ast::VersionExpr
+impl core::cmp::PartialEq for compactp_ast::VersionExpr
+pub fn compactp_ast::VersionExpr::eq(&self, &compactp_ast::VersionExpr) -> bool
+impl core::fmt::Debug for compactp_ast::VersionExpr
+pub fn compactp_ast::VersionExpr::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for compactp_ast::VersionExpr
+pub fn compactp_ast::VersionExpr::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for compactp_ast::VersionExpr
+impl core::marker::Freeze for compactp_ast::VersionExpr
+impl !core::marker::Send for compactp_ast::VersionExpr
+impl !core::marker::Sync for compactp_ast::VersionExpr
+impl core::marker::Unpin for compactp_ast::VersionExpr
+impl core::marker::UnsafeUnpin for compactp_ast::VersionExpr
+impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::VersionExpr
+impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::VersionExpr
 pub struct compactp_ast::AssertStmt(_)
 impl compactp_ast::AssertStmt
 pub fn compactp_ast::AssertStmt::message(&self) -> core::option::Option<compactp_syntax::SyntaxToken>
@@ -2946,6 +3124,7 @@ impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::ParamList
 pub struct compactp_ast::Pragma(_)
 impl compactp_ast::Pragma
 pub fn compactp_ast::Pragma::name(&self) -> core::option::Option<compactp_syntax::SyntaxToken>
+pub fn compactp_ast::Pragma::version(&self) -> core::option::Option<compactp_ast::VersionExpr>
 impl compactp_ast::AstNode for compactp_ast::Pragma
 pub fn compactp_ast::Pragma::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
 pub fn compactp_ast::Pragma::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
@@ -3389,6 +3568,129 @@ impl core::marker::Unpin for compactp_ast::VectorType
 impl core::marker::UnsafeUnpin for compactp_ast::VectorType
 impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::VectorType
 impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::VectorType
+pub struct compactp_ast::VersionAndExpr(_)
+impl compactp_ast::VersionAndExpr
+pub fn compactp_ast::VersionAndExpr::op(&self) -> core::option::Option<compactp_syntax::SyntaxToken>
+pub fn compactp_ast::VersionAndExpr::operands(&self) -> impl core::iter::traits::iterator::Iterator<Item = compactp_ast::VersionExpr>
+impl compactp_ast::AstNode for compactp_ast::VersionAndExpr
+pub fn compactp_ast::VersionAndExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionAndExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionAndExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl core::clone::Clone for compactp_ast::VersionAndExpr
+pub fn compactp_ast::VersionAndExpr::clone(&self) -> compactp_ast::VersionAndExpr
+impl core::cmp::Eq for compactp_ast::VersionAndExpr
+impl core::cmp::PartialEq for compactp_ast::VersionAndExpr
+pub fn compactp_ast::VersionAndExpr::eq(&self, &compactp_ast::VersionAndExpr) -> bool
+impl core::fmt::Debug for compactp_ast::VersionAndExpr
+pub fn compactp_ast::VersionAndExpr::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for compactp_ast::VersionAndExpr
+pub fn compactp_ast::VersionAndExpr::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for compactp_ast::VersionAndExpr
+impl core::marker::Freeze for compactp_ast::VersionAndExpr
+impl !core::marker::Send for compactp_ast::VersionAndExpr
+impl !core::marker::Sync for compactp_ast::VersionAndExpr
+impl core::marker::Unpin for compactp_ast::VersionAndExpr
+impl core::marker::UnsafeUnpin for compactp_ast::VersionAndExpr
+impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::VersionAndExpr
+impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::VersionAndExpr
+pub struct compactp_ast::VersionLitExpr(_)
+impl compactp_ast::VersionLitExpr
+pub fn compactp_ast::VersionLitExpr::literal(&self) -> core::option::Option<compactp_syntax::SyntaxToken>
+impl compactp_ast::AstNode for compactp_ast::VersionLitExpr
+pub fn compactp_ast::VersionLitExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionLitExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionLitExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl core::clone::Clone for compactp_ast::VersionLitExpr
+pub fn compactp_ast::VersionLitExpr::clone(&self) -> compactp_ast::VersionLitExpr
+impl core::cmp::Eq for compactp_ast::VersionLitExpr
+impl core::cmp::PartialEq for compactp_ast::VersionLitExpr
+pub fn compactp_ast::VersionLitExpr::eq(&self, &compactp_ast::VersionLitExpr) -> bool
+impl core::fmt::Debug for compactp_ast::VersionLitExpr
+pub fn compactp_ast::VersionLitExpr::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for compactp_ast::VersionLitExpr
+pub fn compactp_ast::VersionLitExpr::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for compactp_ast::VersionLitExpr
+impl core::marker::Freeze for compactp_ast::VersionLitExpr
+impl !core::marker::Send for compactp_ast::VersionLitExpr
+impl !core::marker::Sync for compactp_ast::VersionLitExpr
+impl core::marker::Unpin for compactp_ast::VersionLitExpr
+impl core::marker::UnsafeUnpin for compactp_ast::VersionLitExpr
+impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::VersionLitExpr
+impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::VersionLitExpr
+pub struct compactp_ast::VersionOrExpr(_)
+impl compactp_ast::VersionOrExpr
+pub fn compactp_ast::VersionOrExpr::op(&self) -> core::option::Option<compactp_syntax::SyntaxToken>
+pub fn compactp_ast::VersionOrExpr::operands(&self) -> impl core::iter::traits::iterator::Iterator<Item = compactp_ast::VersionExpr>
+impl compactp_ast::AstNode for compactp_ast::VersionOrExpr
+pub fn compactp_ast::VersionOrExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionOrExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionOrExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl core::clone::Clone for compactp_ast::VersionOrExpr
+pub fn compactp_ast::VersionOrExpr::clone(&self) -> compactp_ast::VersionOrExpr
+impl core::cmp::Eq for compactp_ast::VersionOrExpr
+impl core::cmp::PartialEq for compactp_ast::VersionOrExpr
+pub fn compactp_ast::VersionOrExpr::eq(&self, &compactp_ast::VersionOrExpr) -> bool
+impl core::fmt::Debug for compactp_ast::VersionOrExpr
+pub fn compactp_ast::VersionOrExpr::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for compactp_ast::VersionOrExpr
+pub fn compactp_ast::VersionOrExpr::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for compactp_ast::VersionOrExpr
+impl core::marker::Freeze for compactp_ast::VersionOrExpr
+impl !core::marker::Send for compactp_ast::VersionOrExpr
+impl !core::marker::Sync for compactp_ast::VersionOrExpr
+impl core::marker::Unpin for compactp_ast::VersionOrExpr
+impl core::marker::UnsafeUnpin for compactp_ast::VersionOrExpr
+impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::VersionOrExpr
+impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::VersionOrExpr
+pub struct compactp_ast::VersionParenExpr(_)
+impl compactp_ast::VersionParenExpr
+pub fn compactp_ast::VersionParenExpr::inner(&self) -> core::option::Option<compactp_ast::VersionExpr>
+impl compactp_ast::AstNode for compactp_ast::VersionParenExpr
+pub fn compactp_ast::VersionParenExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionParenExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionParenExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl core::clone::Clone for compactp_ast::VersionParenExpr
+pub fn compactp_ast::VersionParenExpr::clone(&self) -> compactp_ast::VersionParenExpr
+impl core::cmp::Eq for compactp_ast::VersionParenExpr
+impl core::cmp::PartialEq for compactp_ast::VersionParenExpr
+pub fn compactp_ast::VersionParenExpr::eq(&self, &compactp_ast::VersionParenExpr) -> bool
+impl core::fmt::Debug for compactp_ast::VersionParenExpr
+pub fn compactp_ast::VersionParenExpr::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for compactp_ast::VersionParenExpr
+pub fn compactp_ast::VersionParenExpr::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for compactp_ast::VersionParenExpr
+impl core::marker::Freeze for compactp_ast::VersionParenExpr
+impl !core::marker::Send for compactp_ast::VersionParenExpr
+impl !core::marker::Sync for compactp_ast::VersionParenExpr
+impl core::marker::Unpin for compactp_ast::VersionParenExpr
+impl core::marker::UnsafeUnpin for compactp_ast::VersionParenExpr
+impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::VersionParenExpr
+impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::VersionParenExpr
+pub struct compactp_ast::VersionUnaryExpr(_)
+impl compactp_ast::VersionUnaryExpr
+pub fn compactp_ast::VersionUnaryExpr::op(&self) -> core::option::Option<compactp_syntax::SyntaxToken>
+pub fn compactp_ast::VersionUnaryExpr::operand(&self) -> core::option::Option<compactp_ast::VersionExpr>
+impl compactp_ast::AstNode for compactp_ast::VersionUnaryExpr
+pub fn compactp_ast::VersionUnaryExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionUnaryExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionUnaryExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl core::clone::Clone for compactp_ast::VersionUnaryExpr
+pub fn compactp_ast::VersionUnaryExpr::clone(&self) -> compactp_ast::VersionUnaryExpr
+impl core::cmp::Eq for compactp_ast::VersionUnaryExpr
+impl core::cmp::PartialEq for compactp_ast::VersionUnaryExpr
+pub fn compactp_ast::VersionUnaryExpr::eq(&self, &compactp_ast::VersionUnaryExpr) -> bool
+impl core::fmt::Debug for compactp_ast::VersionUnaryExpr
+pub fn compactp_ast::VersionUnaryExpr::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for compactp_ast::VersionUnaryExpr
+pub fn compactp_ast::VersionUnaryExpr::hash<__H: core::hash::Hasher>(&self, &mut __H)
+impl core::marker::StructuralPartialEq for compactp_ast::VersionUnaryExpr
+impl core::marker::Freeze for compactp_ast::VersionUnaryExpr
+impl !core::marker::Send for compactp_ast::VersionUnaryExpr
+impl !core::marker::Sync for compactp_ast::VersionUnaryExpr
+impl core::marker::Unpin for compactp_ast::VersionUnaryExpr
+impl core::marker::UnsafeUnpin for compactp_ast::VersionUnaryExpr
+impl !core::panic::unwind_safe::RefUnwindSafe for compactp_ast::VersionUnaryExpr
+impl !core::panic::unwind_safe::UnwindSafe for compactp_ast::VersionUnaryExpr
 pub struct compactp_ast::WitnessDecl(_)
 impl compactp_ast::WitnessDecl
 pub fn compactp_ast::WitnessDecl::export_kw(&self) -> core::option::Option<compactp_syntax::SyntaxToken>
@@ -3637,6 +3939,30 @@ impl compactp_ast::AstNode for compactp_ast::VectorType
 pub fn compactp_ast::VectorType::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
 pub fn compactp_ast::VectorType::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
 pub fn compactp_ast::VectorType::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl compactp_ast::AstNode for compactp_ast::VersionAndExpr
+pub fn compactp_ast::VersionAndExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionAndExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionAndExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl compactp_ast::AstNode for compactp_ast::VersionExpr
+pub fn compactp_ast::VersionExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl compactp_ast::AstNode for compactp_ast::VersionLitExpr
+pub fn compactp_ast::VersionLitExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionLitExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionLitExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl compactp_ast::AstNode for compactp_ast::VersionOrExpr
+pub fn compactp_ast::VersionOrExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionOrExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionOrExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl compactp_ast::AstNode for compactp_ast::VersionParenExpr
+pub fn compactp_ast::VersionParenExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionParenExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionParenExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
+impl compactp_ast::AstNode for compactp_ast::VersionUnaryExpr
+pub fn compactp_ast::VersionUnaryExpr::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
+pub fn compactp_ast::VersionUnaryExpr::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>
+pub fn compactp_ast::VersionUnaryExpr::syntax(&self) -> &compactp_syntax::SyntaxNode
 impl compactp_ast::AstNode for compactp_ast::WitnessDecl
 pub fn compactp_ast::WitnessDecl::can_cast(compactp_syntax::syntax_kind::SyntaxKind) -> bool
 pub fn compactp_ast::WitnessDecl::cast(compactp_syntax::SyntaxNode) -> core::option::Option<Self>

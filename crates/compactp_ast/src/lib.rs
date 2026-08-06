@@ -1084,4 +1084,191 @@ enum Color { Red, Green }
             .any(|n| n.kind() == SyntaxKind::RECORD_TYPE && Type::cast(n).is_some());
         assert!(has_record, "Type::cast should accept RECORD_TYPE");
     }
+
+    // -----------------------------------------------------------------------
+    // VersionExpr sum type (Pragma::version) — issue #25
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn pragma_version_simple_dotted_literal() {
+        let root = parse("pragma compact 0.15.0;");
+        let file = SourceFile::cast(root).unwrap();
+        let pragma = file.pragmas().next().expect("should have Pragma");
+        match pragma.version().expect("should have version") {
+            VersionExpr::Literal(lit) => {
+                let tok = lit.literal().expect("should have literal token");
+                assert_eq!(tok.text(), "0.15.0");
+                assert_eq!(tok.kind(), compactp_syntax::SyntaxKind::VERSION_LIT);
+            }
+            other => panic!("expected VersionExpr::Literal, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn pragma_version_bare_int_literal() {
+        let root = parse("pragma compact 1;");
+        let file = SourceFile::cast(root).unwrap();
+        let pragma = file.pragmas().next().unwrap();
+        match pragma.version().expect("should have version") {
+            VersionExpr::Literal(lit) => {
+                let tok = lit.literal().expect("should have literal token");
+                assert_eq!(tok.text(), "1");
+                assert_eq!(tok.kind(), compactp_syntax::SyntaxKind::INT_LIT);
+            }
+            other => panic!("expected VersionExpr::Literal, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn pragma_version_and() {
+        let root = parse("pragma compact >= 0.15 && < 1.0;");
+        let file = SourceFile::cast(root).unwrap();
+        let pragma = file.pragmas().next().unwrap();
+        match pragma.version().expect("should have version") {
+            VersionExpr::And(and_expr) => {
+                assert_eq!(and_expr.op().unwrap().text(), "&&");
+                let operands: Vec<_> = and_expr.operands().collect();
+                assert_eq!(operands.len(), 2);
+                match &operands[0] {
+                    VersionExpr::Unary(u) => {
+                        assert_eq!(u.op().unwrap().text(), ">=");
+                        match u.operand().unwrap() {
+                            VersionExpr::Literal(lit) => {
+                                assert_eq!(lit.literal().unwrap().text(), "0.15");
+                            }
+                            other => panic!("expected Literal, got {other:?}"),
+                        }
+                    }
+                    other => panic!("expected Unary, got {other:?}"),
+                }
+                match &operands[1] {
+                    VersionExpr::Unary(u) => {
+                        assert_eq!(u.op().unwrap().text(), "<");
+                        match u.operand().unwrap() {
+                            VersionExpr::Literal(lit) => {
+                                assert_eq!(lit.literal().unwrap().text(), "1.0");
+                            }
+                            other => panic!("expected Literal, got {other:?}"),
+                        }
+                    }
+                    other => panic!("expected Unary, got {other:?}"),
+                }
+            }
+            other => panic!("expected VersionExpr::And, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn pragma_version_or() {
+        let root = parse("pragma compact >= 0.15 || >= 1.0;");
+        let file = SourceFile::cast(root).unwrap();
+        let pragma = file.pragmas().next().unwrap();
+        match pragma.version().expect("should have version") {
+            VersionExpr::Or(or_expr) => {
+                assert_eq!(or_expr.op().unwrap().text(), "||");
+                assert_eq!(or_expr.operands().count(), 2);
+            }
+            other => panic!("expected VersionExpr::Or, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn pragma_version_unary_not() {
+        let root = parse("pragma compact !0.14;");
+        let file = SourceFile::cast(root).unwrap();
+        let pragma = file.pragmas().next().unwrap();
+        match pragma.version().expect("should have version") {
+            VersionExpr::Unary(u) => {
+                assert_eq!(u.op().unwrap().text(), "!");
+                match u.operand().expect("should have operand") {
+                    VersionExpr::Literal(lit) => {
+                        assert_eq!(lit.literal().unwrap().text(), "0.14");
+                    }
+                    other => panic!("expected Literal, got {other:?}"),
+                }
+            }
+            other => panic!("expected VersionExpr::Unary, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn pragma_version_unary_relational() {
+        let root = parse("pragma compact >= 1.0;");
+        let file = SourceFile::cast(root).unwrap();
+        let pragma = file.pragmas().next().unwrap();
+        match pragma.version().expect("should have version") {
+            VersionExpr::Unary(u) => {
+                assert_eq!(u.op().unwrap().text(), ">=");
+                match u.operand().expect("should have operand") {
+                    VersionExpr::Literal(lit) => {
+                        assert_eq!(lit.literal().unwrap().text(), "1.0");
+                    }
+                    other => panic!("expected Literal, got {other:?}"),
+                }
+            }
+            other => panic!("expected VersionExpr::Unary, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn pragma_version_paren() {
+        let root = parse("pragma compact (>= 1.0);");
+        let file = SourceFile::cast(root).unwrap();
+        let pragma = file.pragmas().next().unwrap();
+        match pragma.version().expect("should have version") {
+            VersionExpr::Paren(paren) => match paren.inner().expect("should have inner") {
+                VersionExpr::Unary(u) => {
+                    assert_eq!(u.op().unwrap().text(), ">=");
+                }
+                other => panic!("expected Unary, got {other:?}"),
+            },
+            other => panic!("expected VersionExpr::Paren, got {other:?}"),
+        }
+    }
+
+    /// Nested `(a && b) || c` — a paren'd AND alongside a bare unary,
+    /// combined under an OR. Exercises the whole enum in one tree so a
+    /// consumer can confirm gate-building never needs positional CST
+    /// hand-walking, only recursive matches on `VersionExpr`.
+    #[test]
+    fn pragma_version_nested() {
+        let root = parse("pragma compact (>= 0.15 && < 1.0) || >= 2.0;");
+        let file = SourceFile::cast(root).unwrap();
+        let pragma = file.pragmas().next().unwrap();
+        match pragma.version().expect("should have version") {
+            VersionExpr::Or(or_expr) => {
+                let operands: Vec<_> = or_expr.operands().collect();
+                assert_eq!(operands.len(), 2);
+
+                match &operands[0] {
+                    VersionExpr::Paren(paren) => match paren.inner().unwrap() {
+                        VersionExpr::And(and_expr) => {
+                            assert_eq!(and_expr.operands().count(), 2);
+                        }
+                        other => panic!("expected And, got {other:?}"),
+                    },
+                    other => panic!("expected Paren, got {other:?}"),
+                }
+
+                match &operands[1] {
+                    VersionExpr::Unary(u) => {
+                        assert_eq!(u.op().unwrap().text(), ">=");
+                    }
+                    other => panic!("expected Unary, got {other:?}"),
+                }
+            }
+            other => panic!("expected VersionExpr::Or, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn pragma_version_absent_when_malformed() {
+        // A pragma whose version expression failed to parse has no VERSION_*
+        // node at all; the accessor must return None rather than panic.
+        let root = parse("pragma compact;");
+        let file = SourceFile::cast(root).unwrap();
+        let pragma = file.pragmas().next().expect("Pragma node still present");
+        assert_eq!(pragma.name().unwrap().text(), "compact");
+        assert!(pragma.version().is_none());
+    }
 }

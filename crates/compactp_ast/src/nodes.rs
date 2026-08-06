@@ -102,6 +102,37 @@ impl Pragma {
     pub fn name(&self) -> Option<SyntaxToken> {
         support::child_token(&self.0, SyntaxKind::IDENT)
     }
+
+    /// The declared version constraint, if the pragma's version expression
+    /// parsed successfully.
+    ///
+    /// `None` only when the version expression is entirely absent from the
+    /// tree — a malformed `pragma id ;` with no constraint at all. A
+    /// syntactically valid pragma always has one.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use compactp_ast::{AstNode, Pragma, SourceFile, VersionExpr};
+    /// use compactp_syntax::SyntaxNode;
+    ///
+    /// let result = compactp_parser::parse("pragma language_version >= 0.15 && < 1.0;");
+    /// let root = SyntaxNode::new_root(result.green);
+    /// let file = SourceFile::cast(root).expect("root is SOURCE_FILE");
+    /// let pragma: Pragma = file.pragmas().next().expect("Pragma node");
+    ///
+    /// // Walk the parsed structure directly -- no positional CST hand-walking
+    /// // needed to reach the two ANDed operands.
+    /// match pragma.version().expect("version expression") {
+    ///     VersionExpr::And(and_expr) => {
+    ///         assert_eq!(and_expr.operands().count(), 2);
+    ///     }
+    ///     other => panic!("expected VersionExpr::And, got {other:?}"),
+    /// }
+    /// ```
+    pub fn version(&self) -> Option<VersionExpr> {
+        support::child_node(&self.0)
+    }
 }
 
 ast_node! {
@@ -1301,6 +1332,170 @@ impl StructPatField {
 
     /// The inner pattern, if this field has a `: pattern` binding.
     pub fn pattern(&self) -> Option<Pat> {
+        support::child_node(&self.0)
+    }
+}
+
+// ===========================================================================
+// Version-constraint expression nodes (`pragma language_version ...`)
+// ===========================================================================
+
+/// Sum type for all version-constraint expression AST nodes.
+///
+/// Reached via [`Pragma::version`]. Every grammar position inside a version
+/// constraint — the operands of [`VersionAndExpr`]/[`VersionOrExpr`], the
+/// operand of [`VersionUnaryExpr`], the contents of [`VersionParenExpr`] —
+/// accepts this enum, so a consumer walks the whole constraint tree by
+/// matching on it recursively instead of hand-walking raw `VERSION_*` syntax
+/// kinds and byte offsets.
+///
+/// compactp does not interpret version constraints: no comparison, no range
+/// checking, no satisfaction logic. This type only exposes the structure the
+/// parser already built; deciding what a constraint means is a consumer's
+/// job.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum VersionExpr {
+    /// A version literal or bare integer atom: `0.15.0` or `1`.
+    Literal(VersionLitExpr),
+    /// `expr && expr (&& expr)*`
+    And(VersionAndExpr),
+    /// `expr || expr (|| expr)*`
+    Or(VersionOrExpr),
+    /// `! expr`, or a relational prefix like `>= expr`.
+    Unary(VersionUnaryExpr),
+    /// `( expr )`
+    Paren(VersionParenExpr),
+}
+
+impl AstNode for VersionExpr {
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            SyntaxKind::VERSION_EXPR
+                | SyntaxKind::VERSION_AND_EXPR
+                | SyntaxKind::VERSION_OR_EXPR
+                | SyntaxKind::VERSION_UNARY_EXPR
+                | SyntaxKind::VERSION_PAREN_EXPR
+        )
+    }
+
+    fn cast(node: SyntaxNode) -> Option<Self> {
+        match node.kind() {
+            SyntaxKind::VERSION_EXPR => Some(Self::Literal(VersionLitExpr(node))),
+            SyntaxKind::VERSION_AND_EXPR => Some(Self::And(VersionAndExpr(node))),
+            SyntaxKind::VERSION_OR_EXPR => Some(Self::Or(VersionOrExpr(node))),
+            SyntaxKind::VERSION_UNARY_EXPR => Some(Self::Unary(VersionUnaryExpr(node))),
+            SyntaxKind::VERSION_PAREN_EXPR => Some(Self::Paren(VersionParenExpr(node))),
+            _ => None,
+        }
+    }
+
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::Literal(n) => &n.0,
+            Self::And(n) => &n.0,
+            Self::Or(n) => &n.0,
+            Self::Unary(n) => &n.0,
+            Self::Paren(n) => &n.0,
+        }
+    }
+}
+
+ast_node! {
+    /// A version literal or bare integer atom: `0.15.0` or `1`.
+    ///
+    /// Wraps [`SyntaxKind::VERSION_EXPR`]. Named `VersionLitExpr` rather than
+    /// `VersionExpr` because that name belongs to the sum type above — the
+    /// grammar's `version-atom` production happens to complete with the same
+    /// `VERSION_EXPR` kind that labels the whole version-constraint category,
+    /// but this type only ever wraps the leaf literal, not a general
+    /// constraint expression.
+    VersionLitExpr => VERSION_EXPR
+}
+
+impl VersionLitExpr {
+    /// The literal token: a dotted [`SyntaxKind::VERSION_LIT`] (e.g.
+    /// `0.15.0`) or a bare [`SyntaxKind::INT_LIT`] (e.g. `1`).
+    pub fn literal(&self) -> Option<SyntaxToken> {
+        self.0
+            .children_with_tokens()
+            .filter_map(rowan::NodeOrToken::into_token)
+            .find(|t| matches!(t.kind(), SyntaxKind::VERSION_LIT | SyntaxKind::INT_LIT))
+    }
+}
+
+ast_node! {
+    /// Logical-and version constraint: `expr && expr (&& expr)*`.
+    VersionAndExpr => VERSION_AND_EXPR
+}
+
+impl VersionAndExpr {
+    /// The `&&` operator token.
+    pub fn op(&self) -> Option<SyntaxToken> {
+        support::child_token(&self.0, SyntaxKind::AMP_AMP)
+    }
+
+    /// The ANDed operands, in source order.
+    pub fn operands(&self) -> impl Iterator<Item = VersionExpr> {
+        support::children_nodes(&self.0)
+    }
+}
+
+ast_node! {
+    /// Logical-or version constraint: `expr || expr (|| expr)*`.
+    VersionOrExpr => VERSION_OR_EXPR
+}
+
+impl VersionOrExpr {
+    /// The `||` operator token.
+    pub fn op(&self) -> Option<SyntaxToken> {
+        support::child_token(&self.0, SyntaxKind::PIPE_PIPE)
+    }
+
+    /// The ORed operands, in source order.
+    pub fn operands(&self) -> impl Iterator<Item = VersionExpr> {
+        support::children_nodes(&self.0)
+    }
+}
+
+ast_node! {
+    /// Unary version constraint: negation (`! expr`) or a relational prefix
+    /// (`>= expr`, `<= expr`, `> expr`, `< expr`).
+    VersionUnaryExpr => VERSION_UNARY_EXPR
+}
+
+impl VersionUnaryExpr {
+    /// The operator token: `!`, `<`, `<=`, `>`, or `>=`.
+    pub fn op(&self) -> Option<SyntaxToken> {
+        self.0
+            .children_with_tokens()
+            .filter_map(rowan::NodeOrToken::into_token)
+            .find(|t| {
+                matches!(
+                    t.kind(),
+                    SyntaxKind::BANG
+                        | SyntaxKind::LT
+                        | SyntaxKind::LT_EQ
+                        | SyntaxKind::GT
+                        | SyntaxKind::GT_EQ
+                )
+            })
+    }
+
+    /// The constrained operand.
+    pub fn operand(&self) -> Option<VersionExpr> {
+        support::child_node(&self.0)
+    }
+}
+
+ast_node! {
+    /// Parenthesized version constraint: `( expr )`.
+    VersionParenExpr => VERSION_PAREN_EXPR
+}
+
+impl VersionParenExpr {
+    /// The parenthesized expression.
+    pub fn inner(&self) -> Option<VersionExpr> {
         support::child_node(&self.0)
     }
 }
