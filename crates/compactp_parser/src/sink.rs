@@ -1,4 +1,5 @@
 use crate::event::Event;
+use crate::green_builder::GreenBuilder;
 use compactp_diagnostics::{Diagnostic, DiagnosticCode};
 use compactp_syntax::SyntaxKind;
 use rowan::GreenNode;
@@ -7,18 +8,19 @@ pub(crate) struct Sink<'src> {
     events: Vec<Event>,
     tokens: Vec<(SyntaxKind, &'src str)>,
     token_pos: usize,
-    builder: rowan::GreenNodeBuilder<'static>,
+    builder: GreenBuilder<'src>,
     errors: Vec<Diagnostic>,
     byte_offset: usize,
 }
 
 impl<'src> Sink<'src> {
     pub(crate) fn new(events: Vec<Event>, tokens: Vec<(SyntaxKind, &'src str)>) -> Self {
+        let builder = GreenBuilder::new(tokens.len());
         Self {
             events,
             tokens,
             token_pos: 0,
-            builder: rowan::GreenNodeBuilder::new(),
+            builder,
             errors: Vec::new(),
             byte_offset: 0,
         }
@@ -81,7 +83,12 @@ impl<'src> Sink<'src> {
         // Consume any remaining trailing trivia
         self.eat_remaining_trivia();
 
-        (self.builder.finish(), self.errors)
+        let root = self
+            .builder
+            .finish(compactp_syntax::CompactLanguage::kind_to_raw(
+                SyntaxKind::SOURCE_FILE,
+            ));
+        (root, self.errors)
     }
 
     fn token(&mut self, _kind: SyntaxKind, n_raw_tokens: u8) {

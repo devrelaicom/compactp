@@ -120,6 +120,23 @@ impl<'src> Parser<'src> {
         SyntaxKind::EOF
     }
 
+    /// The kinds of the upcoming non-trivia tokens, in order.
+    ///
+    /// [`Parser::nth`] restarts from the current position on every call,
+    /// so a scan that reads `nth(0)`, `nth(1)`, … `nth(k)` walks the
+    /// token list `k` times over — quadratic in the lookahead distance,
+    /// and it re-skips the same trivia each pass. Use this instead
+    /// whenever a heuristic needs to look at a *run* of upcoming tokens
+    /// rather than one at a fixed offset.
+    pub(crate) fn lookahead(&self) -> impl Iterator<Item = SyntaxKind> + '_ {
+        self.tokens
+            .get(self.pos..)
+            .unwrap_or(&[])
+            .iter()
+            .map(|&(kind, _)| kind)
+            .filter(|kind| !kind.is_trivia())
+    }
+
     /// Check if the current non-trivia token matches.
     pub(crate) fn at(&self, kind: SyntaxKind) -> bool {
         self.current() == kind

@@ -161,8 +161,40 @@ level, so treat those as order-of-magnitude figures; raise the limit only
 alongside a thread stack sized to match.
 
 What this guarantee covers is depth, and the stack that depth costs. It
-is not a statement about parse time or peak memory, which are bounded by
-other properties of the parser and are not claimed here.
+is not a statement about peak memory, which is bounded by other
+properties of the parser and is not claimed here. For parse time, see
+the next section.
+
+## Parse time
+
+Parse time is intended to be linear in the size of the input, and no
+accepted shape is currently known to break that.
+
+The one that did was a *left-deep spine* — a left-associative operator
+chain (`x+x+...+x`) or a postfix chain (`1()()...`, `x.a.a...`), where
+every extension wraps the whole tree built so far, so subtree sizes run
+`1, 2, 3, ..., n`. `rowan::GreenNodeBuilder`, used for tree construction
+until [#22](https://github.com/devrelaicom/compactp/issues/22), rehashed
+its node interner by walking each cached subtree recursively, making one
+table growth cost the sum of all cached subtree sizes: `O(n log n)` for
+a balanced tree, `Θ(n²)` for a spine. 40 KB of valid Compact took 1.6 s
+in a release build, quadrupling for each doubling of the input. Tree
+construction now keys its interner on child identities rather than on
+the subtree, and the same input takes 3.9 ms.
+
+Note what hid it. At the default `max_depth` the left-spine depth charge
+truncates such a chain after a few hundred extensions, so the quadratic
+was only reachable by a consumer that raised the limit — which the
+documentation above invites, describing it as a stack budget. A
+default-configured consumer was never exposed. Treat "the default caps
+it" as a reason a cost is hard to reach, never as a reason it is safe:
+the caps are there for stack depth, and they bound time only by
+accident.
+
+Chain length is now covered by `cargo bench -p compactp_parser --bench
+parse_bench` at two lengths a factor of four apart, so the ratio between
+them reads the asymptotics directly, and by
+`crates/compactp_parser/tests/chain_scaling.rs`.
 
 ## Bounded error budget
 
