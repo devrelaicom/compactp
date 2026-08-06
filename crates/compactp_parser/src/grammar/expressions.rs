@@ -130,22 +130,36 @@ fn expr_bp(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
         }
         return Some(m.complete(p, ERROR));
     }
+    // Measure this expression's height independently of its siblings:
+    // the Pratt loop needs the height of the subtree it is about to wrap,
+    // not the whole parse's running maximum.
+    let enclosing = p.begin_subtree();
     let result = expr_bp_inner(p, min_bp);
+    p.end_subtree(enclosing);
     p.exit_depth();
     result
 }
 
-/// Charge one level of tree depth for a left-spine extension.
+/// Charge the depth counter for one left-spine extension.
 ///
 /// Every iteration of the Pratt loop in [`expr_bp_inner`] wraps the
-/// current `lhs` in a new parent node, so the tree grows one level
-/// deeper *without* a new stack frame. Left-associative operator chains
-/// (`x+x+...+x`) and postfix chains (`x()()...`, `x[0][0]...`, `x.a.a...`,
-/// `x as T as T...`) therefore build a tree as deep as the chain is long.
-/// Charging `enter_depth` per extension — not just once per `expr_bp`
-/// call — is what makes `max_depth` bound the depth of the tree the
-/// parser *returns*, so every recursive consumer of that tree (including
-/// rowan's own recursive `Drop`) stays within its stack.
+/// current `lhs` in a new parent node via `precede`, so the tree grows
+/// one level deeper *without* a new stack frame. Left-associative
+/// operator chains (`x+x+...+x`) and postfix chains (`x()()...`,
+/// `x[0][0]...`, `x.a.a...`, `x as T as T...`) therefore build a tree as
+/// deep as the chain is long, and charging only on entry to [`expr_bp`]
+/// leaves them unbounded.
+///
+/// The charge must be *height*-aware, not path-aware. `precede` inserts
+/// the new node above everything built so far, pushing that entire
+/// subtree — not merely the current path — one level deeper. `lhs` is
+/// parsed before any charge is held and releases its own charges on the
+/// way out, so a path-only charge of one per extension lets the spine
+/// re-spend the budget `lhs` already used: the two compound to a
+/// Θ(`max_depth`²) tree for input that nests and chains at once, such as
+/// `((( x +x+x… ) +x+x… ) +x+x… )`. Charging up to the deepest point
+/// reached so far, plus one for the new parent, keeps the returned tree
+/// within `max_depth` for *any* composition.
 ///
 /// Returns `false` once the limit is reached, having emitted the
 /// recovery diagnostic; the caller then stops extending the spine and
@@ -154,11 +168,14 @@ fn expr_bp(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
 /// accumulates the levels taken so [`expr_bp_inner`] can release exactly
 /// that many on exit.
 fn charge_spine(p: &mut Parser, charged: &mut u32) -> bool {
-    if !p.enter_depth() {
-        p.error("expression nesting depth limit exceeded");
-        return false;
+    let target = p.depth_watermark().saturating_add(1);
+    while p.current_depth < target {
+        if !p.enter_depth() {
+            p.error("expression nesting depth limit exceeded");
+            return false;
+        }
+        *charged += 1;
     }
-    *charged += 1;
     true
 }
 
@@ -167,10 +184,10 @@ fn charge_spine(p: &mut Parser, charged: &mut u32) -> bool {
 /// out keeps the early `?`-returns from leaking past the depth
 /// bookkeeping.
 ///
-/// The loop below additionally charges the depth counter once per
-/// left-spine extension via [`charge_spine`]. Those charges are *held*
-/// for the rest of the loop — a later extension nests above every
-/// earlier one — and released together when the function returns.
+/// The loop below additionally charges the depth counter per left-spine
+/// extension via [`charge_spine`]. Those charges are *held* for the rest
+/// of the loop — a later extension nests above every earlier one — and
+/// released together when the function returns.
 fn expr_bp_inner(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
     let mut lhs = lhs(p)?;
     let mut charged = 0u32;

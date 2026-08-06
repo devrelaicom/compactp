@@ -46,30 +46,44 @@ pub struct ParseOptions {
     /// Maximum nesting depth the parser will build (default: `256`).
     ///
     /// The counter is charged on entry to each recursive grammar
-    /// function (expression, type, statement, block) *and* once per
-    /// left-spine extension inside the expression Pratt loop. That
-    /// second charge is what bounds the depth of the tree the parser
-    /// *returns*, rather than only the depth of its own stack:
-    /// left-associative operator chains (`x+x+...+x`) and postfix chains
-    /// (`f()()...`, `x[0][0]...`, `x.a.a...`, `x as T as T...`) deepen
-    /// the tree from inside a single stack frame, so charging entry
-    /// alone would leave them unbounded.
+    /// function (expression, type, statement, block) *and* per left-spine
+    /// extension inside the expression Pratt loop. That second charge is
+    /// what bounds the depth of the tree the parser *returns*, rather
+    /// than only the depth of its own stack: left-associative operator
+    /// chains (`x+x+...+x`) and postfix chains (`f()()...`,
+    /// `x[0][0]...`, `x.a.a...`, `x as T as T...`) deepen the tree from
+    /// inside a single stack frame, so charging entry alone would leave
+    /// them unbounded. The spine charge is height-aware — it counts the
+    /// height of the subtree being wrapped, not one step along the
+    /// current path — so nesting and chaining cannot compound.
     ///
     /// On overflow the parser emits a recovery diagnostic and produces
     /// an `ERROR` node instead of nesting further. The CST stays
     /// lossless: every byte of the input remains recoverable.
     ///
-    /// Across those grammars the returned tree's depth is a small
-    /// constant multiple of this value, since one charge may sit beneath
-    /// a few uncharged wrapper nodes (`PAREN_EXPR`, `EXPR_SEQ`, and
-    /// similar).
+    /// Across those grammars the returned tree's node depth is a small
+    /// constant above this value — one charge may sit beneath a few
+    /// uncharged wrapper nodes (`PAREN_EXPR`, `EXPR_SEQ`, and similar).
+    /// Measured over flat chains, pure nesting, and composed
+    /// nesting-plus-chaining shapes, the worst case is `max_depth + 4`.
     ///
-    /// Raising this raises the stack that *consumers* need: rowan drops
-    /// a tree recursively, and most CST walks recurse in the tree's
-    /// depth. The default keeps a dropped tree comfortably inside a
-    /// 2 MiB thread stack (the common async-runtime worker default).
-    /// For scale, the deepest file in the upstream Compact corpus has a
-    /// CST depth of 20.
+    /// # Stack cost
+    ///
+    /// This value is effectively a stack budget, for two parties:
+    ///
+    /// - *Consumers* of the tree — rowan drops a tree recursively, and
+    ///   most CST walks recurse in the tree's depth.
+    /// - The *parser itself* — nested input recurses through the grammar
+    ///   in step with the counter.
+    ///
+    /// At the default, parsing and dropping the deepest accepted input
+    /// needs roughly 1 MiB of stack in a debug build and 200 KiB in
+    /// release — comfortably inside a 2 MiB thread (the common
+    /// async-runtime worker default). Raising it scales both costs
+    /// linearly: on a 2 MiB stack the parser itself overflows at
+    /// `max_depth` around 1024 in debug and 4096 in release. Raise this
+    /// only alongside a thread stack sized to match. For scale, the
+    /// deepest file in the upstream Compact corpus has a CST depth of 20.
     pub max_depth: u32,
 }
 

@@ -15,12 +15,20 @@ While in `0.x`, breaking changes may land in any minor release.
   Left-associative operator chains (`x+x+...+x`) and postfix chains
   (`f()()...`, `x[0][0]...`, `x.a.a...`, `x as T as T...`) deepen the tree from
   inside a single stack frame and were never charged against the limit, so
-  roughly 10 KB of *valid*
-  Compact produced a 5000-deep tree with zero diagnostics. Dropping that tree
-  overflowed the stack and aborted the process with `SIGABRT` — uncatchable,
-  `catch_unwind` does not help — on any thread with a 2 MiB stack, and the
-  `compactp cst` and `compactp stats` commands aborted on their own main
-  thread. ([#21](https://github.com/devrelaicom/compactp/issues/21))
+  roughly 10 KB of *valid* Compact produced a 5000-deep tree with zero
+  diagnostics. Dropping that tree overflowed the stack and aborted the process
+  with `SIGABRT` — uncatchable, `catch_unwind` does not help — on any thread
+  with a 2 MiB stack, and the `compactp cst` and `compactp stats` commands
+  aborted on their own main thread.
+  ([#21](https://github.com/devrelaicom/compactp/issues/21))
+- The spine charge is height-aware: it counts the height of the subtree being
+  wrapped rather than one step along the current path. A path-only charge is
+  insufficient, because the left-hand side is parsed before the loop holds any
+  charge and releases its own charges on the way out — so nesting and chaining
+  together (`((( x +x+x… ) +x+x… ) +x+x… )`) each re-spend the same budget and
+  compound into a Θ(`max_depth`²) tree. At the default that reached CST depth
+  23,297 from 131 KB of valid Compact, enough to abort a 2 MiB thread again.
+  Worst measured node depth is now `max_depth + 4`.
 
 ### Changed
 
@@ -30,7 +38,9 @@ While in `0.x`, breaking changes may land in any minor release.
   operators or postfix operations therefore reports diagnostics where it
   previously reported none; the CST remains lossless in both cases. For scale,
   the deepest file in the 486-file upstream Compact corpus has a CST depth of
-  20. Raise `ParseOptions::max_depth` to accept deeper input.
+  20. Raise `ParseOptions::max_depth` to accept deeper input, sizing the thread
+  stack to match — the knob is a stack budget for the parser as well as for
+  consumers of the tree.
 
 ## [0.1.0-beta.1]
 

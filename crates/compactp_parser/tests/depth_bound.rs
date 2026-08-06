@@ -11,6 +11,14 @@
 //! `Drop` then aborted the process (SIGABRT, uncatchable) on any thread
 //! with a 2 MiB stack.
 //!
+//! Flat chains alone do **not** cover this. `lhs` is parsed before the
+//! loop holds any charge and releases its own charges on the way out, so
+//! a per-extension charge of one still lets the spine re-spend the budget
+//! `lhs` already used. Nesting and chaining then compound into a
+//! Θ(`max_depth`²) tree — at the default that is a 91x overshoot, enough
+//! to abort on a 2 MiB stack again. The `composed_*` tests below are the
+//! ones that distinguish a real bound from a path-only one; keep them.
+//!
 //! Note on test hygiene: every assertion below is written so that a
 //! regression fails the test rather than aborting the test process. A
 //! tree deep enough to trip these bounds is also deep enough to overflow
@@ -38,6 +46,30 @@ fn chained(n: usize, sep: &str, tail: &str) -> String {
     format!("{PRE}{body}{POST}")
 }
 
+/// Build a valid circuit that nests a chain inside a chain, `depth` times:
+/// `E(0) = x`, `E(m) = open E(m-1) (sep tail)*links close`.
+///
+/// With `open`/`close` = `(`/`)` and `sep`/`tail` = `+`/`x` this is
+/// `((( x +x+x… ) +x+x… ) +x+x… )` — the shape that separates a
+/// height-aware depth charge from a path-only one. Each nesting level
+/// hands the Pratt loop an already-built subtree to wrap, so a charge
+/// that only counts path steps lets every level re-spend the full budget.
+fn composed(depth: usize, links: usize, open: &str, close: &str, sep: &str, tail: &str) -> String {
+    let mut body = String::from("x");
+    for _ in 0..depth {
+        let mut next = String::with_capacity(body.len() + links * (sep.len() + tail.len()) + 2);
+        next.push_str(open);
+        next.push_str(&body);
+        for _ in 0..links {
+            next.push_str(sep);
+            next.push_str(tail);
+        }
+        next.push_str(close);
+        body = next;
+    }
+    format!("{PRE}{body}{POST}")
+}
+
 /// Maximum node depth of `root`, computed with an explicit work-stack.
 ///
 /// Deliberately iterative: a recursive walk would overflow the stack on
@@ -59,14 +91,22 @@ fn max_node_depth(root: &SyntaxNode) -> usize {
 
 /// Depth a tree parsed with `max_depth` is allowed to reach.
 ///
-/// A single depth charge can sit beneath a few uncharged wrapper nodes
-/// (`PAREN_EXPR`, `EXPR_SEQ`, …), so the bound is a constant multiple
-/// rather than equality. Measured worst case across the shapes below is
-/// ~1.25x; 4x leaves room for grammar changes while still being three
-/// orders of magnitude below the unbounded depth (`LINKS`) this test
-/// exists to catch.
+/// The invariant the parser establishes is on *charged* depth: the
+/// counter tracks the deepest point of the subtree under construction,
+/// and never exceeds `max_depth`. Node depth is not equal to charged
+/// depth, because a charge can sit beneath a few uncharged wrapper nodes
+/// (`PAREN_EXPR`, `EXPR_SEQ`, …) — so the bound is a constant multiple,
+/// and only a constant multiple is meaningful to assert.
+///
+/// Measured across 18 shapes (flat chains, pure nesting, and the
+/// composed nest-plus-chain shapes) at `max_depth` 8 through 256, the
+/// worst observed node depth is `max_depth + 4`, i.e. ratio 1.02 at the
+/// default and 1.50 at `max_depth` 8 where the constant dominates. `2x`
+/// plus a constant absorbs grammar changes while still failing loudly on
+/// the bug this file exists to catch: the path-only charge produced
+/// ratio 91 at the default (depth 23,297 against a 528 bound).
 fn depth_limit(max_depth: u32) -> usize {
-    4 * max_depth as usize + 16
+    2 * max_depth as usize + 16
 }
 
 /// Take the CST out of `result`, first proving it is shallow enough that
@@ -139,6 +179,45 @@ fn max_depth_option_bounds_the_returned_tree() {
     }
 }
 
+/// Nesting composed with chaining — the shape a flat-chain test cannot
+/// catch.
+///
+/// Each nesting level hands the Pratt loop an already-built subtree to
+/// wrap. A charge that counts only path steps lets every level re-spend
+/// the budget the inner subtree already used, compounding to a
+/// Θ(`max_depth`²) tree: at `max_depth` 256 this input reached depth
+/// 23,297 (ratio 91) and aborted the process when dropped.
+#[test]
+fn composed_nesting_and_chaining_is_depth_bounded() {
+    for (what, open, close, sep, tail) in [
+        ("paren + infix", "(", ")", "+", "x"),
+        ("paren + call", "(", ")", "", "()"),
+        ("paren + member", "(", ")", "", ".a"),
+        ("paren + index/cast", "(", ")", "", "[0] as Field"),
+        ("array + infix", "[", "]", "+", "x"),
+        ("unary + infix", "!(", ")", "+", "x"),
+    ] {
+        for max_depth in [16u32, 64, 256] {
+            let n = max_depth as usize;
+            let src = composed(n, n, open, close, sep, tail);
+            let result = parse_with(
+                &src,
+                ParseOptions {
+                    recover: true,
+                    max_errors: 256,
+                    max_depth,
+                },
+            );
+            assert_bounded_and_lossless(
+                result,
+                &src,
+                max_depth,
+                &format!("composed {what} @ max_depth {max_depth}"),
+            );
+        }
+    }
+}
+
 /// The bound is announced, not silent. Truncating the tree without a
 /// diagnostic would make valid-looking input parse "cleanly" into a tree
 /// that no longer reflects the source.
@@ -168,29 +247,29 @@ fn realistic_nesting_is_unaffected() {
         "}\n"
     );
     let result = parse(src);
+    let messages: Vec<String> = result.errors.iter().map(|e| e.message.clone()).collect();
+    let root = bounded_root(result, 256, "realistic source");
     assert!(
-        result.errors.is_empty(),
-        "realistic source must parse cleanly: {:?}",
-        result.errors.iter().map(|e| &e.message).collect::<Vec<_>>()
+        messages.is_empty(),
+        "realistic source must parse cleanly: {messages:?}"
     );
-    let root = SyntaxNode::new_root(result.green);
     assert!(
         max_node_depth(&root) < 32,
         "realistic source must stay far below the default limit"
     );
 }
 
-/// Issue #21's exact failure mode: dropping the tree on a 2 MiB stack —
-/// the size a Tokio worker thread uses by default — aborted the process.
+/// Parse and drop `src` on a 2 MiB stack — the size a Tokio worker
+/// thread uses by default, and the scenario issue #21 reported.
 ///
 /// The drop is guarded by an iterative depth check so a regression
-/// returns an error to be reported rather than aborting the harness.
-#[test]
-fn deep_chain_drops_cleanly_on_a_2mib_stack_thread() {
+/// reports a depth rather than aborting the harness. At the default
+/// `max_depth` the whole pipeline needs about 1 MiB in a debug build,
+/// so 2 MiB exercises the real scenario without being flaky.
+fn parse_and_drop_on_small_stack(src: String, what: &'static str) {
     let worker = std::thread::Builder::new()
         .stack_size(2 * 1024 * 1024)
-        .spawn(|| {
-            let src = chained(LINKS, "+", "x");
+        .spawn(move || {
             let root = SyntaxNode::new_root(parse(&src).green);
             let depth = max_node_depth(&root);
             if depth > depth_limit(256) {
@@ -209,6 +288,23 @@ fn deep_chain_drops_cleanly_on_a_2mib_stack_thread() {
         .expect("worker thread must not abort or panic")
     {
         Ok(_) => {}
-        Err(depth) => panic!("CST depth {depth} exceeds bound {}", depth_limit(256)),
+        Err(depth) => panic!(
+            "{what}: CST depth {depth} exceeds bound {}",
+            depth_limit(256)
+        ),
     }
+}
+
+/// Issue #21's exact failure mode, flat-chain form.
+#[test]
+fn deep_chain_drops_cleanly_on_a_2mib_stack_thread() {
+    parse_and_drop_on_small_stack(chained(LINKS, "+", "x"), "infix chain");
+}
+
+/// Issue #21's failure mode via the composed shape, which survived the
+/// first (path-only) fix and aborted a 2 MiB thread again at default
+/// options — 131 KB of valid Compact, CST depth 23,297.
+#[test]
+fn composed_input_drops_cleanly_on_a_2mib_stack_thread() {
+    parse_and_drop_on_small_stack(composed(256, 256, "(", ")", "+", "x"), "composed shape");
 }
