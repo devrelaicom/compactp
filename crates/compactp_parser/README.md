@@ -11,7 +11,8 @@ explicit error recovery with `ERROR` nodes. Bounded nesting depth
 the depth of the expression, type, statement, block, pattern, module and
 version-term nesting it builds, so at the default neither the parser nor a
 recursive consumer of the tree overflows a 2 MiB thread stack on adversarial
-input. Nested `contract` declarations are the one production not yet capped.
+input. Nested `contract` declarations are the one production not yet capped
+([#28](https://github.com/devrelaicom/compactp/issues/28)).
 The knob is a stack budget for both — see the bounded-depth guarantee in
 [`SECURITY.md`](https://github.com/devrelaicom/compactp/blob/main/SECURITY.md)
 before raising it.

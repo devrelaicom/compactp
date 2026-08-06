@@ -74,7 +74,7 @@ fn block_inner(p: &mut Parser) {
         if p.errors_exhausted() {
             break;
         }
-        stmt(p);
+        super::step_ensuring_progress(p, stmt);
     }
     p.expect(R_BRACE);
     m.complete(p, BLOCK);

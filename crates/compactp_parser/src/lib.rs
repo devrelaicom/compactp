@@ -42,6 +42,14 @@ pub struct ParseOptions {
     pub recover: bool,
     /// Maximum number of errors before the parser stops recovery
     /// (default: `256`).
+    ///
+    /// A ceiling, not a target. Every list-parsing recovery loop
+    /// consumes at least one token per iteration, so the number of
+    /// diagnostics an input can produce is a function of that input and
+    /// is reached well before the budget for anything but pathological
+    /// source. Raising this therefore surfaces more of a broken file's
+    /// real problems rather than manufacturing diagnostics: the count is
+    /// stable once the budget exceeds what the input warrants.
     pub max_errors: usize,
     /// Maximum nesting depth the parser will build (default: `256`).
     ///
@@ -64,23 +72,30 @@ pub struct ParseOptions {
     ///
     /// Across those grammars the returned tree's node depth is a small
     /// constant *multiple* of this value: a charge can sit beneath up to
-    /// three uncharged wrapper nodes — `PAREN_EXPR` → `EXPR_SEQ` →
-    /// `ASSIGN_EXPR` for input shaped like `( … =y,z )`, or
+    /// three uncharged wrapper nodes. Three grammars reach that maximum
+    /// — `TYPE_REF` → `GENERIC_ARG_LIST` → `GENERIC_ARG` for `A<A<…>>`,
+    /// `PAREN_EXPR` → `EXPR_SEQ` → `ASSIGN_EXPR` for `( … =y,z )`, and
     /// `VERSION_PAREN_EXPR` → `VERSION_OR_EXPR` → `VERSION_AND_EXPR` for
     /// `( … &&2||3&&4 )`. Measured over flat chains, pure nesting,
     /// element-position wrappers, composed nesting-plus-chaining, nested
-    /// destructuring patterns, nested modules and nested version terms,
-    /// the worst node depth is `3 × max_depth + 3` (771 at the default).
-    /// Peak depth is *exactly* affine in `max_depth` at 8, 32, 64, 128,
-    /// 256 and 512, so it is a genuine constant rather than something
-    /// the input can drive.
+    /// destructuring patterns, nested modules, nested version terms and
+    /// nested generic types in every position that accepts one, the
+    /// worst node depth is `3 × max_depth + 4` (772 at the default),
+    /// from a generic type in parameter, struct-field or contract-member
+    /// position such as `circuit f(a: A<A<…>>)`. Peak depth is *exactly*
+    /// affine in `max_depth` at 8, 32, 64, 128, 256 and 512, so it is a
+    /// genuine constant rather than something the input can drive.
     ///
     /// One recursive production is still **not** charged: a `contract`
-    /// declaration nested directly inside another
-    /// (`contract A { contract B { … } }`) recurses through
-    /// `declaration` without touching the counter, so that one shape is
-    /// unbounded at any setting of this option. Everything above holds
-    /// for input that does not nest `contract` declarations.
+    /// declaration nested inside another recurses through `declaration`
+    /// without touching the counter, so that shape is unbounded at any
+    /// setting of this option. It is reachable from four places — a
+    /// top-level `contract A { contract B { … } }`, `export contract`, a
+    /// circuit or constructor body, and a `module` body — so rejecting
+    /// only the top-level form does not mitigate it. Tracked as
+    /// [issue #28](https://github.com/devrelaicom/compactp/issues/28).
+    /// Everything above holds for input that does not nest `contract`
+    /// declarations.
     ///
     /// # Stack cost
     ///

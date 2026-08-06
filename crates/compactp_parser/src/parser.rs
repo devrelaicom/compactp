@@ -88,6 +88,16 @@ impl<'src> Parser<'src> {
         self.depth_watermark = self.depth_watermark.max(enclosing);
     }
 
+    /// Index of the next raw token to be consumed.
+    ///
+    /// Only meaningful as a *progress* probe: a recovery loop that runs
+    /// a production and finds this unchanged knows the production
+    /// consumed nothing, so iterating again would repeat the same work
+    /// on the same token. See [`crate::grammar::step_ensuring_progress`].
+    pub(crate) fn tok_pos(&self) -> usize {
+        self.pos
+    }
+
     /// Peek at the current non-trivia token kind.
     pub(crate) fn current(&self) -> SyntaxKind {
         self.nth(0)

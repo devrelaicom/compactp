@@ -119,7 +119,7 @@ fn module_def_inner(p: &mut Parser, has_export: bool) {
         if p.errors_exhausted() {
             break;
         }
-        declarations::declaration(p);
+        super::step_ensuring_progress(p, declarations::declaration);
     }
     p.expect(R_BRACE);
     m.complete(p, MODULE_DEF);

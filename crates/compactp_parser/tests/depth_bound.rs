@@ -117,8 +117,9 @@ fn max_node_depth(root: &SyntaxNode) -> usize {
 /// wrapper nodes — so only a constant multiple is meaningful to assert.
 ///
 /// The multiplier is set by the deepest wrapper stack any grammar can
-/// place between two charges, which is three. Two shapes reach it:
+/// place between two charges, which is three. Three shapes reach it:
 ///
+/// - types: `TYPE_REF → GENERIC_ARG_LIST → GENERIC_ARG` for `A<A<…>>`
 /// - expressions: `PAREN_EXPR → EXPR_SEQ → ASSIGN_EXPR` for `( … =y,z )`
 /// - version terms: `VERSION_PAREN_EXPR → VERSION_OR_EXPR →
 ///   VERSION_AND_EXPR` for `( … &&2||3&&4 )`
@@ -131,14 +132,17 @@ fn max_node_depth(root: &SyntaxNode) -> usize {
 ///
 /// Measured worst over those families, scanning every level count up to
 /// `4 x max_depth` at `max_depth` 8/32/64/128/256/512, is
-/// `3 x max_depth + 3` — 771 at the default, from the version shape.
-/// Peak depth is *exactly* affine in `max_depth` at every one of those
-/// six settings, which is what makes the multiplier a constant rather
-/// than something the input can drive. `4x` plus a constant leaves
-/// headroom for a further wrapper while still failing loudly on the bugs
-/// this file exists to catch: #21's path-only charge produced ratio 91
-/// at the default (depth 23,297 against a 1,040 bound), and #23's
-/// uncharged grammars produced depth 4,005 from 4 KB of input.
+/// `3 x max_depth + 4` — 772 at the default. The worst shape is a
+/// generic type in parameter, struct-field or contract-member position
+/// (`circuit f(a: A<A<…>>)`), which pays the three type wrappers plus
+/// one uncharged node above the first charge. Peak depth is *exactly*
+/// affine in `max_depth` at every one of those six settings, which is
+/// what makes the multiplier a constant rather than something the input
+/// can drive. `4x` plus a constant leaves headroom for a further wrapper
+/// while still failing loudly on the bugs this file exists to catch:
+/// #21's path-only charge produced ratio 91 at the default (depth 23,297
+/// against a 1,040 bound), and #23's uncharged grammars produced depth
+/// 4,005 from 4 KB of input.
 fn depth_limit(max_depth: u32) -> usize {
     4 * max_depth as usize + 16
 }
@@ -472,6 +476,25 @@ fn pragma_version(levels: usize, open: &str, close: &str, seed: &str) -> String 
     )
 }
 
+/// `circuit f(): A<A<…<B>…>> { return x; }` — nests the type grammar
+/// through `TYPE_REF → GENERIC_ARG_LIST → GENERIC_ARG`, three uncharged
+/// wrapper nodes per `ty` charge.
+fn generic_return_type(levels: usize) -> String {
+    format!(
+        "circuit f(): {} {{ return x; }}",
+        nested(levels, "A<", ">", "B")
+    )
+}
+
+/// The same nesting one node further down, in parameter position. This
+/// is the deepest tree the parser will build at a given `max_depth`.
+fn generic_param_type(levels: usize) -> String {
+    format!(
+        "circuit f(a: {}): Field {{ return x; }}",
+        nested(levels, "A<", ">", "B")
+    )
+}
+
 /// `max_depth` values the #23 families are exercised at.
 ///
 /// Spread wide enough that a bound which is secretly a function of the
@@ -589,7 +612,7 @@ fn version_nesting_is_depth_bounded() {
 #[test]
 fn node_depth_is_affine_in_max_depth() {
     type Shape = (&'static str, fn(usize) -> String, isize, isize);
-    let shapes: [Shape; 7] = [
+    let shapes: [Shape; 10] = [
         ("tuple pattern", |n| const_pattern(n, "[", "]"), 2, 1),
         ("param pattern", param_pattern, 2, 4),
         ("module nesting", |n| modules(n, false, ""), 1, 2),
@@ -618,6 +641,22 @@ fn node_depth_is_affine_in_max_depth() {
             |n| composed(n, 0, "(", "=y,z)", "", ""),
             3,
             -1,
+        ),
+        // The type grammar's own three-wrapper stack, `TYPE_REF →
+        // GENERIC_ARG_LIST → GENERIC_ARG`. Nothing in this PR changes
+        // `types.rs`, but this is the family that sets the *global*
+        // worst case, so it belongs in the instrument that guards it.
+        // Return position pays three wrappers per charge; parameter,
+        // struct-field and contract-member positions add one more
+        // uncharged node above the first charge and are the worst
+        // shapes the parser accepts at any setting.
+        ("generic type, return position", generic_return_type, 3, 3),
+        ("generic type, param position", generic_param_type, 3, 4),
+        (
+            "generic type, struct field",
+            |n| format!("struct S {{ a: {}; }}", nested(n, "A<", ">", "B")),
+            3,
+            4,
         ),
     ];
 

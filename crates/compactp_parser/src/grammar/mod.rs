@@ -10,6 +10,46 @@ use crate::parser::Parser;
 use compactp_syntax::SyntaxKind;
 use compactp_syntax::SyntaxKind::*;
 
+/// Run one iteration of a recovery loop, guaranteeing forward progress.
+///
+/// The loops that repeatedly parse list elements — declarations at file
+/// scope, statements in a block, members of a `module` or `contract` —
+/// are bounded only by `errors_exhausted()`. That bounds the *diagnostic
+/// budget*, not the loop: a production that reports an error and
+/// consumes nothing leaves the loop to run again on the same token, so
+/// the loop emits diagnostics until it reaches `max_errors`. The count
+/// then tracks `ParseOptions::max_errors` rather than the size of the
+/// input, turning a public tuning knob into a memory and CPU amplifier —
+/// `export`, six bytes, reaches `max_errors` diagnostics on its own.
+///
+/// Requiring a token per iteration removes the amplifier at its source.
+/// A stalled production has already reported the problem, so the skipped
+/// token is wrapped in `ERROR` without a second diagnostic; a stall that
+/// somehow reported *nothing* gets one, so a token is never discarded
+/// silently. Either way the token stays in the tree and the CST remains
+/// lossless.
+///
+/// Loops whose body ends in an unconditional `break` on a malformed
+/// element (`struct_def`, `record_type`) terminate structurally and do
+/// not need this.
+fn step_ensuring_progress<F>(p: &mut Parser, parse_fn: F)
+where
+    F: FnOnce(&mut Parser),
+{
+    let tok_before = p.tok_pos();
+    let errors_before = p.error_count;
+    parse_fn(p);
+    if p.tok_pos() != tok_before || p.at_end() {
+        return;
+    }
+    if p.error_count == errors_before {
+        p.error("unexpected token");
+    }
+    let m = p.start();
+    p.bump_any();
+    m.complete(p, ERROR);
+}
+
 /// Parse a complete source file: `source_file → pelt* EOF`
 pub(crate) fn source_file(p: &mut Parser) {
     let m = p.start();
@@ -23,7 +63,7 @@ pub(crate) fn source_file(p: &mut Parser) {
             err.complete(p, ERROR);
             break;
         }
-        declarations::declaration(p);
+        step_ensuring_progress(p, declarations::declaration);
     }
     // Eat trailing trivia so it's inside the SOURCE_FILE node
     p.eat_trivia();

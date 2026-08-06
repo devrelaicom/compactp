@@ -284,11 +284,11 @@ fn contract(p: &mut Parser, has_export: bool) {
         if p.errors_exhausted() {
             break;
         }
-        match p.current() {
+        super::step_ensuring_progress(p, |p| match p.current() {
             CIRCUIT_KW => contract_circuit(p),
             PURE_KW if p.nth(1) == CIRCUIT_KW => contract_circuit(p),
             _ => declaration(p),
-        }
+        });
     }
 
     p.expect(R_BRACE);

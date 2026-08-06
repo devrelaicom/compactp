@@ -48,19 +48,41 @@ While in `0.x`, breaking changes may land in any minor release.
   constraint here is the parser's own recursion rather than the tree's `Drop`:
   leaking the tree instead of dropping it leaves the threshold unchanged, so a
   plain depth charge on entry is the fix. Worst measured node depth across all
-  charged grammars is now `3 × max_depth + 3` (771 at the default), set by
-  `VERSION_PAREN_EXPR` → `VERSION_OR_EXPR` → `VERSION_AND_EXPR`, and is exactly
-  affine in `max_depth` at 8, 32, 64, 128, 256 and 512.
+  grammars is `3 × max_depth + 4` (772 at the default), from a generic type in
+  parameter, struct-field or contract-member position, and is exactly affine in
+  `max_depth` at 8, 32, 64, 128, 256 and 512. Charging `module_def` also
+  improves that worst case from `main`'s 773
+  (`module M{ struct S { a: A<A<…>>; } }`), whose previously documented figure
+  of 767 was understated because the wrapper-stack enumeration omitted
+  `TYPE_REF` → `GENERIC_ARG_LIST` → `GENERIC_ARG`.
   ([#23](https://github.com/devrelaicom/compactp/issues/23))
+- `ParseOptions::max_errors` no longer amplifies. Every list-parsing recovery
+  loop was bounded by the error budget but not by token progress, so a
+  production that reported an error and consumed nothing left the loop to
+  re-run on the same token until it reached `max_errors`. The diagnostic count
+  tracked the option rather than the input: `export` — six bytes — reached
+  `max_errors` diagnostics on its own, and at `max_errors = 5_000_000` a
+  115-byte input produced 5,000,002 diagnostics and over 600 MiB of message
+  strings. Raising `max_errors` is exactly what a language server or a batch
+  linter does, so this made a tuning knob into a memory and CPU amplifier.
+  Recovery loops now skip a token inside an `ERROR` node when a production
+  stalls. Five of the reachable inputs predate this release (`export`, a stray
+  `]` in statement position, `export ;` inside a `contract` or `module` body);
+  two more became reachable when `pattern()` started enforcing `max_depth`.
 
 ### Known issues
 
 - Nested `contract` declarations are still not depth-charged.
   `declarations::contract` recurses through `declarations::declaration` back
-  into itself, so `contract A { contract B { … } }` is unbounded at every
-  `max_depth` and overflows the parser's stack at around 37,500 levels. Same
-  class as [#23](https://github.com/devrelaicom/compactp/issues/23); not yet
-  tracked by its own issue.
+  into itself, so nested `contract` declarations are unbounded at every
+  `max_depth` and overflow the parser's stack at around 37,500 levels.
+  Reachable from a top-level `contract A { contract B { … } }`, from
+  `export contract`, from a circuit or constructor body, and from a `module`
+  body — the enclosing `block`/`stmt`/`module_def` charge is spent once on
+  entry and the uncharged cycle then runs free, so rejecting only the
+  top-level form does not mitigate it. Same class as
+  [#23](https://github.com/devrelaicom/compactp/issues/23); tracked as
+  [#28](https://github.com/devrelaicom/compactp/issues/28).
 
 ### Changed
 
