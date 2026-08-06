@@ -8,11 +8,11 @@ structured diagnostics. Uses marker-based tree construction over
 [`rowan`](https://crates.io/crates/rowan), Pratt-style expression precedence, and
 explicit error recovery with `ERROR` nodes. Bounded nesting depth
 (`ParseOptions::max_depth`, default 256) caps the parser's own recursion and
-the depth of the expression, type, statement, block, pattern, module and
-version-term nesting it builds, so at the default neither the parser nor a
-recursive consumer of the tree overflows a 2 MiB thread stack on adversarial
-input. Nested `contract` declarations are the one production not yet capped
-([#28](https://github.com/devrelaicom/compactp/issues/28)).
+the depth of the tree it builds. Every recursive production in the grammar is
+charged against it — expression, type, statement, block, pattern, module,
+version term and contract — so no shape of input nests without spending the
+counter, and at the default neither the parser nor a recursive consumer of the
+tree overflows a 2 MiB thread stack on adversarial input.
 The knob is a stack budget for both — see the bounded-depth guarantee in
 [`SECURITY.md`](https://github.com/devrelaicom/compactp/blob/main/SECURITY.md)
 before raising it.

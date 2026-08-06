@@ -54,9 +54,9 @@ pub struct ParseOptions {
     /// Maximum nesting depth the parser will build (default: `256`).
     ///
     /// The counter is charged on entry to each recursive grammar
-    /// function — expression, type, statement, block, pattern, module
-    /// and version term — *and* per left-spine extension inside the
-    /// expression Pratt loop. That second charge is what bounds the
+    /// function — expression, type, statement, block, pattern, module,
+    /// version term and contract — *and* per left-spine extension inside
+    /// the expression Pratt loop. That second charge is what bounds the
     /// depth of the tree the parser *returns*, rather than only the
     /// depth of its own stack: left-associative operator chains
     /// (`x+x+...+x`) and postfix chains (`f()()...`, `x[0][0]...`,
@@ -70,32 +70,37 @@ pub struct ParseOptions {
     /// an `ERROR` node instead of nesting further. The CST stays
     /// lossless: every byte of the input remains recoverable.
     ///
-    /// Across those grammars the returned tree's node depth is a small
-    /// constant *multiple* of this value: a charge can sit beneath up to
-    /// three uncharged wrapper nodes. Three grammars reach that maximum
-    /// — `TYPE_REF` → `GENERIC_ARG_LIST` → `GENERIC_ARG` for `A<A<…>>`,
+    /// Those eight charges cover the whole grammar. Every recursion
+    /// cycle in the parser passes through at least one of them — but
+    /// call recursion is not the only way to deepen a tree.
+    /// `CompletedMarker::precede` inserts a parent above an
+    /// already-finished subtree from inside one stack frame, with no
+    /// call cycle at all, which is what left
+    /// [issue #21](https://github.com/devrelaicom/compactp/issues/21)
+    /// unbounded; its six call sites are all inside the
+    /// height-charged Pratt loop.
+    /// Together those two facts leave no way to nest without spending
+    /// the counter, so there is no longer a production that is
+    /// unbounded at every setting of this option.
+    ///
+    /// Node depth is a small constant *multiple* of this value rather
+    /// than equal to it, because a charge can sit beneath up to three
+    /// uncharged wrapper nodes. Three grammars reach that maximum —
+    /// `TYPE_REF` → `GENERIC_ARG_LIST` → `GENERIC_ARG` for `A<A<…>>`,
     /// `PAREN_EXPR` → `EXPR_SEQ` → `ASSIGN_EXPR` for `( … =y,z )`, and
     /// `VERSION_PAREN_EXPR` → `VERSION_OR_EXPR` → `VERSION_AND_EXPR` for
     /// `( … &&2||3&&4 )`. Measured over flat chains, pure nesting,
     /// element-position wrappers, composed nesting-plus-chaining, nested
-    /// destructuring patterns, nested modules, nested version terms and
+    /// destructuring patterns, nested modules, nested contracts through
+    /// each of the four routes that reach them, nested version terms and
     /// nested generic types in every position that accepts one, the
     /// worst node depth is `3 × max_depth + 4` (772 at the default),
-    /// from a generic type in parameter, struct-field or contract-member
-    /// position such as `circuit f(a: A<A<…>>)`. Peak depth is *exactly*
-    /// affine in `max_depth` at 8, 32, 64, 128, 256 and 512, so it is a
-    /// genuine constant rather than something the input can drive.
-    ///
-    /// One recursive production is still **not** charged: a `contract`
-    /// declaration nested inside another recurses through `declaration`
-    /// without touching the counter, so that shape is unbounded at any
-    /// setting of this option. It is reachable from four places — a
-    /// top-level `contract A { contract B { … } }`, `export contract`, a
-    /// circuit or constructor body, and a `module` body — so rejecting
-    /// only the top-level form does not mitigate it. Tracked as
-    /// [issue #28](https://github.com/devrelaicom/compactp/issues/28).
-    /// Everything above holds for input that does not nest `contract`
-    /// declarations.
+    /// from a generic type in parameter or struct-field position such as
+    /// `circuit f(a: A<A<…>>)`. Peak depth is *exactly* affine in
+    /// `max_depth` at 8, 32, 64, 128, 256 and 512, so it is a genuine
+    /// constant rather than something the input can drive. That figure
+    /// is a measurement over those families, not a proof over every
+    /// possible input.
     ///
     /// # Stack cost
     ///

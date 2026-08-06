@@ -271,7 +271,36 @@ fn witness(p: &mut Parser, has_export: bool) {
 /// We dispatch by the current token: contract-circuit forms go through
 /// `contract_circuit` (preserving the existing CST shape); anything else
 /// falls back to the general `declaration` dispatcher.
+///
+/// Charges the depth counter: that fallback closes a recursion cycle,
+/// `contract → declaration → contract`, so `contract A{ contract B{ … } }`
+/// recurses once per level. The charge belongs here rather than in
+/// `declaration`, because both elementary cycles — the plain form and
+/// the `export contract` form routed through `export_prefixed` — pass
+/// through this function. A path-only charge suffices: nothing in this
+/// module uses `CompletedMarker::precede` (its only six call sites are
+/// in `expressions.rs`), so every node is built above the path currently
+/// on the stack and node depth stays proportional to the charge — one
+/// `CONTRACT_DECL` per level.
 fn contract(p: &mut Parser, has_export: bool) {
+    if !p.enter_depth() {
+        // Recursion limit exceeded — emit a recovery diagnostic and an
+        // ERROR placeholder rather than risk a stack overflow. Bump one
+        // token (if any remain) so the enclosing declaration loop makes
+        // progress and cannot spin on the same `contract` keyword.
+        let m = p.start();
+        p.error("contract nesting depth limit exceeded");
+        if !p.at_end() {
+            p.bump_any();
+        }
+        m.complete(p, ERROR);
+        return;
+    }
+    contract_inner(p, has_export);
+    p.exit_depth();
+}
+
+fn contract_inner(p: &mut Parser, has_export: bool) {
     let m = p.start();
     if has_export {
         p.bump(EXPORT_KW);
