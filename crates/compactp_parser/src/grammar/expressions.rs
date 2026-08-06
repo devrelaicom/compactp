@@ -130,16 +130,67 @@ fn expr_bp(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
         }
         return Some(m.complete(p, ERROR));
     }
+    // Measure this expression's height independently of its siblings:
+    // the Pratt loop needs the height of the subtree it is about to wrap,
+    // not the whole parse's running maximum.
+    let enclosing = p.begin_subtree();
     let result = expr_bp_inner(p, min_bp);
+    p.end_subtree(enclosing);
     p.exit_depth();
     result
 }
 
+/// Charge the depth counter for one left-spine extension.
+///
+/// Every iteration of the Pratt loop in [`expr_bp_inner`] wraps the
+/// current `lhs` in a new parent node via `precede`, so the tree grows
+/// one level deeper *without* a new stack frame. Left-associative
+/// operator chains (`x+x+...+x`) and postfix chains (`x()()...`,
+/// `x[0][0]...`, `x.a.a...`, `x as T as T...`) therefore build a tree as
+/// deep as the chain is long, and charging only on entry to [`expr_bp`]
+/// leaves them unbounded.
+///
+/// The charge must be *height*-aware, not path-aware. `precede` inserts
+/// the new node above everything built so far, pushing that entire
+/// subtree — not merely the current path — one level deeper. `lhs` is
+/// parsed before any charge is held and releases its own charges on the
+/// way out, so a path-only charge of one per extension lets the spine
+/// re-spend the budget `lhs` already used: the two compound to a
+/// Θ(`max_depth`²) tree for input that nests and chains at once, such as
+/// `((( x +x+x… ) +x+x… ) +x+x… )`. Charging up to the deepest point
+/// reached so far, plus one for the new parent, keeps the returned tree
+/// within `max_depth` for *any* composition.
+///
+/// Returns `false` once the limit is reached, having emitted the
+/// recovery diagnostic; the caller then stops extending the spine and
+/// leaves the unconsumed tail to the enclosing recovery path, which
+/// wraps it in `ERROR` nodes and so keeps the CST lossless. `charged`
+/// accumulates the levels taken so [`expr_bp_inner`] can release exactly
+/// that many on exit.
+fn charge_spine(p: &mut Parser, charged: &mut u32) -> bool {
+    let target = p.depth_watermark().saturating_add(1);
+    while p.current_depth < target {
+        if !p.enter_depth() {
+            p.error("expression nesting depth limit exceeded");
+            return false;
+        }
+        *charged += 1;
+    }
+    true
+}
+
 /// Pratt parser body — only ever invoked from [`expr_bp`], which owns
-/// the depth-counter enter/exit. Splitting the body out keeps the early
-/// `?`-returns from leaking past the depth bookkeeping.
+/// the depth-counter enter/exit for the call itself. Splitting the body
+/// out keeps the early `?`-returns from leaking past the depth
+/// bookkeeping.
+///
+/// The loop below additionally charges the depth counter per left-spine
+/// extension via [`charge_spine`]. Those charges are *held* for the rest
+/// of the loop — a later extension nests above every earlier one — and
+/// released together when the function returns.
 fn expr_bp_inner(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
     let mut lhs = lhs(p)?;
+    let mut charged = 0u32;
 
     loop {
         let op = p.current();
@@ -148,6 +199,9 @@ fn expr_bp_inner(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
         if op == QUESTION {
             let ((), r_bp) = ((), 1); // right-associative, BP=1
             if r_bp < min_bp {
+                break;
+            }
+            if !charge_spine(p, &mut charged) {
                 break;
             }
             let m = lhs.precede(p);
@@ -165,6 +219,9 @@ fn expr_bp_inner(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
             if l_bp < min_bp {
                 break;
             }
+            if !charge_spine(p, &mut charged) {
+                break;
+            }
             let m = lhs.precede(p);
             p.bump(AS_KW);
             super::types::ty(p);
@@ -176,6 +233,9 @@ fn expr_bp_inner(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
         if op == DOT {
             let l_bp = 20; // Postfix BP (level 10 → 20)
             if l_bp < min_bp {
+                break;
+            }
+            if !charge_spine(p, &mut charged) {
                 break;
             }
             let m = lhs.precede(p);
@@ -200,6 +260,9 @@ fn expr_bp_inner(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
             if l_bp < min_bp {
                 break;
             }
+            if !charge_spine(p, &mut charged) {
+                break;
+            }
             let m = lhs.precede(p);
             p.bump(L_PAREN);
             comma_sep(p, R_PAREN, call_arg);
@@ -211,6 +274,9 @@ fn expr_bp_inner(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
         if op == L_BRACKET {
             let l_bp = 20; // Postfix BP
             if l_bp < min_bp {
+                break;
+            }
+            if !charge_spine(p, &mut charged) {
                 break;
             }
             let m = lhs.precede(p);
@@ -227,6 +293,9 @@ fn expr_bp_inner(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
             if l_bp < min_bp {
                 break;
             }
+            if !charge_spine(p, &mut charged) {
+                break;
+            }
             let m = lhs.precede(p);
             p.bump_any(); // consume the operator token
             expr_bp_or_error(p, r_bp);
@@ -236,6 +305,10 @@ fn expr_bp_inner(p: &mut Parser, min_bp: u8) -> Option<CompletedMarker> {
 
         // No matching operator — stop.
         break;
+    }
+
+    for _ in 0..charged {
+        p.exit_depth();
     }
 
     Some(lhs)

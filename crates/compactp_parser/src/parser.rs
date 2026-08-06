@@ -11,6 +11,7 @@ pub(crate) struct Parser<'src> {
     pub(crate) error_count: usize,
     pub(crate) current_depth: u32,
     pub(crate) max_depth: u32,
+    depth_watermark: u32,
 }
 
 impl<'src> Parser<'src> {
@@ -24,6 +25,7 @@ impl<'src> Parser<'src> {
             error_count: 0,
             current_depth: 0,
             max_depth: 256,
+            depth_watermark: 0,
         }
     }
 
@@ -41,12 +43,49 @@ impl<'src> Parser<'src> {
             return false;
         }
         self.current_depth += 1;
+        if self.current_depth > self.depth_watermark {
+            self.depth_watermark = self.current_depth;
+        }
         true
     }
 
     /// Pair with `enter_depth`; decrement on function exit.
+    ///
+    /// Note this restores the *path* depth but deliberately leaves
+    /// `depth_watermark` alone — see [`Parser::begin_subtree`].
     pub(crate) fn exit_depth(&mut self) {
         self.current_depth = self.current_depth.saturating_sub(1);
+    }
+
+    /// Deepest `current_depth` reached inside the subtree currently being
+    /// measured. Its distance above `current_depth` is the *height* of
+    /// what has been built so far.
+    ///
+    /// `current_depth` alone cannot answer that: it is a path counter, so
+    /// it returns to its starting value once a child subtree finishes,
+    /// forgetting how tall the child was. That is fine for plain
+    /// recursive descent, where a node is only ever built above the path
+    /// currently on the stack, but not for `CompletedMarker::precede`,
+    /// which inserts a parent *above an already-finished subtree* and so
+    /// pushes all of it one level deeper.
+    pub(crate) fn depth_watermark(&self) -> u32 {
+        self.depth_watermark
+    }
+
+    /// Begin measuring a fresh subtree's height, returning the enclosing
+    /// watermark to hand back to [`Parser::end_subtree`].
+    ///
+    /// Without this reset the watermark would be a running maximum over
+    /// the whole parse, and one deep expression would exhaust the budget
+    /// for every later sibling.
+    pub(crate) fn begin_subtree(&mut self) -> u32 {
+        std::mem::replace(&mut self.depth_watermark, self.current_depth)
+    }
+
+    /// Finish measuring a subtree, folding its height back into the
+    /// enclosing one — which contains it, and so is at least as deep.
+    pub(crate) fn end_subtree(&mut self, enclosing: u32) {
+        self.depth_watermark = self.depth_watermark.max(enclosing);
     }
 
     /// Peek at the current non-trivia token kind.

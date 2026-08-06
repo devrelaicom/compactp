@@ -72,14 +72,52 @@ on any crash.
 For longer local sessions: `scripts/fuzz.sh --target <T> --duration
 <minutes>` (see CONTRIBUTING.md for details).
 
-## Bounded-recursion guarantee
+## Bounded-depth guarantee
 
-The parser's recursive grammar functions (`expr_bp`, `ty`, `stmt`,
-`block`) check `ParseOptions::max_depth` (default `256`) at each
-entry. On overflow, the parser emits a recovery diagnostic and
-produces an `ERROR` node rather than overflowing the stack. Adjust
-`max_depth` via `ParseOptions` for inputs intentionally deeper than
-the default.
+`ParseOptions::max_depth` (default `256`) bounds the depth of the CST
+the parser returns, not only the depth of the parser's own recursion.
+The counter is charged on entry to each recursive grammar function
+(`expr_bp`, `ty`, `stmt`, `block`) *and* per left-spine extension
+inside the expression Pratt loop: left-associative operator chains
+(`x+x+...+x`) and postfix chains (`f()()...`, `x[0][0]...`,
+`x.a.a...`, `x as T as T...`) deepen the tree inside a single stack
+frame, so charging entry alone would not bound them. On overflow, the
+parser emits a recovery diagnostic and produces an `ERROR` node; the
+CST stays lossless.
+
+The spine charge is *height*-aware: it counts the height of the subtree
+being wrapped, not one step along the current path. A path-only charge
+is not sufficient — the left-hand side is parsed before the loop holds
+any charge and releases its own charges on the way out, so nesting and
+chaining together (`((( x +x+x… ) +x+x… ) +x+x… )`) would each re-spend
+the same budget and compound into a Θ(`max_depth`²) tree.
+
+Node depth is a small constant *multiple* of `max_depth`, because a
+charge can sit beneath up to three uncharged wrapper nodes
+(`PAREN_EXPR` → `EXPR_SEQ` → `ASSIGN_EXPR`, for input shaped like
+`( … =y,z )`). Measured over flat chains, pure nesting, element-position
+wrappers, and composed nesting-plus-chaining shapes, the worst returned
+node depth is `3 × max_depth` — 767 at the default. The ratio is
+identical at `max_depth` 32, 64 and 256, so it is a genuine constant and
+not something the input can drive.
+
+Bounding the *tree* — not just the parser — is what matters for
+consumers: rowan drops a tree recursively, and most CST walks recurse
+in the tree's depth, so an unbounded tree could abort a consumer's
+process with `SIGABRT` when the tree was merely dropped.
+
+`max_depth` is therefore a stack budget for both the parser and the
+consumer. Measured against the worst-case accepted shape above: at the
+default, parsing and dropping it needs roughly 1 MiB of stack in debug
+and 256 KiB in release, inside a 2 MiB thread. Raising the limit scales
+both linearly: on a 2 MiB stack the parser itself overflows at
+`max_depth` around 1024 in debug and 4096 in release. Raise it only
+alongside a thread stack sized to match.
+
+Known gap: the pattern, module, and version grammars do not yet charge
+the counter, so deeply nested destructuring patterns
+(`const [[[...x...]]] = y;`) remain unbounded. Tracked as
+[#23](https://github.com/devrelaicom/compactp/issues/23).
 
 ## Response Expectations
 
