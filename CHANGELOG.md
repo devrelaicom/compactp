@@ -33,9 +33,44 @@ While in `0.x`, breaking changes may land in any minor release.
   place between two charges (`PAREN_EXPR` → `EXPR_SEQ` → `ASSIGN_EXPR`). That
   ratio is identical at `max_depth` 32, 64 and 256 — a genuine constant, not an
   input-controlled multiplier.
+- `ParseOptions::max_depth` now also bounds the pattern, module and version
+  grammars. Three recursive productions never charged the counter at all —
+  `pattern → tuple_pattern → tuple_pat_elt → pattern`,
+  `module_def → declaration → module_def` and
+  `version_term → version_or_expr → version_and_expr → version_term` — so no
+  setting of `max_depth` constrained them: `max_depth = 1` still parsed
+  2001-deep module nesting with zero diagnostics. Each could be driven to a
+  stack overflow that aborts the process uncatchably — around 37,500 nested
+  brackets, 57,000 nested modules or 21,500 nested version parentheses on an
+  8 MiB stack — and the version case reaches through the CLI on a single line:
+  `pragma language_version ((((>= 0.23))));`. Unlike
+  [#21](https://github.com/devrelaicom/compactp/issues/21), the binding
+  constraint here is the parser's own recursion rather than the tree's `Drop`:
+  leaking the tree instead of dropping it leaves the threshold unchanged, so a
+  plain depth charge on entry is the fix. Worst measured node depth across all
+  charged grammars is now `3 × max_depth + 3` (771 at the default), set by
+  `VERSION_PAREN_EXPR` → `VERSION_OR_EXPR` → `VERSION_AND_EXPR`, and is exactly
+  affine in `max_depth` at 8, 32, 64, 128, 256 and 512.
+  ([#23](https://github.com/devrelaicom/compactp/issues/23))
+
+### Known issues
+
+- Nested `contract` declarations are still not depth-charged.
+  `declarations::contract` recurses through `declarations::declaration` back
+  into itself, so `contract A { contract B { … } }` is unbounded at every
+  `max_depth` and overflows the parser's stack at around 37,500 levels. Same
+  class as [#23](https://github.com/devrelaicom/compactp/issues/23); not yet
+  tracked by its own issue.
 
 ### Changed
 
+- Deeply nested destructuring patterns, module declarations and pragma version
+  terms now emit a `pattern nesting depth limit exceeded`,
+  `module nesting depth limit exceeded` or
+  `version expression nesting depth limit exceeded` diagnostic and an `ERROR`
+  node once they pass `max_depth`, where they previously nested without limit
+  and reported nothing. The CST remains lossless in both cases. For scale, the
+  deepest file in the upstream Compact corpus has a CST depth of 20.
 - Expression chains longer than `max_depth` links now emit an
   `expression nesting depth limit exceeded` diagnostic and an `ERROR` node
   rather than nesting without limit. Input with more than roughly 250 chained

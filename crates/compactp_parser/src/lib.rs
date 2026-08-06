@@ -46,14 +46,15 @@ pub struct ParseOptions {
     /// Maximum nesting depth the parser will build (default: `256`).
     ///
     /// The counter is charged on entry to each recursive grammar
-    /// function (expression, type, statement, block) *and* per left-spine
-    /// extension inside the expression Pratt loop. That second charge is
-    /// what bounds the depth of the tree the parser *returns*, rather
-    /// than only the depth of its own stack: left-associative operator
-    /// chains (`x+x+...+x`) and postfix chains (`f()()...`,
-    /// `x[0][0]...`, `x.a.a...`, `x as T as T...`) deepen the tree from
-    /// inside a single stack frame, so charging entry alone would leave
-    /// them unbounded. The spine charge is height-aware — it counts the
+    /// function — expression, type, statement, block, pattern, module
+    /// and version term — *and* per left-spine extension inside the
+    /// expression Pratt loop. That second charge is what bounds the
+    /// depth of the tree the parser *returns*, rather than only the
+    /// depth of its own stack: left-associative operator chains
+    /// (`x+x+...+x`) and postfix chains (`f()()...`, `x[0][0]...`,
+    /// `x.a.a...`, `x as T as T...`) deepen the tree from inside a
+    /// single stack frame, so charging entry alone would leave them
+    /// unbounded. The spine charge is height-aware — it counts the
     /// height of the subtree being wrapped, not one step along the
     /// current path — so nesting and chaining cannot compound.
     ///
@@ -64,12 +65,22 @@ pub struct ParseOptions {
     /// Across those grammars the returned tree's node depth is a small
     /// constant *multiple* of this value: a charge can sit beneath up to
     /// three uncharged wrapper nodes — `PAREN_EXPR` → `EXPR_SEQ` →
-    /// `ASSIGN_EXPR`, for input shaped like `( … =y,z )`. Measured over
-    /// flat chains, pure nesting, element-position wrappers, and
-    /// composed nesting-plus-chaining shapes, the worst node depth is
-    /// `3 × max_depth` (767 at the default). The ratio is identical at
-    /// `max_depth` 32, 64 and 256, so it is a genuine constant rather
-    /// than something the input can drive.
+    /// `ASSIGN_EXPR` for input shaped like `( … =y,z )`, or
+    /// `VERSION_PAREN_EXPR` → `VERSION_OR_EXPR` → `VERSION_AND_EXPR` for
+    /// `( … &&2||3&&4 )`. Measured over flat chains, pure nesting,
+    /// element-position wrappers, composed nesting-plus-chaining, nested
+    /// destructuring patterns, nested modules and nested version terms,
+    /// the worst node depth is `3 × max_depth + 3` (771 at the default).
+    /// Peak depth is *exactly* affine in `max_depth` at 8, 32, 64, 128,
+    /// 256 and 512, so it is a genuine constant rather than something
+    /// the input can drive.
+    ///
+    /// One recursive production is still **not** charged: a `contract`
+    /// declaration nested directly inside another
+    /// (`contract A { contract B { … } }`) recurses through
+    /// `declaration` without touching the counter, so that one shape is
+    /// unbounded at any setting of this option. Everything above holds
+    /// for input that does not nest `contract` declarations.
     ///
     /// # Stack cost
     ///
@@ -80,15 +91,17 @@ pub struct ParseOptions {
     /// - The *parser itself* — nested input recurses through the grammar
     ///   in step with the counter.
     ///
-    /// Measured against the worst-case accepted shape above: at the
-    /// default, parsing and dropping it needs roughly 1 MiB of stack in
-    /// a debug build and 256 KiB in release — comfortably inside a 2 MiB
-    /// thread (the common async-runtime worker default). Raising the
-    /// limit scales both costs linearly: on a 2 MiB stack the parser
-    /// itself overflows at `max_depth` around 1024 in debug and 4096 in
-    /// release. Raise this only alongside a thread stack sized to match.
-    /// For scale, the deepest file in the upstream Compact corpus has a
-    /// CST depth of 20.
+    /// Measured against the worst-case accepted shapes above, on
+    /// `aarch64-apple-darwin`: at the default, parsing and dropping one
+    /// needs under 1 MiB of stack in a debug build and under 256 KiB in
+    /// release — comfortably inside a 2 MiB thread (the common
+    /// async-runtime worker default). Raising the limit scales both
+    /// costs linearly: on a 2 MiB stack the deepest setting the parser
+    /// itself survives is around 640 in debug and around 3,100 in
+    /// release. Frame sizes vary by target and optimization level, so
+    /// treat those as order-of-magnitude figures and raise this only
+    /// alongside a thread stack sized to match. For scale, the deepest
+    /// file in the upstream Compact corpus has a CST depth of 20.
     pub max_depth: u32,
 }
 
