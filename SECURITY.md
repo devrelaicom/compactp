@@ -90,9 +90,16 @@ being wrapped, not one step along the current path. A path-only charge
 is not sufficient — the left-hand side is parsed before the loop holds
 any charge and releases its own charges on the way out, so nesting and
 chaining together (`((( x +x+x… ) +x+x… ) +x+x… )`) would each re-spend
-the same budget and compound into a Θ(`max_depth`²) tree. Measured over
-flat chains, pure nesting, and composed shapes, the worst returned node
-depth is `max_depth + 4`.
+the same budget and compound into a Θ(`max_depth`²) tree.
+
+Node depth is a small constant *multiple* of `max_depth`, because a
+charge can sit beneath up to three uncharged wrapper nodes
+(`PAREN_EXPR` → `EXPR_SEQ` → `ASSIGN_EXPR`, for input shaped like
+`( … =y,z )`). Measured over flat chains, pure nesting, element-position
+wrappers, and composed nesting-plus-chaining shapes, the worst returned
+node depth is `3 × max_depth` — 767 at the default. The ratio is
+identical at `max_depth` 32, 64 and 256, so it is a genuine constant and
+not something the input can drive.
 
 Bounding the *tree* — not just the parser — is what matters for
 consumers: rowan drops a tree recursively, and most CST walks recurse
@@ -100,12 +107,12 @@ in the tree's depth, so an unbounded tree could abort a consumer's
 process with `SIGABRT` when the tree was merely dropped.
 
 `max_depth` is therefore a stack budget for both the parser and the
-consumer. At the default, parsing and dropping the deepest accepted
-input needs roughly 1 MiB of stack in debug and 200 KiB in release,
-inside a 2 MiB thread. Raising it scales both linearly: on a 2 MiB
-stack the parser itself overflows at `max_depth` around 1024 in debug
-and 4096 in release. Raise it only alongside a thread stack sized to
-match.
+consumer. Measured against the worst-case accepted shape above: at the
+default, parsing and dropping it needs roughly 1 MiB of stack in debug
+and 256 KiB in release, inside a 2 MiB thread. Raising the limit scales
+both linearly: on a 2 MiB stack the parser itself overflows at
+`max_depth` around 1024 in debug and 4096 in release. Raise it only
+alongside a thread stack sized to match.
 
 Known gap: the pattern, module, and version grammars do not yet charge
 the counter, so deeply nested destructuring patterns

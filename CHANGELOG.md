@@ -28,7 +28,11 @@ While in `0.x`, breaking changes may land in any minor release.
   together (`((( x +x+x… ) +x+x… ) +x+x… )`) each re-spend the same budget and
   compound into a Θ(`max_depth`²) tree. At the default that reached CST depth
   23,297 from 131 KB of valid Compact, enough to abort a 2 MiB thread again.
-  Worst measured node depth is now `max_depth + 4`.
+  Worst measured node depth is now `3 × max_depth` (767 at the default), the
+  multiplier being the deepest stack of uncharged wrapper nodes the grammar can
+  place between two charges (`PAREN_EXPR` → `EXPR_SEQ` → `ASSIGN_EXPR`). That
+  ratio is identical at `max_depth` 32, 64 and 256 — a genuine constant, not an
+  input-controlled multiplier.
 
 ### Changed
 

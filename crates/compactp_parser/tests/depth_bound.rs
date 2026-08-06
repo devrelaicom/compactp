@@ -92,21 +92,29 @@ fn max_node_depth(root: &SyntaxNode) -> usize {
 /// Depth a tree parsed with `max_depth` is allowed to reach.
 ///
 /// The invariant the parser establishes is on *charged* depth: the
-/// counter tracks the deepest point of the subtree under construction,
-/// and never exceeds `max_depth`. Node depth is not equal to charged
-/// depth, because a charge can sit beneath a few uncharged wrapper nodes
-/// (`PAREN_EXPR`, `EXPR_SEQ`, …) — so the bound is a constant multiple,
-/// and only a constant multiple is meaningful to assert.
+/// counter tracks the deepest point of the subtree under construction
+/// and never exceeds `max_depth`. Node depth is a constant multiple of
+/// that, not equal to it, because a charge can sit beneath uncharged
+/// wrapper nodes — so only a constant multiple is meaningful to assert.
 ///
-/// Measured across 18 shapes (flat chains, pure nesting, and the
-/// composed nest-plus-chain shapes) at `max_depth` 8 through 256, the
-/// worst observed node depth is `max_depth + 4`, i.e. ratio 1.02 at the
-/// default and 1.50 at `max_depth` 8 where the constant dominates. `2x`
-/// plus a constant absorbs grammar changes while still failing loudly on
-/// the bug this file exists to catch: the path-only charge produced
-/// ratio 91 at the default (depth 23,297 against a 528 bound).
+/// The multiplier is set by the deepest wrapper stack the grammar can
+/// place between two charges, which is three:
+/// `PAREN_EXPR → EXPR_SEQ → ASSIGN_EXPR` for `( … =y,z )`. Element
+/// positions contribute two (`ARRAY_EXPR → SPREAD_EXPR`, `CALL_EXPR →
+/// NAMED_ARG`, `STRUCT_EXPR → STRUCT_FIELD_INIT`) at a flat 2.00x
+/// regardless of nesting count — those are the first thing that would
+/// shift if an element wrapper were added.
+/// `uncharged_wrappers_bound_the_node_depth_ratio` pins all of them.
+///
+/// Measured worst over those families at `max_depth` 32/64/256 is
+/// `3 x max_depth - 1` (95, 191, 767) — ratio 3.00, and *identical*
+/// across `max_depth`, which is what makes it a constant rather than an
+/// input-controlled multiplier. `4x` plus a constant leaves headroom for
+/// a further wrapper while still failing loudly on the bug this file
+/// exists to catch: the path-only charge produced ratio 91 at the
+/// default (depth 23,297 against a 1,040 bound).
 fn depth_limit(max_depth: u32) -> usize {
-    2 * max_depth as usize + 16
+    4 * max_depth as usize + 16
 }
 
 /// Take the CST out of `result`, first proving it is shallow enough that
@@ -213,6 +221,73 @@ fn composed_nesting_and_chaining_is_depth_bounded() {
                 &src,
                 max_depth,
                 &format!("composed {what} @ max_depth {max_depth}"),
+            );
+        }
+    }
+}
+
+/// Uncharged wrapper nodes are what separate node depth from charged
+/// depth, and they set the real constant in [`depth_limit`].
+///
+/// Between one depth charge and the next, an `lhs` arm opens a bounded
+/// number of markers: one for most forms, two in element positions
+/// (`ARRAY_EXPR → SPREAD_EXPR`, `CALL_EXPR → NAMED_ARG`,
+/// `STRUCT_EXPR → STRUCT_FIELD_INIT`), and three at most —
+/// `PAREN_EXPR → EXPR_SEQ → ASSIGN_EXPR` for `( … =y,z )`. Hence the
+/// `3x` in [`depth_limit`]. Re-measure these if the grammar gains a
+/// wrapper.
+///
+/// Two traps this test is shaped to avoid:
+///
+/// - Depth **peaks at `max_depth - 2` levels and collapses to 1x at
+///   `max_depth` levels**: past the peak the cap fires mid-parse,
+///   recovery desynchronises the trailing `=y,z`, and the extra markers
+///   are abandoned. Pinning one level count would silently measure the
+///   collapsed side, so scan a window.
+/// - Passing the upper bound proves nothing on its own if the shape
+///   stopped exercising its wrapper stack, so assert the peak actually
+///   *reaches* the ratio too.
+#[test]
+fn uncharged_wrappers_bound_the_node_depth_ratio() {
+    for (what, open, close, markers) in [
+        ("paren", "(", ")", 1usize),
+        ("array + spread", "[...", "]", 2),
+        ("call + named arg", "g(a=", ")", 2),
+        ("struct + field", "S{a:", "}", 2),
+        ("paren + seq + assign", "(", "=y,z)", 3),
+    ] {
+        for max_depth in [32u32, 256] {
+            let mut peak = 0usize;
+            for levels in (max_depth as usize).saturating_sub(6)..=(max_depth as usize) {
+                let src = composed(levels, 0, open, close, "", "");
+                let result = parse_with(
+                    &src,
+                    ParseOptions {
+                        recover: true,
+                        max_errors: 256,
+                        max_depth,
+                    },
+                );
+                let root = bounded_root(
+                    result,
+                    max_depth,
+                    &format!("{what} @ max_depth {max_depth}, {levels} levels"),
+                );
+                assert_eq!(
+                    root.text().to_string(),
+                    src,
+                    "{what}: CST must round-trip to the input byte-for-byte"
+                );
+                peak = peak.max(max_node_depth(&root));
+            }
+
+            let expected = markers * max_depth as usize;
+            let floor = expected * 9 / 10;
+            assert!(
+                peak >= floor,
+                "{what} @ max_depth {max_depth}: peak depth {peak} never approached the \
+                 {markers}x wrapper ratio (expected at least {floor}); this shape no longer \
+                 exercises its wrapper stack, so it is not constraining depth_limit"
             );
         }
     }

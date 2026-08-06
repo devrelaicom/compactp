@@ -62,10 +62,14 @@ pub struct ParseOptions {
     /// lossless: every byte of the input remains recoverable.
     ///
     /// Across those grammars the returned tree's node depth is a small
-    /// constant above this value — one charge may sit beneath a few
-    /// uncharged wrapper nodes (`PAREN_EXPR`, `EXPR_SEQ`, and similar).
-    /// Measured over flat chains, pure nesting, and composed
-    /// nesting-plus-chaining shapes, the worst case is `max_depth + 4`.
+    /// constant *multiple* of this value: a charge can sit beneath up to
+    /// three uncharged wrapper nodes — `PAREN_EXPR` → `EXPR_SEQ` →
+    /// `ASSIGN_EXPR`, for input shaped like `( … =y,z )`. Measured over
+    /// flat chains, pure nesting, element-position wrappers, and
+    /// composed nesting-plus-chaining shapes, the worst node depth is
+    /// `3 × max_depth` (767 at the default). The ratio is identical at
+    /// `max_depth` 32, 64 and 256, so it is a genuine constant rather
+    /// than something the input can drive.
     ///
     /// # Stack cost
     ///
@@ -76,14 +80,15 @@ pub struct ParseOptions {
     /// - The *parser itself* — nested input recurses through the grammar
     ///   in step with the counter.
     ///
-    /// At the default, parsing and dropping the deepest accepted input
-    /// needs roughly 1 MiB of stack in a debug build and 200 KiB in
-    /// release — comfortably inside a 2 MiB thread (the common
-    /// async-runtime worker default). Raising it scales both costs
-    /// linearly: on a 2 MiB stack the parser itself overflows at
-    /// `max_depth` around 1024 in debug and 4096 in release. Raise this
-    /// only alongside a thread stack sized to match. For scale, the
-    /// deepest file in the upstream Compact corpus has a CST depth of 20.
+    /// Measured against the worst-case accepted shape above: at the
+    /// default, parsing and dropping it needs roughly 1 MiB of stack in
+    /// a debug build and 256 KiB in release — comfortably inside a 2 MiB
+    /// thread (the common async-runtime worker default). Raising the
+    /// limit scales both costs linearly: on a 2 MiB stack the parser
+    /// itself overflows at `max_depth` around 1024 in debug and 4096 in
+    /// release. Raise this only alongside a thread stack sized to match.
+    /// For scale, the deepest file in the upstream Compact corpus has a
+    /// CST depth of 20.
     pub max_depth: u32,
 }
 
