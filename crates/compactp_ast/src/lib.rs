@@ -31,6 +31,36 @@
 //! }
 //! # }
 //! ```
+//!
+//! ## Iterator accessors and error recovery
+//!
+//! Accessors that return `impl Iterator<Item = N>` (for example
+//! [`VersionAndExpr::operands`](nodes::VersionAndExpr::operands),
+//! [`TupleType::element_types`](nodes::TupleType::element_types),
+//! [`StructDef::fields`](nodes::StructDef::fields)) walk direct children and
+//! yield only the ones that cast to `N`. When the parser recovers from a
+//! syntax error, it can leave an `ERROR` node in a position that would
+//! otherwise hold a well-formed child of that type. `ERROR` has no typed
+//! representation, so it is silently skipped rather than surfaced as `None`
+//! or a sentinel value -- the iterator just yields fewer items than the
+//! source visually appears to contain.
+//!
+//! The same applies to single-value accessors returning `Option<N>`: a
+//! syntactically present but malformed child (or one entirely swallowed by
+//! recovery) yields `None`, indistinguishable from that position being
+//! absent by design.
+//!
+//! A short, empty, or `None` result from one of these accessors is
+//! therefore **not proof** that the source had few, zero, or no elements at
+//! that position -- it may mean recovery swallowed one. Concretely: folding
+//! an operand iterator with `.all(predicate)` returns `true` on zero
+//! operands regardless of `predicate`, so code like
+//! `constraint.operands().all(is_satisfied)` can report "satisfied" for a
+//! constraint the accessor never actually read. Any consumer turning one of
+//! these accessors into a pass/fail decision should first confirm the
+//! surrounding parse produced no diagnostics for the region in question
+//! (e.g. the parser's `ParseResult::errors` is empty). On clean input every
+//! accessor in this crate is exhaustive and precise.
 
 #![deny(missing_docs)]
 
@@ -1270,5 +1300,173 @@ enum Color { Red, Green }
         let pragma = file.pragmas().next().expect("Pragma node still present");
         assert_eq!(pragma.name().unwrap().text(), "compact");
         assert!(pragma.version().is_none());
+    }
+
+    // -----------------------------------------------------------------------
+    // VersionExpr recovery behaviour — review follow-up on issue #25.
+    //
+    // These pin down cases where the outer VERSION_* node parses (so
+    // `version()` is `Some`) but a sub-position failed, which is exactly
+    // where an `Option`-returning accessor and an iterator-returning
+    // accessor can misbehave if a consumer forgets to check for parser
+    // diagnostics first. See the crate-level "Iterator accessors and error
+    // recovery" note in `lib.rs`.
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn pragma_version_unary_operand_none_on_malformed_rhs() {
+        // `>= ;` -- the unary node parses, but its operand does not.
+        let root = parse("pragma compact >= ;");
+        let file = SourceFile::cast(root).unwrap();
+        let pragma = file.pragmas().next().unwrap();
+        match pragma.version().expect("outer VERSION_UNARY_EXPR parses") {
+            VersionExpr::Unary(u) => {
+                assert_eq!(u.op().unwrap().text(), ">=");
+                assert!(
+                    u.operand().is_none(),
+                    "operand() must be None, not panic or fabricate a node"
+                );
+            }
+            other => panic!("expected VersionExpr::Unary, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn pragma_version_paren_inner_none_when_empty() {
+        // `()` -- the paren node parses, but its contents do not.
+        let root = parse("pragma compact ();");
+        let file = SourceFile::cast(root).unwrap();
+        let pragma = file.pragmas().next().unwrap();
+        match pragma.version().expect("outer VERSION_PAREN_EXPR parses") {
+            VersionExpr::Paren(p) => {
+                assert!(
+                    p.inner().is_none(),
+                    "inner() must be None, not panic or fabricate a node"
+                );
+            }
+            other => panic!("expected VersionExpr::Paren, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn pragma_version_and_truncates_missing_leading_operand() {
+        // `&& >= 1.0` -- the leading operand before `&&` failed to parse and
+        // is dropped entirely; `operands()` silently yields only the one
+        // operand that *did* parse, not a placeholder for the missing one.
+        // This is deliberate crate-wide behaviour (see the crate-level
+        // note), pinned here so the truncation is a tested fact rather than
+        // an accident a future refactor could silently change.
+        let root = parse("pragma compact && >= 1.0;");
+        let file = SourceFile::cast(root).unwrap();
+        let pragma = file.pragmas().next().unwrap();
+        match pragma.version().expect("outer VERSION_AND_EXPR parses") {
+            VersionExpr::And(and_expr) => {
+                let operands: Vec<_> = and_expr.operands().collect();
+                assert_eq!(
+                    operands.len(),
+                    1,
+                    "the missing leading operand must not appear as a placeholder"
+                );
+                match &operands[0] {
+                    VersionExpr::Unary(u) => assert_eq!(u.op().unwrap().text(), ">="),
+                    other => panic!("expected Unary, got {other:?}"),
+                }
+            }
+            other => panic!("expected VersionExpr::And, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn pragma_version_or_children_are_heterogeneous_without_parens() {
+        // `>= 0.1 || >= 1.0 && < 2.0` -- no parens anywhere, yet the OR's
+        // two operands are of different VersionExpr variants (a bare Unary
+        // and an AND chain). This is the exact shape that makes a single
+        // struct-per-kind design untypeable for `operands()`: the enum is
+        // required because AND/OR children are heterogeneous by
+        // construction, not just under parens.
+        let root = parse("pragma compact >= 0.1 || >= 1.0 && < 2.0;");
+        let file = SourceFile::cast(root).unwrap();
+        let pragma = file.pragmas().next().unwrap();
+        match pragma.version().expect("should have version") {
+            VersionExpr::Or(or_expr) => {
+                let operands: Vec<_> = or_expr.operands().collect();
+                assert_eq!(operands.len(), 2);
+                match &operands[0] {
+                    VersionExpr::Unary(u) => assert_eq!(u.op().unwrap().text(), ">="),
+                    other => panic!("expected Unary, got {other:?}"),
+                }
+                match &operands[1] {
+                    VersionExpr::And(a) => assert_eq!(a.operands().count(), 2),
+                    other => panic!("expected And, got {other:?}"),
+                }
+            }
+            other => panic!("expected VersionExpr::Or, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn pragma_version_and_three_operands_op_is_first_of_two_tokens() {
+        // Three operands means two `&&` tokens in the node; op() must
+        // return the first, not panic on ambiguity or return the last.
+        let root = parse("pragma compact >= 0.1 && >= 0.2 && >= 0.3;");
+        let file = SourceFile::cast(root).unwrap();
+        let pragma = file.pragmas().next().unwrap();
+        match pragma.version().expect("should have version") {
+            VersionExpr::And(and_expr) => {
+                assert_eq!(and_expr.op().unwrap().text(), "&&");
+                let operands: Vec<_> = and_expr.operands().collect();
+                assert_eq!(operands.len(), 3);
+            }
+            other => panic!("expected VersionExpr::And, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn pragma_version_double_negation() {
+        // `!!0.14` -- Unary wrapping Unary wrapping Literal.
+        let root = parse("pragma compact !!0.14;");
+        let file = SourceFile::cast(root).unwrap();
+        let pragma = file.pragmas().next().unwrap();
+        match pragma.version().expect("should have version") {
+            VersionExpr::Unary(outer) => {
+                assert_eq!(outer.op().unwrap().text(), "!");
+                match outer.operand().expect("should have operand") {
+                    VersionExpr::Unary(inner) => {
+                        assert_eq!(inner.op().unwrap().text(), "!");
+                        match inner.operand().expect("should have operand") {
+                            VersionExpr::Literal(lit) => {
+                                assert_eq!(lit.literal().unwrap().text(), "0.14");
+                            }
+                            other => panic!("expected Literal, got {other:?}"),
+                        }
+                    }
+                    other => panic!("expected inner Unary, got {other:?}"),
+                }
+            }
+            other => panic!("expected VersionExpr::Unary, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn pragma_version_negated_paren() {
+        // `!(>= 1.0)` -- Unary wrapping Paren wrapping Unary wrapping Literal.
+        let root = parse("pragma compact !(>= 1.0);");
+        let file = SourceFile::cast(root).unwrap();
+        let pragma = file.pragmas().next().unwrap();
+        match pragma.version().expect("should have version") {
+            VersionExpr::Unary(u) => {
+                assert_eq!(u.op().unwrap().text(), "!");
+                match u.operand().expect("should have operand") {
+                    VersionExpr::Paren(p) => match p.inner().expect("should have inner") {
+                        VersionExpr::Unary(inner) => {
+                            assert_eq!(inner.op().unwrap().text(), ">=");
+                        }
+                        other => panic!("expected inner Unary, got {other:?}"),
+                    },
+                    other => panic!("expected Paren, got {other:?}"),
+                }
+            }
+            other => panic!("expected VersionExpr::Unary, got {other:?}"),
+        }
     }
 }
