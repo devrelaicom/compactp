@@ -56,6 +56,40 @@ While in `0.x`, breaking changes may land in any minor release.
   of 767 was understated because the wrapper-stack enumeration omitted
   `TYPE_REF` → `GENERIC_ARG_LIST` → `GENERIC_ARG`.
   ([#23](https://github.com/devrelaicom/compactp/issues/23))
+- `ParseOptions::max_depth` now also bounds nested `contract` declarations —
+  the last recursive production that never charged the counter.
+  `declarations::contract` recursed through `declarations::declaration` back
+  into itself, so no setting of `max_depth` constrained it: `max_depth = 1`
+  parsed 2001 levels of `contract A{ contract B{ … } }` with zero diagnostics,
+  and around 29,000 levels overflowed the parser's own stack and aborted the
+  process uncatchably (`SIGABRT`) on an 8 MiB main thread in a release build.
+  As with [#23](https://github.com/devrelaicom/compactp/issues/23) the binding
+  constraint is the parser's own recursion rather than the tree's `Drop` —
+  leaking the tree instead of dropping it leaves the threshold unchanged — so
+  a plain depth charge on entry is the fix. The cycle was reachable four ways,
+  and rejecting only the top-level form would not have mitigated it:
+  `export contract` reaches it through `export_prefixed`, and a circuit body, a
+  constructor body and a `module` body each spend their enclosing
+  `block`/`stmt`/`module_def` charge once on entry and then leave the uncharged
+  cycle to run free. One `enter_depth()` in `contract` closes every variant.
+  With it, every recursion cycle in the grammar passes through a charged
+  function, so no production is unbounded at any setting — verified both by
+  strongly-connected-component analysis of the grammar call graph with the
+  charged functions deleted, and by driving 34 nesting constructs 50,000 levels
+  deep. Worst measured node depth is still `3 × max_depth + 4` (772 at the
+  default), from a generic type in parameter or struct-field position, exactly
+  affine in `max_depth` at 8, 32, 64, 128, 256 and 512 — and now actually
+  attained, which it was not before. Two shapes exceeded it on `main`, and
+  neither nests a `contract`, so neither fell under the caveat that scoped the
+  #23 guarantee to input that does not nest `contract` declarations:
+  `contract C { circuit m(a: A<A<…>>): Field; }` and
+  `contract C { struct S { a: A<A<…>> } }` both measured `3 × max_depth + 5`
+  (773), because `CONTRACT_DECL` plus the member node stacked two uncharged
+  nodes above the first `ty` charge rather than one. Both measure
+  `3 × max_depth + 2` (770) after. (Shapes that *do* nest a `contract` went
+  further still — up to `4 × max_depth + 7` = 1031 — but those the caveat did
+  cover.)
+  ([#28](https://github.com/devrelaicom/compactp/issues/28))
 - `ParseOptions::max_errors` no longer amplifies. Every list-parsing recovery
   loop was bounded by the error budget but not by token progress, so a
   production that reported an error and consumed nothing left the loop to
@@ -70,26 +104,14 @@ While in `0.x`, breaking changes may land in any minor release.
   `]` in statement position, `export ;` inside a `contract` or `module` body);
   two more became reachable when `pattern()` started enforcing `max_depth`.
 
-### Known issues
-
-- Nested `contract` declarations are still not depth-charged.
-  `declarations::contract` recurses through `declarations::declaration` back
-  into itself, so nested `contract` declarations are unbounded at every
-  `max_depth` and overflow the parser's stack at around 37,500 levels.
-  Reachable from a top-level `contract A { contract B { … } }`, from
-  `export contract`, from a circuit or constructor body, and from a `module`
-  body — the enclosing `block`/`stmt`/`module_def` charge is spent once on
-  entry and the uncharged cycle then runs free, so rejecting only the
-  top-level form does not mitigate it. Same class as
-  [#23](https://github.com/devrelaicom/compactp/issues/23); tracked as
-  [#28](https://github.com/devrelaicom/compactp/issues/28).
-
 ### Changed
 
-- Deeply nested destructuring patterns, module declarations and pragma version
-  terms now emit a `pattern nesting depth limit exceeded`,
-  `module nesting depth limit exceeded` or
-  `version expression nesting depth limit exceeded` diagnostic and an `ERROR`
+- Deeply nested destructuring patterns, module declarations, pragma version
+  terms and `contract` declarations now emit a
+  `pattern nesting depth limit exceeded`,
+  `module nesting depth limit exceeded`,
+  `version expression nesting depth limit exceeded` or
+  `contract nesting depth limit exceeded` diagnostic and an `ERROR`
   node once they pass `max_depth`, where they previously nested without limit
   and reported nothing. The CST remains lossless in both cases. For scale, the
   deepest file in the upstream Compact corpus has a CST depth of 20.

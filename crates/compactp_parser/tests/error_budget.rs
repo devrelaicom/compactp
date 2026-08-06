@@ -28,6 +28,18 @@
 //! started enforcing `max_depth`. Both kinds are kept here — the fix is
 //! one progress guard shared by every affected loop, so the test covers
 //! the guard rather than the inputs that found it.
+//!
+//! Issue #28 added a `max_depth` charge to `contract`, which is one of
+//! the four loops carrying that guard (`source_file`, `block_inner`,
+//! `contract`, `module_def_inner`). A cap firing inside a loop that owns
+//! the guard is exactly the composition that went wrong for `pattern` in
+//! #23 — the cap stranded the token stream on a token no enclosing
+//! production consumed, and the loop spun emitting diagnostics — so the
+//! over-deep `contract` inputs below are here to pin that the two
+//! compose. They are checked at every route into the cycle, because the
+//! enclosing loop differs by route: `source_file` for a top-level
+//! contract, `block_inner` from a circuit body, `module_def_inner` from
+//! a module body, and `contract` itself for the nested levels.
 
 use compactp_parser::{ParseOptions, parse_with};
 use compactp_syntax::SyntaxNode;
@@ -37,6 +49,32 @@ use compactp_syntax::SyntaxNode;
 /// budget rather than by the source.
 const BUDGETS: [usize; 2] = [100_000, 1_000_000];
 
+/// Maximum node depth of `root`, computed with an explicit work-stack.
+///
+/// Deliberately iterative — see [`parse_at`].
+fn max_node_depth(root: &SyntaxNode) -> usize {
+    let mut stack = vec![(root.clone(), 1usize)];
+    let mut max = 0usize;
+    while let Some((node, depth)) = stack.pop() {
+        if depth > max {
+            max = depth;
+        }
+        for child in node.children() {
+            stack.push((child, depth + 1));
+        }
+    }
+    max
+}
+
+/// Parse, then read the diagnostic count and the round-tripped text.
+///
+/// The tree is measured iteratively and leaked rather than dropped when
+/// it is deep enough that rowan's recursive `Drop` could abort the
+/// process. The inputs here are over-`max_depth` by construction, so a
+/// regression in the depth charges makes them deep; without this guard a
+/// depth regression would take the whole test binary down with `SIGABRT`
+/// instead of failing one assertion. Same reasoning as the helper in
+/// `depth_bound.rs`.
 fn parse_at(src: &str, max_errors: usize, max_depth: u32) -> (usize, String) {
     let result = parse_with(
         src,
@@ -49,6 +87,9 @@ fn parse_at(src: &str, max_errors: usize, max_depth: u32) -> (usize, String) {
     let count = result.errors.len();
     let root = SyntaxNode::new_root(result.green);
     let text = root.text().to_string();
+    if max_node_depth(&root) > 4 * max_depth as usize + 16 {
+        std::mem::forget(root);
+    }
     (count, text)
 }
 
@@ -150,24 +191,96 @@ fn diagnostic_count_does_not_track_max_errors() {
             ),
             max_depth,
         );
+
+        // Reachable only once `contract()` enforces `max_depth` (issue
+        // #28). `contract` is itself one of the guarded loops, so these
+        // check the cap and the guard compose at every route in.
+        let nest = |head: &str| format!("{}{}", head.repeat(levels), "}".repeat(levels));
+        assert_budget_independent(
+            "over-deep contract nesting",
+            &nest("contract C{"),
+            max_depth,
+        );
+        assert_budget_independent(
+            "over-deep exported contract nesting",
+            &nest("export contract C{"),
+            max_depth,
+        );
+        assert_budget_independent(
+            "over-deep contract in a circuit body",
+            &format!("circuit f(): Field {{ {} }}", nest("contract C{")),
+            max_depth,
+        );
+        assert_budget_independent(
+            "over-deep contract in a constructor body",
+            &format!("constructor() {{ {} }}", nest("contract C{")),
+            max_depth,
+        );
+        assert_budget_independent(
+            "over-deep contract in a module body",
+            &format!("module M{{ {} }}", nest("contract C{")),
+            max_depth,
+        );
+        // The cap fires with no closing braces left to resynchronise on,
+        // and with a malformed header the cap must skip rather than stall.
+        assert_budget_independent(
+            "over-deep contract, unterminated",
+            &"contract C{".repeat(levels),
+            max_depth,
+        );
+        assert_budget_independent(
+            "over-deep contract, missing name",
+            &nest("contract{"),
+            max_depth,
+        );
     }
 }
 
 /// The count must grow with the source, not stay pinned to the budget.
-///
-/// Budget independence alone would also be satisfied by a parser that
-/// reported a fixed number of diagnostics regardless of input. This
-/// pins the other direction: doubling the malformed input roughly
-/// doubles the diagnostics, and a tenfold increase in input never
-/// produces fewer.
 #[test]
 fn diagnostic_count_scales_with_input_size() {
-    let counts: Vec<(usize, usize)> = [1usize, 10, 100]
+    assert_scales_with_input("stray `]` in statement position", [1, 10, 100], 256, |n| {
+        "circuit f(): Field { ] }".repeat(n)
+    });
+
+    // Issue #28: the same property for the path where a depth cap fires
+    // inside a guarded loop. Level counts start well past `max_depth` so
+    // the over-deep *portion* of the input scales with the input and the
+    // ratio is not dominated by the free prefix below the cap. They stay
+    // under a few thousand so that an *unfixed* parser still completes
+    // the parse and reports an assertion rather than overflowing its own
+    // stack and aborting the harness — it survives around 17,000 levels
+    // in a debug build.
+    for max_depth in [8u32, 32] {
+        let base = max_depth as usize * 8;
+        assert_scales_with_input(
+            "over-deep contract nesting",
+            [base, base * 3, base * 9],
+            max_depth,
+            |n| format!("{}{}", "contract C{".repeat(n), "}".repeat(n)),
+        );
+    }
+}
+
+/// Assert the diagnostic count grows with the input and does so no more
+/// than proportionally.
+///
+/// Budget independence alone would also be satisfied by a parser that
+/// reported a fixed number of diagnostics regardless of input. This pins
+/// the other direction: a tenfold increase in input never produces
+/// fewer, and never produces more than twice the proportional share.
+fn assert_scales_with_input(
+    what: &str,
+    sizes: [usize; 3],
+    max_depth: u32,
+    build: impl Fn(usize) -> String,
+) {
+    let counts: Vec<(usize, usize)> = sizes
         .iter()
         .map(|&n| {
-            let src = "circuit f(): Field { ] }".repeat(n);
-            let (count, text) = parse_at(&src, 1_000_000, 256);
-            assert_eq!(text, src, "CST must round-trip byte-for-byte");
+            let src = build(n);
+            let (count, text) = parse_at(&src, 1_000_000, max_depth);
+            assert_eq!(text, src, "{what}: CST must round-trip byte-for-byte");
             (src.len(), count)
         })
         .collect();
@@ -177,8 +290,8 @@ fn diagnostic_count_scales_with_input_size() {
         let (big_bytes, big) = pair[1];
         assert!(
             big > small,
-            "diagnostics did not grow with input: {small} for {small_bytes} bytes, \
-             {big} for {big_bytes} bytes"
+            "{what}: diagnostics did not grow with input: {small} for {small_bytes} \
+             bytes, {big} for {big_bytes} bytes"
         );
         // Growth must stay proportional — a superlinear blow-up is the
         // amplification bug wearing a different hat.
@@ -186,7 +299,7 @@ fn diagnostic_count_scales_with_input_size() {
         let size_ratio = big_bytes as f64 / small_bytes as f64;
         assert!(
             ratio <= size_ratio * 2.0,
-            "diagnostics grew {ratio:.1}x for a {size_ratio:.1}x larger input \
+            "{what}: diagnostics grew {ratio:.1}x for a {size_ratio:.1}x larger input \
              ({small} -> {big}); recovery is emitting superlinearly"
         );
     }

@@ -1,23 +1,32 @@
 //! `ParseOptions::max_depth` bounds the depth of the *returned tree*.
 //!
-//! Regression coverage for issues #21 and #23. The two are different
-//! failure modes of the same invariant, and both are covered here.
+//! Regression coverage for issues #21, #23 and #28. They are different
+//! failure modes of the same invariant, and all three are covered here.
 //!
-//! **#23** — the simpler one. Three recursive productions never charged
-//! the counter at all: `pattern` (`pattern → tuple_pattern →
+//! **#23 and #28** — the simpler ones. Four recursive productions never
+//! charged the counter at all: `pattern` (`pattern → tuple_pattern →
 //! tuple_pat_elt → pattern`), `module_def` (`module_def → declaration →
-//! module_def`) and `version_term` (`version_term → version_or_expr →
-//! version_and_expr → version_term`). No value of `max_depth`
-//! constrained them: `max_depth = 1` still parsed 2001-deep module
-//! nesting with zero diagnostics, and each shape recursed the *parser*
-//! deep enough to overflow the stack and abort the process. Unlike #21
-//! this was a parse-time overflow, not a drop-time one — the
-//! `mem::forget` control aborts at the same input size as the drop path
-//! — so a plain path charge on entry is the fix, not a height-aware one.
-//! These grammars build every node above the path currently on the
-//! stack (nothing outside `expressions.rs` calls
+//! module_def`), `version_term` (`version_term → version_or_expr →
+//! version_and_expr → version_term`) and, last of the four,
+//! `contract` (`contract → declaration → contract`). No value of
+//! `max_depth` constrained them: `max_depth = 1` still parsed 2001-deep
+//! module *and* contract nesting with zero diagnostics, and each shape
+//! recursed the *parser* deep enough to overflow the stack and abort the
+//! process. Unlike #21 these were parse-time overflows, not drop-time
+//! ones — the `mem::forget` control aborts at the same input size as the
+//! drop path — so a plain path charge on entry is the fix, not a
+//! height-aware one. These grammars build every node above the path
+//! currently on the stack (nothing outside `expressions.rs` calls
 //! `CompletedMarker::precede`), so node depth stays a fixed multiple of
 //! the charge.
+//!
+//! `contract` (#28) is reached four ways, and the tests below exercise
+//! all of them: a top-level `contract A{ contract B{ … } }`, `export
+//! contract`, a circuit or constructor body (`statements::stmt`
+//! dispatches `CONTRACT_KW` into `declarations::declaration`), and a
+//! `module` body. The enclosing `block`/`stmt`/`module_def` charge is
+//! spent once on entry and the uncharged cycle then ran free, so a test
+//! covering only the top-level form would have passed against the bug.
 //!
 //! **#21** — the subtle one. A long left-associative operator
 //! chain (`x+x+...+x`) or postfix chain (`f()()...`, `x[0][0]...`,
@@ -126,14 +135,15 @@ fn max_node_depth(root: &SyntaxNode) -> usize {
 ///
 /// Element positions contribute two (`ARRAY_EXPR → SPREAD_EXPR`,
 /// `CALL_EXPR → NAMED_ARG`, `STRUCT_EXPR → STRUCT_FIELD_INIT`), as do
-/// patterns (`TUPLE_PAT → TUPLE_PAT_ELT`); modules contribute one
-/// (`MODULE_DEF`). `uncharged_wrappers_bound_the_node_depth_ratio` and
+/// patterns (`TUPLE_PAT → TUPLE_PAT_ELT`); modules and contracts
+/// contribute one each (`MODULE_DEF`, `CONTRACT_DECL`).
+/// `uncharged_wrappers_bound_the_node_depth_ratio` and
 /// `node_depth_is_affine_in_max_depth` pin all of them.
 ///
 /// Measured worst over those families, scanning every level count up to
 /// `4 x max_depth` at `max_depth` 8/32/64/128/256/512, is
 /// `3 x max_depth + 4` — 772 at the default. The worst shape is a
-/// generic type in parameter, struct-field or contract-member position
+/// generic type in parameter or struct-field position
 /// (`circuit f(a: A<A<…>>)`), which pays the three type wrappers plus
 /// one uncharged node above the first charge. Peak depth is *exactly*
 /// affine in `max_depth` at every one of those six settings, which is
@@ -141,8 +151,9 @@ fn max_node_depth(root: &SyntaxNode) -> usize {
 /// can drive. `4x` plus a constant leaves headroom for a further wrapper
 /// while still failing loudly on the bugs this file exists to catch:
 /// #21's path-only charge produced ratio 91 at the default (depth 23,297
-/// against a 1,040 bound), and #23's uncharged grammars produced depth
-/// 4,005 from 4 KB of input.
+/// against a 1,040 bound), #23's uncharged grammars produced depth
+/// 4,005 from 4 KB of input, and #28's uncharged `contract` produced
+/// depth 2,002 from 24 KB — at *every* `max_depth`, including 1.
 fn depth_limit(max_depth: u32) -> usize {
     4 * max_depth as usize + 16
 }
@@ -468,6 +479,24 @@ fn modules(levels: usize, exported: bool, innermost: &str) -> String {
     s
 }
 
+/// `contract C{ contract C{ … } }`, optionally `export`ed at every level.
+fn contracts(levels: usize, exported: bool, innermost: &str) -> String {
+    let head = if exported {
+        "export contract C{"
+    } else {
+        "contract C{"
+    };
+    let mut s = String::with_capacity(levels * (head.len() + 1) + innermost.len());
+    for _ in 0..levels {
+        s.push_str(head);
+    }
+    s.push_str(innermost);
+    for _ in 0..levels {
+        s.push('}');
+    }
+    s
+}
+
 /// `pragma language_version <nested version term>;`
 fn pragma_version(levels: usize, open: &str, close: &str, seed: &str) -> String {
     format!(
@@ -569,6 +598,153 @@ fn module_nesting_is_depth_bounded() {
     });
 }
 
+/// Issue #28: `contract → declarations::declaration → contract` never
+/// charged the counter, so nested `contract` declarations were unbounded
+/// at *every* `max_depth` — `max_depth = 1` parsed 2001 levels with zero
+/// diagnostics — and overflowed the parser's own stack at around 29,000
+/// levels in a release build on an 8 MiB main thread. The `mem::forget`
+/// control puts the threshold at the same level as the `drop` path, so
+/// the overflow is the parser's own recursion rather than rowan's
+/// recursive `Drop`, and a path charge on entry is the right fix.
+///
+/// The cycle is reachable four ways. Only the first is a top-level
+/// `contract`; the other three enter through a production that charges
+/// *once* on the way in and then leaves the cycle to run free, so a test
+/// covering only the top-level form would not have caught the bug.
+#[test]
+fn contract_nesting_is_depth_bounded() {
+    // 1. Top-level `contract A{ contract B{ … } }`.
+    assert_family_bounded("contract nesting", |n| contracts(n, false, ""));
+    // 2. `export contract` — the second elementary cycle, routed through
+    //    `export_prefixed`. One `enter_depth()` in `contract` closes both.
+    assert_family_bounded("exported contract nesting", |n| contracts(n, true, ""));
+    assert_family_bounded("alternating export/plain contract nesting", |n| {
+        let mut s = String::new();
+        for i in 0..n {
+            s.push_str(if i % 2 == 0 {
+                "contract C{"
+            } else {
+                "export contract C{"
+            });
+        }
+        s.push_str(&"}".repeat(n));
+        s
+    });
+    // 3. From a circuit or constructor body: `statements::stmt` dispatches
+    //    `CONTRACT_KW` into `declarations::declaration`.
+    assert_family_bounded("contract in a circuit body", |n| {
+        format!("circuit f(): Field {{ {} }}", contracts(n, false, ""))
+    });
+    assert_family_bounded("contract in a constructor body", |n| {
+        format!("constructor() {{ {} }}", contracts(n, false, ""))
+    });
+    // 4. From a module body.
+    assert_family_bounded("contract in a module body", |n| {
+        format!("module M{{ {} }}", contracts(n, false, ""))
+    });
+
+    assert_family_bounded("contract nesting with a member", |n| {
+        contracts(n, false, "circuit m(): Field;")
+    });
+    // Two charged grammars sharing one budget, in both orders.
+    assert_family_bounded("contract nesting over a deep module", |n| {
+        contracts(n, false, &modules(n, false, ""))
+    });
+    assert_family_bounded("module nesting over a deep contract", |n| {
+        modules(n, false, &contracts(n, false, ""))
+    });
+    assert_family_bounded("contract nesting over a deep pattern", |n| {
+        contracts(
+            n,
+            false,
+            &format!(
+                "circuit f(): Field {{ const {} = x; }}",
+                nested(n, "[", "]", "a")
+            ),
+        )
+    });
+    // The deepest tree the unfixed parser would build: nested contracts
+    // stacking uncharged nodes above a generic type that still gets the
+    // whole budget. `4 x max_depth + 7` (1,031 at the default) on `main`,
+    // against a documented worst of 772; `max_depth + 16` now. Not in
+    // `node_depth_is_affine_in_max_depth` because two charged grammars
+    // share one budget here, so the peak lands at a different offset in
+    // the scan window per `max_depth` and is not a clean affine family —
+    // it is far below the bound either way.
+    assert_family_bounded("nested contracts over a generic member", |n| {
+        format!(
+            "{}circuit m(a: {}): Field;{}",
+            "contract C{".repeat(n),
+            nested(n, "A<", ">", "B"),
+            "}".repeat(n)
+        )
+    });
+}
+
+/// The four routes into the `contract` cycle, at the tightest settings
+/// `max_depth` has — the issue's headline evidence.
+///
+/// `max_depth = 1` parsing 2001 levels of nesting with **zero
+/// diagnostics** was the proof the counter was not involved at all: no
+/// setting constrained this production. This is the assertion that
+/// separates "charged" from "merely within the 4x headroom
+/// [`depth_limit`] allows"; the family scan above only reaches
+/// `4 x max_depth` levels, which a one-node-per-level grammar can clear
+/// even uncharged.
+#[test]
+fn contract_nesting_is_bounded_at_the_tightest_max_depth() {
+    type Route = (&'static str, fn(usize) -> String);
+    let routes: [Route; 6] = [
+        ("top-level contract", |n| contracts(n, false, "")),
+        ("export contract", |n| contracts(n, true, "")),
+        ("contract in a circuit body", |n| {
+            format!("circuit f(): Field {{ {} }}", contracts(n, false, ""))
+        }),
+        ("contract in a constructor body", |n| {
+            format!("constructor() {{ {} }}", contracts(n, false, ""))
+        }),
+        ("contract in a module body", |n| {
+            format!("module M{{ {} }}", contracts(n, false, ""))
+        }),
+        ("contract in a nested block", |n| {
+            format!(
+                "circuit f(): Field {{ if (c) {{ {} }} }}",
+                contracts(n, false, "")
+            )
+        }),
+    ];
+
+    for (what, build) in routes {
+        for max_depth in [1u32, 2, 4] {
+            let src = build(2001);
+            let result = parse_with(
+                &src,
+                ParseOptions {
+                    recover: true,
+                    max_errors: 1_000_000,
+                    max_depth,
+                },
+            );
+            let messages: Vec<String> = result.errors.iter().map(|e| e.message.clone()).collect();
+            let root = bounded_root(
+                result,
+                max_depth,
+                &format!("{what} @ max_depth {max_depth}"),
+            );
+            assert_eq!(
+                root.text().to_string(),
+                src,
+                "{what}: CST must round-trip to the input byte-for-byte"
+            );
+            assert!(
+                !messages.is_empty(),
+                "{what} @ max_depth {max_depth}: 2001 levels of nesting parsed with zero \
+                 diagnostics, so no setting of max_depth constrains this production"
+            );
+        }
+    }
+}
+
 /// Issue #23: `version_term → version_or_expr → version_and_expr →
 /// version_term` never charged the counter. This is the cheapest of the
 /// three to drive — it overflowed the parser's stack at around 21,750
@@ -612,7 +788,7 @@ fn version_nesting_is_depth_bounded() {
 #[test]
 fn node_depth_is_affine_in_max_depth() {
     type Shape = (&'static str, fn(usize) -> String, isize, isize);
-    let shapes: [Shape; 10] = [
+    let shapes: [Shape; 17] = [
         ("tuple pattern", |n| const_pattern(n, "[", "]"), 2, 1),
         ("param pattern", param_pattern, 2, 4),
         ("module nesting", |n| modules(n, false, ""), 1, 2),
@@ -658,6 +834,63 @@ fn node_depth_is_affine_in_max_depth() {
             3,
             4,
         ),
+        // Issue #28. `CONTRACT_DECL` is one node per charge, like
+        // `MODULE_DEF`, and all four routes into the cycle land on the
+        // same constants — the enclosing `block`/`stmt`/`module_def`
+        // charge is what absorbs their extra wrapper.
+        ("contract nesting", |n| contracts(n, false, ""), 1, 2),
+        (
+            "exported contract nesting",
+            |n| contracts(n, true, ""),
+            1,
+            2,
+        ),
+        (
+            "contract in a circuit body",
+            |n| format!("circuit f(): Field {{ {} }}", contracts(n, false, "")),
+            1,
+            2,
+        ),
+        (
+            "contract in a module body",
+            |n| format!("module M{{ {} }}", contracts(n, false, "")),
+            1,
+            2,
+        ),
+        (
+            "module nesting over a deep contract",
+            |n| modules(n, false, &contracts(n, false, "")),
+            1,
+            2,
+        ),
+        // A generic type in contract-member position. This is the shape
+        // charging `contract` *improved*: unfixed it was `3 x md + 5`
+        // (773 at the default) — one deeper than the documented global
+        // worst of 772, since `CONTRACT_DECL → CONTRACT_CIRCUIT` stacked
+        // two uncharged nodes above the first `ty` charge. The charge now
+        // pays for one of them.
+        (
+            "generic type, contract member param",
+            |n| {
+                format!(
+                    "contract C {{ circuit m(a: {}): Field; }}",
+                    nested(n, "A<", ">", "B")
+                )
+            },
+            3,
+            2,
+        ),
+        (
+            "generic type, contract member return",
+            |n| {
+                format!(
+                    "contract C {{ circuit m(): {}; }}",
+                    nested(n, "A<", ">", "B")
+                )
+            },
+            3,
+            1,
+        ),
     ];
 
     for (what, build, slope, intercept) in shapes {
@@ -698,11 +931,11 @@ fn node_depth_is_affine_in_max_depth() {
     }
 }
 
-/// Each of the three grammars announces its cap rather than silently
+/// Each of the four grammars announces its cap rather than silently
 /// truncating, and the CST still round-trips byte-for-byte on a run that
 /// produces hundreds of diagnostics.
 #[test]
-fn depth_bounded_pattern_module_version_report_diagnostics() {
+fn depth_bounded_pattern_module_version_contract_report_diagnostics() {
     for (what, src, needle) in [
         (
             "pattern",
@@ -718,6 +951,26 @@ fn depth_bounded_pattern_module_version_report_diagnostics() {
             "version",
             pragma_version(1024, "(", ")", ">= 0.23"),
             "version expression nesting depth limit",
+        ),
+        (
+            "contract",
+            contracts(1024, false, ""),
+            "contract nesting depth limit",
+        ),
+        (
+            "exported contract",
+            contracts(1024, true, ""),
+            "contract nesting depth limit",
+        ),
+        (
+            "contract in a circuit body",
+            format!("circuit f(): Field {{ {} }}", contracts(1024, false, "")),
+            "contract nesting depth limit",
+        ),
+        (
+            "contract in a module body",
+            format!("module M{{ {} }}", contracts(1024, false, "")),
+            "contract nesting depth limit",
         ),
     ] {
         let result = parse(&src);
@@ -736,11 +989,78 @@ fn depth_bounded_pattern_module_version_report_diagnostics() {
     }
 }
 
-/// Ordinary Compact using all three grammars must parse cleanly and stay
+/// The token the `contract` cap skips to make progress stays visible in
+/// the tree, inside an `ERROR` node.
+///
+/// A bare `bump_any()` would keep the CST lossless — the token is still
+/// there — but would bury it in whatever node happened to be open, which
+/// the constitution forbids ("ERROR nodes are never invisible"). Every
+/// `contract` keyword past the cap must therefore sit directly under an
+/// `ERROR`.
+/// Both routes are checked, because they skip *different* tokens: on the
+/// plain route the cap fires with `contract` current, on the `export
+/// contract` route it fires with `export` current (`export_prefixed`
+/// peeks `nth(1)` and calls `contract` without bumping). Only the
+/// `contract` keyword is counted, which both routes reach — on the
+/// export route via the second cap firing, one token later.
+#[test]
+fn contract_cap_wraps_the_skipped_token_in_an_error_node() {
+    for exported in [false, true] {
+        for max_depth in [8u32, 32] {
+            let levels = max_depth as usize + 16;
+            let src = contracts(levels, exported, "");
+            let what = if exported {
+                "export contract cap ERROR wrapping"
+            } else {
+                "contract cap ERROR wrapping"
+            };
+            let result = parse_with(
+                &src,
+                ParseOptions {
+                    recover: true,
+                    max_errors: 1_000_000,
+                    max_depth,
+                },
+            );
+            let root = bounded_root(result, max_depth, what);
+
+            let mut in_error = 0usize;
+            let mut bare = 0usize;
+            for node in root.descendants() {
+                for tok in node.children_with_tokens().filter_map(|c| c.into_token()) {
+                    if tok.kind() == compactp_syntax::SyntaxKind::CONTRACT_KW {
+                        if node.kind() == compactp_syntax::SyntaxKind::ERROR {
+                            in_error += 1;
+                        } else {
+                            bare += 1;
+                        }
+                    }
+                }
+            }
+
+            // `max_depth` levels parse normally; every level past that has its
+            // keyword skipped by the cap and must land inside an `ERROR`.
+            assert_eq!(
+                bare, max_depth as usize,
+                "{what} @ max_depth {max_depth}: expected exactly {max_depth} \
+                 `contract` keywords inside CONTRACT_DECL nodes, found {bare}"
+            );
+            assert_eq!(
+                in_error,
+                levels - max_depth as usize,
+                "{what} @ max_depth {max_depth}: every `contract` keyword past the \
+                 cap must be wrapped in an ERROR node, found {in_error} of {}",
+                levels - max_depth as usize
+            );
+        }
+    }
+}
+
+/// Ordinary Compact using all four grammars must parse cleanly and stay
 /// far below the limit — the caps may not turn realistic source into
 /// `ERROR` nodes.
 #[test]
-fn realistic_pattern_module_version_nesting_is_unaffected() {
+fn realistic_pattern_module_version_contract_nesting_is_unaffected() {
     let src = concat!(
         "pragma language_version (>= 0.23) && (< 1.0);\n",
         "module Utils {\n",
@@ -748,14 +1068,23 @@ fn realistic_pattern_module_version_nesting_is_unaffected() {
         "    export circuit g(x: Field): Field { return x; }\n",
         "  }\n",
         "}\n",
+        "export contract Outer {\n",
+        "  circuit m(a: Field): Field;\n",
+        "  contract Inner { pure circuit n(): Field; }\n",
+        "}\n",
         "circuit f([a, [b, c]]: [Field, [Field, Field]]): Field {\n",
         "  const {p, q: [r, s]} = t;\n",
+        "  contract Local { circuit o(): Field; }\n",
         "  return a + b + c + p + r + s;\n",
         "}\n"
     );
     let result = parse(src);
     let messages: Vec<String> = result.errors.iter().map(|e| e.message.clone()).collect();
-    let root = bounded_root(result, 256, "realistic pattern/module/version source");
+    let root = bounded_root(
+        result,
+        256,
+        "realistic pattern/module/version/contract source",
+    );
     assert!(
         messages.is_empty(),
         "realistic source must parse cleanly: {messages:?}"
@@ -766,15 +1095,15 @@ fn realistic_pattern_module_version_nesting_is_unaffected() {
     );
 }
 
-/// Number of nesting levels used by the #23 small-stack tests.
+/// Number of nesting levels used by the #23 and #28 small-stack tests.
 ///
 /// Chosen so an *unfixed* parser both (a) returns a tree deeper than
-/// [`depth_limit`] — 2,405 / 1,201 / 1,204 nodes for the three shapes
-/// against a 1,040 bound — and (b) still completes the parse inside the
-/// 2 MiB thread, needing 1,118 / 575 / 895 KiB in a debug build. Without
-/// (b) a regression would overflow during the parse and abort the test
-/// process instead of reporting a depth, which is the failure mode this
-/// whole file is written to avoid.
+/// [`depth_limit`] — 2,405 / 1,201 / 1,204 / 1,202 nodes for the four
+/// shapes against a 1,040 bound — and (b) still completes the parse
+/// inside the 2 MiB thread, needing 1,118 / 575 / 895 / 1,022 KiB in a
+/// debug build. Without (b) a regression would overflow during the parse
+/// and abort the test process instead of reporting a depth, which is the
+/// failure mode this whole file is written to avoid.
 const NEST_LEVELS: usize = 1200;
 
 /// Issue #23, pattern shape: 2.4 KB of input, CST depth 2,405 unfixed.
@@ -797,5 +1126,26 @@ fn deep_version_nesting_drops_cleanly_on_a_2mib_stack_thread() {
     parse_and_drop_on_small_stack(
         pragma_version(NEST_LEVELS, "(", ")", ">= 0.23"),
         "nested version term",
+    );
+}
+
+/// Issue #28, contract shape: CST depth 1,202 unfixed, and unbounded at
+/// every `max_depth`.
+#[test]
+fn deep_contract_nesting_drops_cleanly_on_a_2mib_stack_thread() {
+    parse_and_drop_on_small_stack(contracts(NEST_LEVELS, false, ""), "nested contracts");
+}
+
+/// The same shape entered through a circuit body — the route where the
+/// enclosing `block`/`stmt` charge is spent once and the uncharged cycle
+/// then ran free.
+#[test]
+fn deep_contract_in_a_circuit_body_drops_cleanly_on_a_2mib_stack_thread() {
+    parse_and_drop_on_small_stack(
+        format!(
+            "circuit f(): Field {{ {} }}",
+            contracts(NEST_LEVELS, false, "")
+        ),
+        "nested contracts in a circuit body",
     );
 }
