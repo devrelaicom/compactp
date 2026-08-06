@@ -77,7 +77,31 @@ pub(crate) fn export_list(p: &mut Parser) {
 }
 
 /// `export? module name gparams? { pelts... }`
+///
+/// Charges the depth counter: `module_def → declarations::declaration →
+/// module_def` is a recursion cycle, so `module M{ module M{ … } }`
+/// recurses once per level. A path-only charge suffices — nothing on
+/// this path uses `CompletedMarker::precede`, so node depth is one
+/// `MODULE_DEF` per charge.
 pub(crate) fn module_def(p: &mut Parser, has_export: bool) {
+    if !p.enter_depth() {
+        // Recursion limit exceeded — emit a recovery diagnostic and an
+        // ERROR placeholder rather than risk a stack overflow. Bump one
+        // token (if any remain) so the enclosing declaration loop makes
+        // progress and cannot spin on the same `module` keyword.
+        let m = p.start();
+        p.error("module nesting depth limit exceeded");
+        if !p.at_end() {
+            p.bump_any();
+        }
+        m.complete(p, ERROR);
+        return;
+    }
+    module_def_inner(p, has_export);
+    p.exit_depth();
+}
+
+fn module_def_inner(p: &mut Parser, has_export: bool) {
     let m = p.start();
     if has_export {
         p.bump(EXPORT_KW);
@@ -95,7 +119,7 @@ pub(crate) fn module_def(p: &mut Parser, has_export: bool) {
         if p.errors_exhausted() {
             break;
         }
-        declarations::declaration(p);
+        super::step_ensuring_progress(p, declarations::declaration);
     }
     p.expect(R_BRACE);
     m.complete(p, MODULE_DEF);

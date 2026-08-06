@@ -14,7 +14,32 @@ use crate::parser::Parser;
 use compactp_syntax::SyntaxKind::*;
 
 /// Parse a pattern.
+///
+/// Charges the depth counter: `pattern → tuple_pattern → tuple_pat_elt
+/// → pattern` (and the `struct_pat_field` equivalent) is a recursion
+/// cycle, so `const [[[…x…]]] = y;` recurses once per bracket. A
+/// path-only charge suffices here — nothing in this module uses
+/// `CompletedMarker::precede`, so every node is built above the path
+/// currently on the stack and node depth stays proportional to the
+/// charge (two nodes per level: `TUPLE_PAT → TUPLE_PAT_ELT`).
 pub(crate) fn pattern(p: &mut Parser) {
+    if !p.enter_depth() {
+        // Recursion limit exceeded — emit a recovery diagnostic and an
+        // ERROR placeholder rather than risk a stack overflow. Bump one
+        // token (if any remain) so enclosing loops make progress.
+        let m = p.start();
+        p.error("pattern nesting depth limit exceeded");
+        if !p.at_end() {
+            p.bump_any();
+        }
+        m.complete(p, ERROR);
+        return;
+    }
+    pattern_inner(p);
+    p.exit_depth();
+}
+
+fn pattern_inner(p: &mut Parser) {
     match p.current() {
         L_BRACKET => tuple_pattern(p),
         L_BRACE => struct_pattern(p),

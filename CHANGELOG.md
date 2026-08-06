@@ -33,9 +33,66 @@ While in `0.x`, breaking changes may land in any minor release.
   place between two charges (`PAREN_EXPR` → `EXPR_SEQ` → `ASSIGN_EXPR`). That
   ratio is identical at `max_depth` 32, 64 and 256 — a genuine constant, not an
   input-controlled multiplier.
+- `ParseOptions::max_depth` now also bounds the pattern, module and version
+  grammars. Three recursive productions never charged the counter at all —
+  `pattern → tuple_pattern → tuple_pat_elt → pattern`,
+  `module_def → declaration → module_def` and
+  `version_term → version_or_expr → version_and_expr → version_term` — so no
+  setting of `max_depth` constrained them: `max_depth = 1` still parsed
+  2001-deep module nesting with zero diagnostics. Each could be driven to a
+  stack overflow that aborts the process uncatchably — around 37,500 nested
+  brackets, 57,000 nested modules or 21,500 nested version parentheses on an
+  8 MiB stack — and the version case reaches through the CLI on a single line:
+  `pragma language_version ((((>= 0.23))));`. Unlike
+  [#21](https://github.com/devrelaicom/compactp/issues/21), the binding
+  constraint here is the parser's own recursion rather than the tree's `Drop`:
+  leaking the tree instead of dropping it leaves the threshold unchanged, so a
+  plain depth charge on entry is the fix. Worst measured node depth across all
+  grammars is `3 × max_depth + 4` (772 at the default), from a generic type in
+  parameter, struct-field or contract-member position, and is exactly affine in
+  `max_depth` at 8, 32, 64, 128, 256 and 512. Charging `module_def` also
+  improves that worst case from `main`'s 773
+  (`module M{ struct S { a: A<A<…>>; } }`), whose previously documented figure
+  of 767 was understated because the wrapper-stack enumeration omitted
+  `TYPE_REF` → `GENERIC_ARG_LIST` → `GENERIC_ARG`.
+  ([#23](https://github.com/devrelaicom/compactp/issues/23))
+- `ParseOptions::max_errors` no longer amplifies. Every list-parsing recovery
+  loop was bounded by the error budget but not by token progress, so a
+  production that reported an error and consumed nothing left the loop to
+  re-run on the same token until it reached `max_errors`. The diagnostic count
+  tracked the option rather than the input: `export` — six bytes — reached
+  `max_errors` diagnostics on its own, and at `max_errors = 5_000_000` a
+  115-byte input produced 5,000,002 diagnostics and over 600 MiB of message
+  strings. Raising `max_errors` is exactly what a language server or a batch
+  linter does, so this made a tuning knob into a memory and CPU amplifier.
+  Recovery loops now skip a token inside an `ERROR` node when a production
+  stalls. Five of the reachable inputs predate this release (`export`, a stray
+  `]` in statement position, `export ;` inside a `contract` or `module` body);
+  two more became reachable when `pattern()` started enforcing `max_depth`.
+
+### Known issues
+
+- Nested `contract` declarations are still not depth-charged.
+  `declarations::contract` recurses through `declarations::declaration` back
+  into itself, so nested `contract` declarations are unbounded at every
+  `max_depth` and overflow the parser's stack at around 37,500 levels.
+  Reachable from a top-level `contract A { contract B { … } }`, from
+  `export contract`, from a circuit or constructor body, and from a `module`
+  body — the enclosing `block`/`stmt`/`module_def` charge is spent once on
+  entry and the uncharged cycle then runs free, so rejecting only the
+  top-level form does not mitigate it. Same class as
+  [#23](https://github.com/devrelaicom/compactp/issues/23); tracked as
+  [#28](https://github.com/devrelaicom/compactp/issues/28).
 
 ### Changed
 
+- Deeply nested destructuring patterns, module declarations and pragma version
+  terms now emit a `pattern nesting depth limit exceeded`,
+  `module nesting depth limit exceeded` or
+  `version expression nesting depth limit exceeded` diagnostic and an `ERROR`
+  node once they pass `max_depth`, where they previously nested without limit
+  and reported nothing. The CST remains lossless in both cases. For scale, the
+  deepest file in the upstream Compact corpus has a CST depth of 20.
 - Expression chains longer than `max_depth` links now emit an
   `expression nesting depth limit exceeded` diagnostic and an `ERROR` node
   rather than nesting without limit. Input with more than roughly 250 chained

@@ -50,7 +50,39 @@ fn version_and_expr(p: &mut Parser) {
 }
 
 /// version-term → version-atom | op version-atom | ! version-term | ( version-expr )
+///
+/// Charges the depth counter: both `( version-expr )` and `! version-term`
+/// re-enter this production — via `version_or_expr → version_and_expr →
+/// version_term` for the parenthesized form — so
+/// `pragma language_version ((((>= 0.23))));` recurses once per paren.
+/// This is the cheapest of the three uncharged cycles to drive and the
+/// only one reachable through a single pragma.
+///
+/// A path-only charge suffices. The `VERSION_OR_EXPR`/`VERSION_AND_EXPR`
+/// markers do enclose the recursion, but they are opened *before* it, at
+/// the enclosing path depth, so they are ordinary recursive-descent
+/// wrappers rather than `precede`-style insertions above a finished
+/// subtree; node depth stays proportional to the charge (at most
+/// `VERSION_PAREN_EXPR → VERSION_OR_EXPR → VERSION_AND_EXPR`, three per
+/// level).
 fn version_term(p: &mut Parser) {
+    if !p.enter_depth() {
+        // Recursion limit exceeded — emit a recovery diagnostic and an
+        // ERROR placeholder rather than risk a stack overflow. Bump one
+        // token (if any remain) so enclosing loops make progress.
+        let m = p.start();
+        p.error("version expression nesting depth limit exceeded");
+        if !p.at_end() {
+            p.bump_any();
+        }
+        m.complete(p, ERROR);
+        return;
+    }
+    version_term_inner(p);
+    p.exit_depth();
+}
+
+fn version_term_inner(p: &mut Parser) {
     match p.current() {
         BANG => {
             let m = p.start();
