@@ -10,6 +10,45 @@ While in `0.x`, breaking changes may land in any minor release.
 
 ### Fixed
 
+- Parse time is now linear in the size of the input for left-associative
+  operator chains (`x+x+...+x`) and postfix chains (`1()()...`, `x.a.a...`),
+  which were quadratic in the chain length. Such a chain builds a *left-deep
+  spine* — every extension wraps the whole tree built so far — so the spine's
+  subtree sizes run `1, 2, 3, ..., n`. `rowan::GreenNodeBuilder`, which this
+  crate used for tree construction, interns nodes in a hash table whose rehash
+  callback recomputes a node's hash by walking its entire subtree, so growing
+  that table cost the sum of all cached subtree sizes: `O(n log n)` for a
+  balanced tree, `Θ(n²)` for a spine. Measured release,
+  `aarch64-apple-darwin`, `max_depth = 100_000`: 5,000 terms 105 ms, 10,000
+  terms 405 ms, 20,000 terms 1,606 ms, with ~90% of profile samples inside
+  rowan's `node_hash`. The same chains now take 1.15 ms, 2.08 ms and 3.73 ms —
+  **431x** faster at 20,000 terms, and doubling the input now doubles the time.
+  The default `max_depth` masked this by truncating a chain after a few
+  hundred extensions; it was reachable by any consumer that raised the limit,
+  which the documentation invites. Tree construction moved to an in-crate
+  builder that keys its interner on `(kind, child identities)` rather than on
+  the subtree itself, making a rehash `O(1)` per entry. The CST, AST and
+  diagnostics are identical, verified over the corpus, the fuzz corpora and
+  generated shapes at six `max_depth` settings — see
+  `crates/compactp_parser/tests/tree_equivalence.rs`. Corpus throughput
+  improved from 88.0 to 91.4 MiB/s. The *retained tree* is unchanged, since
+  the interner keeps the same equality relation and so shares the same
+  subtrees; its *transient tables* are 4-6x wider per entry than rowan's,
+  which raised peak RSS from 4.22 to 4.94 MiB on a 74 KB input and from 64.75
+  to 70.03 MiB on a 1.48 MB one.
+  ([#22](https://github.com/devrelaicom/compactp/issues/22))
+- Nested parentheses no longer cost time proportional to the lambda-lookahead
+  window at every level. `looks_like_lambda` decides whether a `(` opens a
+  lambda parameter list by reading up to 100 tokens ahead, and read them with
+  `Parser::nth`, which restarts the walk from the current position on every
+  call — around 5,000 token steps per `(`, and more when trivia sits between
+  them, since `nth` re-skips it on each pass. `((((...x...))))` parsed at
+  ~0.8 MiB/s against ~92 MiB/s for the 486-file corpus. The scan now walks the
+  upcoming tokens once. Measured debug: nesting 1,000 parens ran 34.4x slower
+  per byte than the same nesting in brackets, now 2.7x; 8,000 nested parens
+  went from 19.4 ms to 2.2 ms in release. Behaviour is unchanged — the same
+  cutoffs apply and the same inputs are recognized as lambdas.
+  ([#22](https://github.com/devrelaicom/compactp/issues/22))
 - `ParseOptions::max_depth` now bounds the depth of the expression tree the
   parser returns, not only the depth of recursive-descent entry.
   Left-associative operator chains (`x+x+...+x`) and postfix chains

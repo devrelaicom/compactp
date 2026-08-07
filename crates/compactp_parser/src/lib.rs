@@ -11,6 +11,7 @@
 
 mod event;
 pub(crate) mod grammar;
+mod green_builder;
 mod marker;
 mod parser;
 mod sink;

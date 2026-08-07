@@ -664,54 +664,64 @@ fn paren_or_lambda(p: &mut Parser) -> Option<CompletedMarker> {
     Some(m.complete(p, PAREN_EXPR))
 }
 
+/// Non-trivia tokens [`looks_like_lambda`] will read before giving up
+/// and calling the `(` a parenthesized expression.
+const LAMBDA_LOOKAHEAD: usize = 100;
+
 /// Heuristic to determine if `(` starts a lambda.
 /// Look for `)` followed by optional `: type` then `=>`.
+///
+/// Walks the upcoming tokens once, via [`Parser::lookahead`]. Reading
+/// them with `p.nth(i)` for successive `i` instead would restart the
+/// walk on every step: with the cutoff at 100 that is ~5,000 token
+/// steps per `(`, and more when trivia sits between them because `nth`
+/// re-skips it each pass. Nested parens pay it per level —
+/// `((((…x…))))` parsed at ~0.8 MiB/s against ~92 MiB/s for the
+/// corpus, and adding a space between each paren halved it again.
 fn looks_like_lambda(p: &Parser) -> bool {
     let mut depth = 0i32;
-    let mut i = 0usize;
-    loop {
-        let kind = p.nth(i);
+    let mut index = 0usize;
+    let mut scan = p.lookahead();
+    while let Some(kind) = scan.next() {
         match kind {
             L_PAREN => depth += 1,
             R_PAREN => {
                 depth -= 1;
                 if depth == 0 {
                     // After `)`, look for optional `: type` then `=>`
-                    let next = p.nth(i + 1);
-                    if next == FAT_ARROW {
+                    let next = scan.next();
+                    if next == Some(FAT_ARROW) {
                         return true;
                     }
-                    if next == COLON {
-                        // Skip past `: type` to find `=>`
-                        let mut j = i + 2;
-                        loop {
-                            let k = p.nth(j);
-                            if k == FAT_ARROW {
-                                return true;
-                            }
-                            if matches!(
-                                k,
-                                SEMICOLON | L_BRACE | R_BRACE | EOF | EQ | PLUS_EQ | MINUS_EQ
-                            ) {
-                                return false;
-                            }
-                            j += 1;
-                            if j > 100 {
-                                return false;
-                            }
+                    if next != Some(COLON) {
+                        return false;
+                    }
+                    // Skip past `: type` to find `=>`
+                    let mut j = index + 2;
+                    for k in scan {
+                        if k == FAT_ARROW {
+                            return true;
+                        }
+                        if matches!(k, SEMICOLON | L_BRACE | R_BRACE | EQ | PLUS_EQ | MINUS_EQ) {
+                            return false;
+                        }
+                        j += 1;
+                        if j > LAMBDA_LOOKAHEAD {
+                            return false;
                         }
                     }
                     return false;
                 }
             }
-            EOF | SEMICOLON => return false,
+            SEMICOLON => return false,
             _ => {}
         }
-        i += 1;
-        if i > 100 {
+        index += 1;
+        if index > LAMBDA_LOOKAHEAD {
             return false;
         }
     }
+    false
 }
 
 /// Parse a lambda expression: `(params) : type? => expr | block`

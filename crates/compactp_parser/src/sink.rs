@@ -1,4 +1,5 @@
 use crate::event::Event;
+use crate::green_builder::GreenBuilder;
 use compactp_diagnostics::{Diagnostic, DiagnosticCode};
 use compactp_syntax::SyntaxKind;
 use rowan::GreenNode;
@@ -7,18 +8,19 @@ pub(crate) struct Sink<'src> {
     events: Vec<Event>,
     tokens: Vec<(SyntaxKind, &'src str)>,
     token_pos: usize,
-    builder: rowan::GreenNodeBuilder<'static>,
+    builder: GreenBuilder<'src>,
     errors: Vec<Diagnostic>,
     byte_offset: usize,
 }
 
 impl<'src> Sink<'src> {
     pub(crate) fn new(events: Vec<Event>, tokens: Vec<(SyntaxKind, &'src str)>) -> Self {
+        let builder = GreenBuilder::new(tokens.len());
         Self {
             events,
             tokens,
             token_pos: 0,
-            builder: rowan::GreenNodeBuilder::new(),
+            builder,
             errors: Vec::new(),
             byte_offset: 0,
         }
@@ -81,7 +83,19 @@ impl<'src> Sink<'src> {
         // Consume any remaining trailing trivia
         self.eat_remaining_trivia();
 
-        (self.builder.finish(), self.errors)
+        let root_kind = compactp_syntax::CompactLanguage::kind_to_raw(SyntaxKind::SOURCE_FILE);
+        // The grammar's start/finish events nest, and `source_file`
+        // wraps the whole parse, so the builder must close to exactly
+        // one SOURCE_FILE. `GreenBuilder::finish` degrades gracefully
+        // instead of asserting, because it must never panic on user
+        // input — so the detector rowan's builder provided lives here.
+        debug_assert!(
+            self.builder.is_balanced(root_kind),
+            "event stream did not close to a single SOURCE_FILE: the grammar \
+             emitted start/finish events that do not nest"
+        );
+        let root = self.builder.finish(root_kind);
+        (root, self.errors)
     }
 
     fn token(&mut self, _kind: SyntaxKind, n_raw_tokens: u8) {
