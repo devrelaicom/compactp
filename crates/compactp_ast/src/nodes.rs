@@ -102,6 +102,45 @@ impl Pragma {
     pub fn name(&self) -> Option<SyntaxToken> {
         support::child_token(&self.0, SyntaxKind::IDENT)
     }
+
+    /// The declared version constraint, if the pragma's version expression
+    /// parsed into one of the five `VERSION_*` node kinds.
+    ///
+    /// `None` whenever no such node is a direct child of the pragma, which
+    /// happens two ways: the version expression is entirely absent from the
+    /// tree (a malformed `pragma id ;`), or the parser replaced it with an
+    /// `ERROR` node during recovery (for example when a configured
+    /// `max_depth` is exhausted partway through the expression) — the
+    /// position is present in the tree, just not castable to `VersionExpr`.
+    /// Either way, `None` here means a parse failure at this position, not
+    /// necessarily an empty pragma; see the crate-level note on [iterator
+    /// accessors and error
+    /// recovery](crate#iterator-accessors-and-error-recovery), which covers
+    /// `Option`-returning accessors too.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use compactp_ast::{AstNode, Pragma, SourceFile, VersionExpr};
+    /// use compactp_syntax::SyntaxNode;
+    ///
+    /// let result = compactp_parser::parse("pragma language_version >= 0.15 && < 1.0;");
+    /// let root = SyntaxNode::new_root(result.green);
+    /// let file = SourceFile::cast(root).expect("root is SOURCE_FILE");
+    /// let pragma: Pragma = file.pragmas().next().expect("Pragma node");
+    ///
+    /// // Walk the parsed structure directly -- no positional CST hand-walking
+    /// // needed to reach the two ANDed operands.
+    /// match pragma.version().expect("version expression") {
+    ///     VersionExpr::And(and_expr) => {
+    ///         assert_eq!(and_expr.operands().count(), 2);
+    ///     }
+    ///     other => panic!("expected VersionExpr::And, got {other:?}"),
+    /// }
+    /// ```
+    pub fn version(&self) -> Option<VersionExpr> {
+        support::child_node(&self.0)
+    }
 }
 
 ast_node! {
@@ -1301,6 +1340,211 @@ impl StructPatField {
 
     /// The inner pattern, if this field has a `: pattern` binding.
     pub fn pattern(&self) -> Option<Pat> {
+        support::child_node(&self.0)
+    }
+}
+
+// ===========================================================================
+// Version-constraint expression nodes (`pragma language_version ...`)
+// ===========================================================================
+
+/// Sum type for all version-constraint expression AST nodes.
+///
+/// Reached via [`Pragma::version`]. Every grammar position inside a version
+/// constraint — the operands of [`VersionAndExpr`]/[`VersionOrExpr`], the
+/// operand of [`VersionUnaryExpr`], the contents of [`VersionParenExpr`] —
+/// accepts this enum, so a consumer walks the whole constraint tree by
+/// matching on it recursively instead of hand-walking raw `VERSION_*` syntax
+/// kinds and byte offsets.
+///
+/// compactp does not interpret version constraints: no comparison, no range
+/// checking, no satisfaction logic. This type only exposes the structure the
+/// parser already built; deciding what a constraint means is a consumer's
+/// job.
+///
+/// See the crate-level note on [iterator accessors and error
+/// recovery](crate#iterator-accessors-and-error-recovery) before folding
+/// [`VersionAndExpr::operands`]/[`VersionOrExpr::operands`] into a pass/fail
+/// decision.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum VersionExpr {
+    /// A version literal or bare integer atom: `0.15.0` or `1`.
+    ///
+    /// Wraps [`SyntaxKind::VERSION_EXPR`] — the grammar's `version-atom`
+    /// production, *not* the whole version-constraint category this enum
+    /// represents. The two share a name only because the grammar happened
+    /// to complete the atom with the same `VERSION_EXPR` kind that labels
+    /// the category; see [`VersionAtomExpr`] for how the AST layer
+    /// resolves the resulting name collision.
+    Literal(VersionAtomExpr),
+    /// `expr && expr (&& expr)*`
+    And(VersionAndExpr),
+    /// `expr || expr (|| expr)*`
+    Or(VersionOrExpr),
+    /// `! expr`, or a relational prefix like `>= expr`.
+    Unary(VersionUnaryExpr),
+    /// `( expr )`
+    Paren(VersionParenExpr),
+}
+
+impl AstNode for VersionExpr {
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            SyntaxKind::VERSION_EXPR
+                | SyntaxKind::VERSION_AND_EXPR
+                | SyntaxKind::VERSION_OR_EXPR
+                | SyntaxKind::VERSION_UNARY_EXPR
+                | SyntaxKind::VERSION_PAREN_EXPR
+        )
+    }
+
+    fn cast(node: SyntaxNode) -> Option<Self> {
+        match node.kind() {
+            SyntaxKind::VERSION_EXPR => Some(Self::Literal(VersionAtomExpr(node))),
+            SyntaxKind::VERSION_AND_EXPR => Some(Self::And(VersionAndExpr(node))),
+            SyntaxKind::VERSION_OR_EXPR => Some(Self::Or(VersionOrExpr(node))),
+            SyntaxKind::VERSION_UNARY_EXPR => Some(Self::Unary(VersionUnaryExpr(node))),
+            SyntaxKind::VERSION_PAREN_EXPR => Some(Self::Paren(VersionParenExpr(node))),
+            _ => None,
+        }
+    }
+
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::Literal(n) => &n.0,
+            Self::And(n) => &n.0,
+            Self::Or(n) => &n.0,
+            Self::Unary(n) => &n.0,
+            Self::Paren(n) => &n.0,
+        }
+    }
+}
+
+ast_node! {
+    /// A version literal or bare integer atom: `0.15.0` or `1`.
+    ///
+    /// Wraps [`SyntaxKind::VERSION_EXPR`], the grammar's `version-atom`
+    /// production (`version_atom` in `grammar/version.rs`). Named
+    /// `VersionAtomExpr` — after the grammar production, not
+    /// `VersionExpr` — because that name belongs to the sum type above;
+    /// see [`VersionExpr::Literal`] for the full explanation of the
+    /// collision this avoids. This is the only `ast_node!` wrapper in the
+    /// crate whose name doesn't match its `SyntaxKind` 1:1.
+    VersionAtomExpr => VERSION_EXPR
+}
+
+impl VersionAtomExpr {
+    /// The literal token: a dotted [`SyntaxKind::VERSION_LIT`] (e.g.
+    /// `0.15.0`) or a bare [`SyntaxKind::INT_LIT`] (e.g. `1`).
+    pub fn literal(&self) -> Option<SyntaxToken> {
+        self.0
+            .children_with_tokens()
+            .filter_map(rowan::NodeOrToken::into_token)
+            .find(|t| matches!(t.kind(), SyntaxKind::VERSION_LIT | SyntaxKind::INT_LIT))
+    }
+}
+
+ast_node! {
+    /// Logical-and version constraint: `expr && expr (&& expr)*`.
+    VersionAndExpr => VERSION_AND_EXPR
+}
+
+impl VersionAndExpr {
+    /// The `&&` operator token joining the operands.
+    ///
+    /// The grammar only ever puts `&&` in this node (never `||`), so every
+    /// occurrence here is the same token; this returns the first one as a
+    /// representative, not because later occurrences might differ.
+    pub fn op(&self) -> Option<SyntaxToken> {
+        support::child_token(&self.0, SyntaxKind::AMP_AMP)
+    }
+
+    /// The ANDed operands, in source order.
+    ///
+    /// See the crate-level note on [iterator accessors and error
+    /// recovery](crate#iterator-accessors-and-error-recovery): a syntax
+    /// error at an operand's position can make it vanish from this
+    /// iterator rather than appear as an empty/error placeholder.
+    pub fn operands(&self) -> impl Iterator<Item = VersionExpr> {
+        support::children_nodes(&self.0)
+    }
+}
+
+ast_node! {
+    /// Logical-or version constraint: `expr || expr (|| expr)*`.
+    VersionOrExpr => VERSION_OR_EXPR
+}
+
+impl VersionOrExpr {
+    /// The `||` operator token joining the operands.
+    ///
+    /// The grammar only ever puts `||` in this node (never `&&`), so every
+    /// occurrence here is the same token; this returns the first one as a
+    /// representative, not because later occurrences might differ.
+    pub fn op(&self) -> Option<SyntaxToken> {
+        support::child_token(&self.0, SyntaxKind::PIPE_PIPE)
+    }
+
+    /// The ORed operands, in source order.
+    ///
+    /// See the crate-level note on [iterator accessors and error
+    /// recovery](crate#iterator-accessors-and-error-recovery): a syntax
+    /// error at an operand's position can make it vanish from this
+    /// iterator rather than appear as an empty/error placeholder.
+    pub fn operands(&self) -> impl Iterator<Item = VersionExpr> {
+        support::children_nodes(&self.0)
+    }
+}
+
+ast_node! {
+    /// Unary version constraint: negation (`! expr`) or a relational prefix
+    /// (`>= expr`, `<= expr`, `> expr`, `< expr`).
+    VersionUnaryExpr => VERSION_UNARY_EXPR
+}
+
+impl VersionUnaryExpr {
+    /// The operator token: `!`, `<`, `<=`, `>`, or `>=`.
+    pub fn op(&self) -> Option<SyntaxToken> {
+        self.0
+            .children_with_tokens()
+            .filter_map(rowan::NodeOrToken::into_token)
+            .find(|t| {
+                matches!(
+                    t.kind(),
+                    SyntaxKind::BANG
+                        | SyntaxKind::LT
+                        | SyntaxKind::LT_EQ
+                        | SyntaxKind::GT
+                        | SyntaxKind::GT_EQ
+                )
+            })
+    }
+
+    /// The constrained operand.
+    ///
+    /// `None` if the operand failed to parse (e.g. `>= ;`) even though the
+    /// unary node itself is present; see the crate-level note on [iterator
+    /// accessors and error
+    /// recovery](crate#iterator-accessors-and-error-recovery).
+    pub fn operand(&self) -> Option<VersionExpr> {
+        support::child_node(&self.0)
+    }
+}
+
+ast_node! {
+    /// Parenthesized version constraint: `( expr )`.
+    VersionParenExpr => VERSION_PAREN_EXPR
+}
+
+impl VersionParenExpr {
+    /// The parenthesized expression.
+    ///
+    /// `None` if the parens are empty or their contents failed to parse
+    /// (e.g. `()`) even though the paren node itself is present; see the
+    /// crate-level note on [iterator accessors and error
+    /// recovery](crate#iterator-accessors-and-error-recovery).
+    pub fn inner(&self) -> Option<VersionExpr> {
         support::child_node(&self.0)
     }
 }

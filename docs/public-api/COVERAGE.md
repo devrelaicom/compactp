@@ -16,7 +16,7 @@ WS2 T2 and re-snapshotted in WS2 T4 after demotions):
 | `compactp_syntax`      | 230            | −2 (`is_keyword`, `SyntaxElement` removed) |
 | `compactp_diagnostics` | 91             | —          |
 | `compactp_parser`      | 25             | −2 (`grammar` module demoted, `parse_file` removed) |
-| `compactp_ast`         | 3739           | −4 (`support` module demoted to `pub(crate)`) |
+| `compactp_ast`         | 4065           | +326 (`VersionExpr` family added for #25) |
 
 Each baseline line is roughly one public item — top-level types,
 functions, free items, plus per-type accessor methods and the standard
@@ -116,15 +116,17 @@ consumer accesses it via `crate::grammar`); `parse_file` was removed
 (zero callers in the workspace, and the CLI reads source via
 `resolve_inputs` + `parse_with`).
 
-### `compactp_ast` (3743 baseline lines)
+### `compactp_ast` (4065 baseline lines)
 
 The surface is dominated by AstNode-family items. Each AST node
 contributes one `pub struct Foo(_)`, three `AstNode` impl items
 (`can_cast`, `cast`, `syntax`), and the standard auto-derive impls
 (`Clone`, `Debug`, `PartialEq`, `Eq`, `Hash`, plus the marker traits)
 — roughly 15 baseline lines per node, before any node-specific
-accessor methods. There are ~50 such nodes, accounting for most of
-the 3743 lines.
+accessor methods. There are ~55 such nodes, accounting for most of
+the 4065 lines. (#25 added the `VersionExpr` enum and its five
+`VERSION_*` node wrappers — see the dedicated family section below —
+bringing the baseline from 3739 to 4065.)
 
 Coverage below is grouped by family. The rule of thumb: if the `ast`
 subcommand walks the family, every accessor it exposes is covered
@@ -175,6 +177,40 @@ listed in `Item` is therefore reached by the `ast` subcommand.
 | `PrefixDecl`                                                 | doctest       | Kept `pub` and exercised by a doctest on the struct itself (`crates/compactp_ast/src/nodes.rs`) — reached at runtime via `Import::prefix()`. |
 | `ImportSpecifier`                                            | doctest       | Kept `pub` and exercised by a doctest on the struct itself; walks `import { foo, bar } from "x";` and pulls each specifier's `name()`. |
 
+#### Version-constraint expression family (`pragma language_version ...`, added in #25)
+
+`Pragma` is matched as an opaque variant by `item_summary`/`item_json`
+(see the top-level `Item` family above) — the `ast` subcommand never
+descends into a pragma's declared version constraint, so nothing in
+this family is CLI-reachable. Coverage here is doctest-only, and it is
+partial by design rather than padded out to a false "no orphans":
+
+| Family member                                              | Subcommand(s) | Notes                                                                                                    |
+| ------------------------------------------------------------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `Pragma::version`                                           | doctest       | Exercised by the doctest on `Pragma::version` itself (`crates/compactp_ast/src/nodes.rs`), which parses an AND constraint and matches `VersionExpr::And`. |
+| `enum VersionExpr` (`Literal`/`And`/`Or`/`Unary`/`Paren`) + `AstNode` impl | doctest (partial) | The `And` variant and its `cast`/`syntax` path are exercised transitively by the `Pragma::version` doctest; the other four variants are not. |
+| `VersionAndExpr::operands`                                  | doctest       | Called directly by the `Pragma::version` doctest (`and_expr.operands().count()`).                                                |
+| `VersionAndExpr::op`                                        | orphan        | Not called by the CLI or any doctest. Unit-tested in `crates/compactp_ast/src/lib.rs` (`pragma_version_and`, `pragma_version_and_three_operands_op_is_first_of_two_tokens`), which satisfies neither prong of this document's contract (CLI-reachable or doctest) but does mean the accessor is exercised by `cargo test`. |
+| `VersionOrExpr::op` / `VersionOrExpr::operands`              | orphan        | Same as above — unit-tested, not CLI-reachable, not doctested.                                                                   |
+| `VersionUnaryExpr::op` / `VersionUnaryExpr::operand`         | orphan        | Same as above.                                                                                                                    |
+| `VersionParenExpr::inner`                                   | orphan        | Same as above.                                                                                                                    |
+| `VersionAtomExpr::literal`                                  | orphan        | Same as above. Note `VersionAtomExpr` is the sole `ast_node!` wrapper in the crate whose name doesn't match its `SyntaxKind` 1:1 (it wraps `SyntaxKind::VERSION_EXPR`) — see its doc comment in `nodes.rs`.                    |
+
+Seven accessors are genuine orphans by this document's letter (not
+reached by a CLI subcommand or a doctest), unlike every other family
+in this crate. They are intentionally kept `pub`: the whole point of
+#25 was to let a downstream consumer walk a version constraint's full
+structure without positional CST hand-walking, and `Pragma` being
+opaque to the CLI's own `ast` dump doesn't change that a real external
+consumer needs these. Closing the gap with CLI reachability would mean
+teaching the `ast` subcommand to interpret version constraints, which
+is exactly the semantic-policy scope compactp is deliberately staying
+out of (see #25's scope note). Closing it with more doctests was
+judged not worth the added doc-comment weight given `cargo test`
+already exercises every accessor through the unit tests referenced
+above — flagged here for accuracy rather than silently left off the
+Orphans ledger below.
+
 #### `Stmt` / `Pat` / `Type` families and the entire `expr` module
 
 T4 added the `--include-bodies` flag to the `ast` subcommand
@@ -200,8 +236,8 @@ workspace). It no longer appears in the public surface.
 
 ## Orphans (items not exercised by any CLI subcommand)
 
-**No orphans.** All public items identified in WS2 T3 have been resolved
-in T4 via one of three buckets:
+**No orphans as of T4.** All public items identified in WS2 T3 were
+resolved in T4 via one of three buckets:
 
 | Bucket                          | Items                                                                                                                                                       |
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -209,17 +245,36 @@ in T4 via one of three buckets:
 | Exposed via `ast --include-bodies` | `enum Stmt` + 9 newtypes, `enum Pat` + 5 newtypes, `enum Type` + 11 newtypes + `TypeSize`, `enum Expr` + 22 expression newtypes (incl. `StructFieldInit`, `StructUpdate`), `Block`, `Param`, `ParamList` |
 | Added doctest as consumer       | `SyntaxKind::is_trivia`, `ImportSpecifier`, `PrefixDecl`                                                                                                    |
 
+### Post-T4: orphans introduced by #25
+
+The T4 "no orphans" state didn't survive #25 unchanged. Adding
+`Pragma::version` and its `VersionExpr` family (see the dedicated
+family section above) introduced 7 accessors that are neither
+CLI-reachable (the `ast` subcommand treats `Pragma` as opaque) nor
+doctested: `VersionAndExpr::op`, `VersionOrExpr::op`,
+`VersionOrExpr::operands`, `VersionUnaryExpr::op`,
+`VersionUnaryExpr::operand`, `VersionParenExpr::inner`,
+`VersionAtomExpr::literal`. They are `cargo test`-exercised via unit
+tests in `crates/compactp_ast/src/lib.rs`, which satisfies neither
+prong of this document's contract but is not nothing. Recorded here
+rather than silently dropped from the "no orphans" claim — see the
+family section above for why closing the gap via CLI reachability
+would mean compactp interpreting version constraints, which is out of
+scope.
+
 ### Per-crate resolution
 
-| Crate                  | Orphans before T4 | Orphans after T4 |
-| ---------------------- | ----------------- | ---------------- |
-| `compactp_lexer`       | 0                 | 0                |
-| `compactp_syntax`      | 3                 | 0                |
-| `compactp_diagnostics` | 0                 | 0                |
-| `compactp_parser`      | 2                 | 0                |
-| `compactp_ast`         | ~50               | 0                |
+| Crate                  | Orphans before T4 | Orphans after T4 | Orphans after #25 |
+| ---------------------- | ----------------- | ----------------- | ------------------ |
+| `compactp_lexer`       | 0                 | 0                 | 0                   |
+| `compactp_syntax`      | 3                 | 0                 | 0                   |
+| `compactp_diagnostics` | 0                 | 0                 | 0                   |
+| `compactp_parser`      | 2                 | 0                 | 0                   |
+| `compactp_ast`         | ~50               | 0                 | 7 (`VersionExpr` family, see above) |
 
-The contract is preserved: every public item is either (a) exercised by
-a CLI subcommand (the `ast` subcommand alone, with `--include-bodies`,
-covers the entire AST surface), or (b) carries a runnable doctest in
-the source of the item itself.
+The T4 contract (every public item is either (a) exercised by a CLI
+subcommand, or (b) carries a runnable doctest) held exactly through
+T4. #25 knowingly widened it for `compactp_ast` to "(a), (b), or (c)
+exercised by a unit test and documented here as a deliberate
+CLI-reachability gap" — see the family section above for the
+reasoning.
