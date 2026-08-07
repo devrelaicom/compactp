@@ -8,6 +8,22 @@ While in `0.x`, breaking changes may land in any minor release.
 
 ## [Unreleased]
 
+## [0.1.0-beta.2](https://github.com/devrelaicom/compactp/compare/compactp-v0.1.0-beta.1...compactp-v0.1.0-beta.2) - 2026-08-07
+
+### Added
+
+- *(ast)* expose pragma version-constraint structure via Pragma::version() ([#35](https://github.com/devrelaicom/compactp/pull/35))
+
+### Fixed
+
+- *(parser)* charge max_depth in the contract grammar ([#32](https://github.com/devrelaicom/compactp/pull/32))
+- *(parser)* charge max_depth in the pattern, module and version grammars ([#29](https://github.com/devrelaicom/compactp/pull/29))
+- *(parser)* bound the returned CST depth so dropping it cannot abort the process ([#26](https://github.com/devrelaicom/compactp/pull/26))
+
+### Other
+
+- *(parser)* make tree construction linear in chain length ([#34](https://github.com/devrelaicom/compactp/pull/34))
+
 ### Fixed
 
 - Parse time is now linear in the size of the input for left-associative
